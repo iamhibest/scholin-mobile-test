@@ -47,6 +47,18 @@ jobs:
           npm install react-native-html-to-pdf react-native-share
           npm install @react-navigation/native @react-navigation/native-stack
           npm install react-native-screens react-native-safe-area-context
+          npm install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill
+          npm install lucide-react-native react-native-svg
+          npm install @expo-google-fonts/inter @expo-google-fonts/lora
+
+      - name: Bundle fonts
+        working-directory: ScholinMobile
+        run: |
+          mkdir -p android/app/src/main/assets/fonts
+          for f in Inter_400Regular Inter_500Medium Inter_600SemiBold Inter_700Bold Lora_600SemiBold Lora_700Bold; do
+            find node_modules/@expo-google-fonts -name "$f.ttf" -exec cp {} android/app/src/main/assets/fonts/ \;
+          done
+          ls android/app/src/main/assets/fonts
 
       - name: Add permissions and Firebase plugin
         working-directory: ScholinMobile/android
