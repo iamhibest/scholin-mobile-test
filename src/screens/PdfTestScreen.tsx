@@ -34,17 +34,14 @@ export default function PdfTestScreen() {
     setStatus('Generating...');
     try {
       const mod: any = HtmlToPdfModule;
-      const RNHTMLtoPDF =
-        typeof mod.convert === 'function' ? mod :
-        typeof mod.default?.convert === 'function' ? mod.default :
-        typeof mod.default?.default?.convert === 'function' ? mod.default.default : null;
-      if (!RNHTMLtoPDF) {
-        throw new Error('pdf exports: ' + Object.keys(mod).join(', ') + ' | default: ' + Object.keys(mod.default || {}).join(', '));
+      const generate = mod.generatePDF || mod.default?.generatePDF || mod.convert || mod.default?.convert;
+      if (typeof generate !== 'function') {
+        throw new Error('pdf exports: ' + Object.keys(mod).join(', '));
       }
-      const file = await RNHTMLtoPDF.convert({
+      const file = await generate({
         html: sampleHtml,
         fileName: 'phase0_test_report_card',
-        base64: false,
+        directory: 'Documents',
       });
 
       setStatus('Saved at ' + file.filePath);
