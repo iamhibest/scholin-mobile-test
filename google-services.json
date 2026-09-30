@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "74686789973",
+    "project_id": "scholin-mobile",
+    "storage_bucket": "scholin-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74686789973:android:41b27b5302ffaae2af17dc",
+        "android_client_info": {
+          "package_name": "com.scholinmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlvVbwKXxOBNJBIiO6FgCiJCVh0UIura4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
