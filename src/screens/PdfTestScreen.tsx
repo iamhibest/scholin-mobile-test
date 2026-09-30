@@ -32,6 +32,7 @@ export default function PdfTestScreen() {
 
   async function handleGeneratePdf() {
     setStatus('Generating...');
+    let stage = 'generate';
     try {
       const mod: any = HtmlToPdfModule;
       const generate = mod.generatePDF || mod.default?.generatePDF || mod.convert || mod.default?.convert;
@@ -41,16 +42,20 @@ export default function PdfTestScreen() {
       const file = await generate({
         html: sampleHtml,
         fileName: 'phase0_test_report_card',
-        directory: 'Documents',
       });
+      setStatus('Generated: ' + JSON.stringify(file));
 
-      setStatus('Saved at ' + file.filePath);
-
-      if (file.filePath) {
-        await Share.open({ url: 'file://' + file.filePath, type: 'application/pdf' });
+      const path = file && (file.filePath || file.path);
+      if (!path) {
+        throw new Error('no file path returned');
       }
+
+      stage = 'share';
+      const url = path.startsWith('file://') ? path : 'file://' + path;
+      await Share.open({ url, type: 'application/pdf', failOnCancel: false });
+      setStatus('Shared OK: ' + path);
     } catch (error: any) {
-      setStatus('Error, ' + (error.message || 'could not generate PDF'));
+      setStatus('Error at ' + stage + ', ' + (error.message || 'unknown'));
     }
   }
 
