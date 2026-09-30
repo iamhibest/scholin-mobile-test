@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import * as HtmlToPdfModule from 'react-native-html-to-pdf';
 import Share from 'react-native-share';
 
 const sampleHtml = `
@@ -33,6 +33,14 @@ export default function PdfTestScreen() {
   async function handleGeneratePdf() {
     setStatus('Generating...');
     try {
+      const mod: any = HtmlToPdfModule;
+      const RNHTMLtoPDF =
+        typeof mod.convert === 'function' ? mod :
+        typeof mod.default?.convert === 'function' ? mod.default :
+        typeof mod.default?.default?.convert === 'function' ? mod.default.default : null;
+      if (!RNHTMLtoPDF) {
+        throw new Error('pdf exports: ' + Object.keys(mod).join(', ') + ' | default: ' + Object.keys(mod.default || {}).join(', '));
+      }
       const file = await RNHTMLtoPDF.convert({
         html: sampleHtml,
         fileName: 'phase0_test_report_card',

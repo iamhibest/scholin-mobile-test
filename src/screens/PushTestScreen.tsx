@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, PermissionsAndroid, Platform } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import * as FirebaseMessaging from '@react-native-firebase/messaging';
 
 export default function PushTestScreen() {
   const [token, setToken] = useState('Tap the button to get an FCM token');
@@ -11,7 +11,15 @@ export default function PushTestScreen() {
     }
 
     try {
-      const fcmToken = await messaging().getToken();
+      const fm: any = FirebaseMessaging;
+      let fcmToken: string;
+      if (typeof fm.getMessaging === 'function' && typeof fm.getToken === 'function') {
+        fcmToken = await fm.getToken(fm.getMessaging());
+      } else if (typeof fm.default === 'function') {
+        fcmToken = await fm.default().getToken();
+      } else {
+        throw new Error('messaging exports: ' + Object.keys(fm).join(', '));
+      }
       setToken(fcmToken);
     } catch (error: any) {
       setToken('Error, ' + (error.message || 'could not get token'));
