@@ -29,6 +29,15 @@ jobs:
           cp -r src ScholinMobile/src
           cp google-services.json ScholinMobile/android/app/google-services.json
 
+      - name: Apply branding
+        working-directory: ScholinMobile/android/app/src/main/res
+        run: |
+          rm -f mipmap-*/ic_launcher*.webp mipmap-*/ic_launcher*.png
+          rm -rf mipmap-anydpi*
+          cp -r "$GITHUB_WORKSPACE"/branding/res/* .
+          sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">Scholin</string>#' values/strings.xml
+          sed -i '/<style name="AppTheme"/a\        <item name="android:windowBackground">@drawable/splash_background</item>\n        <item name="android:windowSplashScreenBackground">@color/splash_background</item>\n        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>' values/styles.xml
+
       - name: Install libraries
         working-directory: ScholinMobile
         run: |
