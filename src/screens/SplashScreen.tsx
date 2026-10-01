@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { hasSeenWelcome } from '../lib/storage';
 import { resolveDestination } from '../lib/session';
 import { logger } from '../lib/logger';
+import { consumeRecovery } from '../lib/deeplink';
 
 const EMBLEM_HEIGHT = 124;
 const EMBLEM_WIDTH = Math.round((EMBLEM_HEIGHT * 692) / 720);
@@ -39,6 +40,9 @@ export default function SplashScreen({ navigation }: any) {
       const wait = Math.max(0, MIN_DISPLAY - (Date.now() - started));
       setTimeout(() => {
         if (!cancelled) {
+          if (consumeRecovery()) {
+            target = 'ResetPassword';
+          }
           navigation.reset({ index: 0, routes: [{ name: target, params }] });
         }
       }, wait);

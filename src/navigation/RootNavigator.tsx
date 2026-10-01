@@ -10,7 +10,15 @@ import ParentLoginScreen from '../screens/ParentLoginScreen';
 import ParentRegisterScreen from '../screens/ParentRegisterScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import TermsScreen from '../screens/TermsScreen';
-import RoleHomeScreen from '../screens/RoleHomeScreen';
+import StaffHomeScreen from '../screens/StaffHomeScreen';
+import ParentHomeScreen from '../screens/ParentHomeScreen';
+import SuperAdminHomeScreen from '../screens/SuperAdminHomeScreen';
+import FeatureScreen from '../screens/FeatureScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import RegisterSchoolScreen from '../screens/RegisterSchoolScreen';
+import JoinSchoolScreen from '../screens/JoinSchoolScreen';
+import PendingApprovalScreen from '../screens/PendingApprovalScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import DeveloperScreen from '../screens/DeveloperScreen';
 import LogsScreen from '../screens/LogsScreen';
 import ScanTestScreen from '../screens/ScanTestScreen';
@@ -39,10 +47,15 @@ export default function RootNavigator() {
       <Stack.Screen name="ParentRegister" component={ParentRegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="Terms" component={TermsScreen} options={{ ...headerOptions, title: 'Terms and About' }} />
-      <Stack.Screen name="Home" component={RoleHomeScreen} options={{ animation: 'fade' }} />
-      <Stack.Screen name="ParentHome" component={RoleHomeScreen} options={{ animation: 'fade' }} />
-      <Stack.Screen name="SuperAdminHome" component={RoleHomeScreen} options={{ animation: 'fade' }} />
-      <Stack.Screen name="Onboarding" component={RoleHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Home" component={StaffHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="ParentHome" component={ParentHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="SuperAdminHome" component={SuperAdminHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Feature" component={FeatureScreen} />
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="RegisterSchool" component={RegisterSchoolScreen} />
+      <Stack.Screen name="JoinSchool" component={JoinSchoolScreen} />
+      <Stack.Screen name="PendingApproval" component={PendingApprovalScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

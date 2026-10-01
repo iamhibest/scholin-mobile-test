@@ -15,7 +15,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     setMsg('');
     setOk(false);
     setLoading(true);
-    const options = env.webBaseUrl ? { redirectTo: env.webBaseUrl + '/reset-password.html' } : undefined;
+    const options = { redirectTo: env.authRedirect };
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), options);
     setLoading(false);
     if (error) {

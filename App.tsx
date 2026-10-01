@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { logger } from './src/lib/logger';
+import { navigationRef, startDeepLinks } from './src/lib/deeplink';
 import './src/lib/supabase';
 
 export default function App() {
@@ -17,11 +18,13 @@ export default function App() {
     });
   }, []);
 
+  useEffect(() => startDeepLinks(), []);
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <ErrorBoundary>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <RootNavigator />
         </NavigationContainer>
       </ErrorBoundary>

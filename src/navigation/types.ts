@@ -11,6 +11,11 @@ export type RootStackParamList = {
   ParentHome: undefined;
   SuperAdminHome: undefined;
   Onboarding: undefined;
+  RegisterSchool: undefined;
+  JoinSchool: undefined;
+  PendingApproval: undefined;
+  ResetPassword: undefined;
+  Feature: { title: string } | undefined;
   Developer: undefined;
   Logs: undefined;
   Scan: undefined;

@@ -67,6 +67,19 @@ jobs:
           sed -i '/classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")/a\        classpath("com.google.gms:google-services:4.4.2")' build.gradle
           printf "\napply plugin: 'com.google.gms.google-services'\n" >> app/build.gradle
           sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 26/' build.gradle
+          python3 - <<'PYEOF'
+          p = 'app/src/main/AndroidManifest.xml'
+          s = open(p).read()
+          f = """<intent-filter>
+                  <action android:name="android.intent.action.VIEW" />
+                  <category android:name="android.intent.category.DEFAULT" />
+                  <category android:name="android.intent.category.BROWSABLE" />
+                  <data android:scheme="scholin" />
+                </intent-filter>
+              </activity>"""
+          s = s.replace('</activity>', f, 1)
+          open(p, 'w').write(s)
+          PYEOF
 
       - name: Build APK
         working-directory: ScholinMobile/android

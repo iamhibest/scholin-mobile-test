@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { getLastDestination, saveLastDestination } from './storage';
 
-export type Destination = 'SuperAdminHome' | 'Home' | 'ParentHome' | 'Onboarding';
+export type Destination = 'SuperAdminHome' | 'Home' | 'ParentHome' | 'Onboarding' | 'PendingApproval';
 
 export async function recordTerms() {
   try {
@@ -36,7 +36,17 @@ export async function resolveDestination(userId: string): Promise<Destination> {
           .select('student_id')
           .eq('parent_id', userId)
           .limit(1);
-        dest = links && links.length > 0 ? 'ParentHome' : 'Onboarding';
+        if (links && links.length > 0) {
+          dest = 'ParentHome';
+        } else {
+          const { data: pending } = await supabase
+            .from('school_members')
+            .select('id')
+            .eq('profile_id', userId)
+            .eq('is_active', false)
+            .limit(1);
+          dest = pending && pending.length > 0 ? 'PendingApproval' : 'Onboarding';
+        }
       }
     }
     await saveLastDestination(dest);
