@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import Icon, { IconName } from './Icon';
 
@@ -20,6 +21,8 @@ export default function SideMenu({ visible, onClose, groups, header, footer }: P
   const x = useRef(new Animated.Value(-WIDTH)).current;
   const fade = useRef(new Animated.Value(0)).current;
   const [mounted, setMounted] = useState(visible);
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 40);
 
   useEffect(() => {
     if (visible) {
@@ -47,7 +50,7 @@ export default function SideMenu({ visible, onClose, groups, header, footer }: P
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: colors.overlay, opacity: fade }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
-        <Animated.View style={[styles.panel, { transform: [{ translateX: x }] }]}>
+        <Animated.View style={[styles.panel, { paddingTop: insets.top + 12, transform: [{ translateX: x }] }]}>
           <View style={styles.brand}>
             <Image source={require('../assets/images/emblem.png')} style={styles.logo} resizeMode="contain" />
             <View>
@@ -75,7 +78,7 @@ export default function SideMenu({ visible, onClose, groups, header, footer }: P
               );
             })}
           </ScrollView>
-          <Pressable onPress={() => choose(footer)} style={styles.footer}>
+          <Pressable onPress={() => choose(footer)} style={[styles.footer, { marginBottom: bottomPad }]}>
             <Icon name={footer.icon} size={20} color={colors.danger} />
             <Text style={[text.bodyStrong, { color: colors.danger }]}>{footer.label}</Text>
           </Pressable>
@@ -87,12 +90,12 @@ export default function SideMenu({ visible, onClose, groups, header, footer }: P
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  panel: { position: 'absolute', top: 0, bottom: 0, left: 0, width: WIDTH, backgroundColor: colors.surface, paddingTop: 44, paddingHorizontal: spacing.lg, borderTopRightRadius: radius.xl, borderBottomRightRadius: radius.xl },
+  panel: { position: 'absolute', top: 0, bottom: 0, left: 0, width: WIDTH, backgroundColor: colors.surface, paddingHorizontal: spacing.lg, borderTopRightRadius: radius.xl, borderBottomRightRadius: radius.xl },
   brand: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingBottom: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   logo: { width: 42, height: 44 },
   name: { fontFamily: fonts.headingBold, fontSize: 22, color: colors.primary },
   group: { color: colors.textMuted, letterSpacing: 1, marginBottom: 4, marginLeft: spacing.sm },
   item: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 13, paddingHorizontal: spacing.md, borderRadius: radius.md },
   itemActive: { backgroundColor: colors.primarySoft },
-  footer: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg, paddingHorizontal: spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, marginBottom: spacing.md },
+  footer: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg, paddingHorizontal: spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });

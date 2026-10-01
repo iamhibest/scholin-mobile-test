@@ -22,3 +22,5 @@ export { default as InfoBanner } from './InfoBanner';
 export { default as QuickTile } from './QuickTile';
 export { default as SideMenu } from './SideMenu';
 export { default as BottomTabs } from './BottomTabs';
+export { default as SquareBanner } from './SquareBanner';
+export { default as MoreToolsSheet } from './MoreToolsSheet';

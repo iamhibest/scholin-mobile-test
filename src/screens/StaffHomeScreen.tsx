@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomSheet, Button, FadeIn, Icon, InfoBanner, ListRow, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
+import { BottomSheet, Button, FadeIn, Icon, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, SquareBanner, StatCard, TopBar } from '../components';
 import { MenuGroup } from '../components/SideMenu';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -28,24 +28,6 @@ const teacherTiles: Tile[] = [
   { label: 'My Postings', icon: 'file', tone: 'green', route: 'Feature' },
   { label: 'Announcements', icon: 'megaphone', tone: 'purple', route: 'Feature' },
   { label: 'Clock In and Out', icon: 'clock', tone: 'amber', route: 'Feature' },
-];
-
-const moreTools: { label: string; icon: IconName }[] = [
-  { label: 'Report Card Templates', icon: 'file' },
-  { label: 'Events and Fees', icon: 'receipt' },
-  { label: 'Students', icon: 'users' },
-  { label: 'Subjects', icon: 'book' },
-  { label: 'Class Subjects', icon: 'layers' },
-  { label: 'Student Promotion', icon: 'trend' },
-  { label: 'Student Migration', icon: 'userPlus' },
-  { label: 'Staff Attendance', icon: 'clock' },
-  { label: 'Student Attendance', icon: 'clipboard' },
-  { label: 'Teacher Attendance', icon: 'checklist' },
-  { label: 'Attendance QR Codes', icon: 'qr' },
-  { label: 'Sessions and Terms', icon: 'calendar' },
-  { label: 'Auto Comments', icon: 'tags' },
-  { label: 'School Settings', icon: 'settings' },
-  { label: 'Archived Sessions', icon: 'layers' },
 ];
 
 export default function StaffHomeScreen({ navigation }: any) {
@@ -295,14 +277,17 @@ export default function StaffHomeScreen({ navigation }: any) {
           )}
         </FadeIn>
 
-        {data.announcement ? (
-          <InfoBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
-        ) : null}
-
-        {vacancy ? (
-          <Animated.View style={{ opacity: fade }}>
-            <InfoBanner tag="Vacancies" icon="briefcase" tone="orange" title={vacancy.title ? vacancy.title + '.' : ''} body={vacancy.poster ? 'Posted by ' + vacancy.poster : ''} onPress={() => go('Job Vacancies')} />
-          </Animated.View>
+        {data.announcement || vacancy ? (
+          <View style={styles.banners}>
+            {data.announcement ? (
+              <SquareBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
+            ) : null}
+            {vacancy ? (
+              <Animated.View style={{ opacity: fade }}>
+                <SquareBanner tag="Vacancies" icon="briefcase" tone="orange" title={vacancy.title ? vacancy.title + '.' : ''} body={vacancy.poster ? 'Posted by ' + vacancy.poster : ''} onPress={() => go('Job Vacancies')} />
+              </Animated.View>
+            ) : null}
+          </View>
         ) : null}
 
         <SectionTitle title="Quick Access" action={isAdmin && access.active ? 'More tools' : undefined} onAction={() => setTools(true)} />
@@ -317,13 +302,7 @@ export default function StaffHomeScreen({ navigation }: any) {
 
       <SideMenu visible={menu} onClose={() => setMenu(false)} groups={groups} header={schoolHeader} footer={{ label: 'Sign out', icon: 'logout', onPress: signOut }} />
 
-      <BottomSheet visible={tools} onClose={() => setTools(false)} title="More admin tools">
-        <ScrollView style={{ maxHeight: 440 }} showsVerticalScrollIndicator={false}>
-          {moreTools.map(t => (
-            <ListRow key={t.label} title={t.label} icon={t.icon} onPress={() => { setTools(false); setTimeout(() => go(t.label), 250); }} />
-          ))}
-        </ScrollView>
-      </BottomSheet>
+      <MoreToolsSheet visible={tools} onClose={() => setTools(false)} onSelect={label => { setTools(false); setTimeout(() => go(label), 280); }} />
 
       <BottomSheet visible={news} onClose={() => setNews(false)} title={data.announcement?.title || 'Announcement'}>
         <ScrollView style={{ maxHeight: 360 }}>
@@ -346,6 +325,7 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   half: { width: '48%', flexGrow: 1 },
+  banners: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: spacing.md },
   schools: { marginTop: spacing.lg, gap: 4 },
   schoolRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 11, paddingHorizontal: spacing.md, borderRadius: radius.md },

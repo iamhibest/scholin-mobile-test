@@ -34,11 +34,11 @@ export default function StatCard({ label, value, sub, icon, tone, size = 'mini',
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, shadow.soft, { backgroundColor: t.bg }, hero && styles.hero, pressed && { opacity: 0.92, transform: [{ scale: 0.99 }] }, style]}>
       <View style={styles.top}>
         <View style={[styles.chip, { backgroundColor: t.chip }, hero && styles.chipHero]}>
-          <Icon name={icon} size={hero ? 24 : 18} color="#FFFFFF" />
+          <Icon name={icon} size={hero ? 22 : 18} color="#FFFFFF" />
         </View>
         {!hero && onPress ? <Icon name="chevron" size={18} color={colors.textMuted} /> : null}
       </View>
-      <Text style={[text.bodyStrong, { color: colors.text, marginTop: hero ? spacing.lg : spacing.md }]}>{label}</Text>
+      <Text style={[text.bodyStrong, { color: colors.text, marginTop: hero ? spacing.md : spacing.sm }]}>{label}</Text>
       <Text style={[hero ? styles.valueHero : styles.value, { color: valueColor || colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
         {value}
       </Text>
@@ -62,14 +62,14 @@ export default function StatCard({ label, value, sub, icon, tone, size = 'mini',
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radius.xl, padding: spacing.lg },
-  hero: { padding: spacing.xl },
+  card: { borderRadius: radius.xl, padding: spacing.md },
+  hero: { padding: spacing.lg },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  chip: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  chipHero: { width: 52, height: 52, borderRadius: 16 },
+  chip: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  chipHero: { width: 44, height: 44, borderRadius: 14 },
   value: { fontFamily: fonts.headingBold, fontSize: 26, lineHeight: 34, marginTop: 2 },
-  valueHero: { fontFamily: fonts.headingBold, fontSize: 28, lineHeight: 38, marginTop: 4 },
+  valueHero: { fontFamily: fonts.headingBold, fontSize: 24, lineHeight: 32, marginTop: 2 },
   subRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   trend: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  cta: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', marginTop: spacing.lg, paddingHorizontal: 16, paddingVertical: 10, borderRadius: radius.pill },
+  cta: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', marginTop: spacing.md, paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill },
 });
