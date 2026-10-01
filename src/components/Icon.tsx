@@ -6,6 +6,7 @@ import {
   Clock, Megaphone, Briefcase, GraduationCap, CalendarDays, CreditCard, Settings, ArrowUp, ArrowDown,
   ChevronDown, X, Plus, ClipboardCheck, Gift, Shield, LayoutGrid, Layers, QrCode, Building2, UserCog,
   LayoutDashboard, Receipt, Tags, TrendingUp, ListChecks, Landmark,
+  MessageSquare, CalendarCheck, ShieldCheck, Pencil, Trash2,
 } from 'lucide-react-native';
 import { colors } from '../theme';
 
@@ -20,6 +21,7 @@ const icons = {
   plus: Plus, clipboard: ClipboardCheck, gift: Gift, shield: Shield, grid: LayoutGrid, layers: Layers,
   qr: QrCode, building: Building2, userCog: UserCog, dashboard: LayoutDashboard, receipt: Receipt,
   tags: Tags, trend: TrendingUp, checklist: ListChecks, bank: Landmark,
+  chat: MessageSquare, calendarCheck: CalendarCheck, shieldCheck: ShieldCheck, edit: Pencil, trash: Trash2,
 };
 
 export type IconName = keyof typeof icons;

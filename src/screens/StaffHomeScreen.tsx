@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomSheet, Button, FadeIn, Icon, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, SquareBanner, StatCard, TopBar } from '../components';
+import { BottomSheet, Button, FadeIn, Icon, InfoBanner, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
 import { MenuGroup } from '../components/SideMenu';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -29,6 +29,12 @@ const teacherTiles: Tile[] = [
   { label: 'Announcements', icon: 'megaphone', tone: 'purple', route: 'Feature' },
   { label: 'Clock In and Out', icon: 'clock', tone: 'amber', route: 'Feature' },
 ];
+
+const featureRoutes: Record<string, string> = {
+  'Students': 'Students',
+  'Teachers and Roles': 'Teachers',
+  'School Portal': 'Portal',
+};
 
 export default function StaffHomeScreen({ navigation }: any) {
   const [data, setData] = useState<StaffData | null>(null);
@@ -100,7 +106,14 @@ export default function StaffHomeScreen({ navigation }: any) {
     await load();
   }
 
-  const go = (title: string) => navigation.navigate('Feature', { title });
+  const go = (title: string) => {
+    const route = featureRoutes[title];
+    if (route) {
+      navigation.navigate(route);
+    } else {
+      navigation.navigate('Feature', { title });
+    }
+  };
 
   if (loading || !data) {
     return (
@@ -277,17 +290,14 @@ export default function StaffHomeScreen({ navigation }: any) {
           )}
         </FadeIn>
 
-        {data.announcement || vacancy ? (
-          <View style={styles.banners}>
-            {data.announcement ? (
-              <SquareBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
-            ) : null}
-            {vacancy ? (
-              <Animated.View style={{ opacity: fade }}>
-                <SquareBanner tag="Vacancies" icon="briefcase" tone="orange" title={vacancy.title ? vacancy.title + '.' : ''} body={vacancy.poster ? 'Posted by ' + vacancy.poster : ''} onPress={() => go('Job Vacancies')} />
-              </Animated.View>
-            ) : null}
-          </View>
+        {data.announcement ? (
+          <InfoBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
+        ) : null}
+
+        {vacancy ? (
+          <Animated.View style={{ opacity: fade }}>
+            <InfoBanner tag="Vacancies" icon="briefcase" tone="orange" title={vacancy.title ? vacancy.title + '.' : ''} body={vacancy.poster ? 'Posted by ' + vacancy.poster : ''} onPress={() => go('Job Vacancies')} />
+          </Animated.View>
         ) : null}
 
         <SectionTitle title="Quick Access" action={isAdmin && access.active ? 'More tools' : undefined} onAction={() => setTools(true)} />
@@ -325,7 +335,6 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   half: { width: '48%', flexGrow: 1 },
-  banners: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: spacing.md },
   schools: { marginTop: spacing.lg, gap: 4 },
   schoolRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 11, paddingHorizontal: spacing.md, borderRadius: radius.md },

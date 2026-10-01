@@ -25,6 +25,15 @@ import ScanTestScreen from '../screens/ScanTestScreen';
 import LocationTestScreen from '../screens/LocationTestScreen';
 import PushTestScreen from '../screens/PushTestScreen';
 import PdfTestScreen from '../screens/PdfTestScreen';
+import StudentsScreen from '../screens/StudentsScreen';
+import StudentDetailScreen from '../screens/StudentDetailScreen';
+import StudentFormScreen from '../screens/StudentFormScreen';
+import TeachersScreen from '../screens/TeachersScreen';
+import TeacherEditScreen from '../screens/TeacherEditScreen';
+import { PortalSessionsScreen, PortalTermsScreen } from '../screens/PortalScreen';
+import PortalClassesScreen from '../screens/PortalClassesScreen';
+import ClassDetailScreen from '../screens/ClassDetailScreen';
+import ClassFormScreen from '../screens/ClassFormScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -56,6 +65,16 @@ export default function RootNavigator() {
       <Stack.Screen name="JoinSchool" component={JoinSchoolScreen} />
       <Stack.Screen name="PendingApproval" component={PendingApprovalScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Students" component={StudentsScreen} options={{ ...headerOptions, title: 'Students' }} />
+      <Stack.Screen name="StudentDetail" component={StudentDetailScreen} options={{ ...headerOptions, title: 'Student' }} />
+      <Stack.Screen name="StudentForm" component={StudentFormScreen} options={{ ...headerOptions, title: 'Add student' }} />
+      <Stack.Screen name="Teachers" component={TeachersScreen} options={{ ...headerOptions, title: 'Teachers and Roles' }} />
+      <Stack.Screen name="TeacherEdit" component={TeacherEditScreen} options={{ ...headerOptions, title: 'Edit teacher' }} />
+      <Stack.Screen name="Portal" component={PortalSessionsScreen} options={{ ...headerOptions, title: 'School Portal' }} />
+      <Stack.Screen name="PortalTerms" component={PortalTermsScreen} options={{ ...headerOptions, title: 'Terms' }} />
+      <Stack.Screen name="PortalClasses" component={PortalClassesScreen} options={{ ...headerOptions, title: 'Classes' }} />
+      <Stack.Screen name="ClassDetail" component={ClassDetailScreen} options={{ ...headerOptions, title: 'Class' }} />
+      <Stack.Screen name="ClassForm" component={ClassFormScreen} options={{ ...headerOptions, title: 'Add class' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

@@ -16,6 +16,16 @@ export type RootStackParamList = {
   PendingApproval: undefined;
   ResetPassword: undefined;
   Feature: { title: string } | undefined;
+  Students: undefined;
+  StudentDetail: { studentId: string; sessionId: string };
+  StudentForm: { studentId?: string; sessionId: string };
+  Teachers: undefined;
+  TeacherEdit: { profileId: string; name: string; phone: string; avatar: string };
+  Portal: undefined;
+  PortalTerms: { sessionId: string; sessionName: string };
+  PortalClasses: { sessionId: string; sessionName: string; termId: string; termName: string };
+  ClassDetail: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string };
+  ClassForm: { sessionId: string; classId?: string; name?: string; arm?: string };
   Developer: undefined;
   Logs: undefined;
   Scan: undefined;
