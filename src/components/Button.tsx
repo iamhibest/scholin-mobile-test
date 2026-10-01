@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 
 import { colors, radius, shadow, text } from '../theme';
 import Icon, { IconName } from './Icon';
 
-type Variant = 'primary' | 'soft' | 'ghost' | 'danger';
+type Variant = 'primary' | 'soft' | 'ghost' | 'danger' | 'outline';
 
 type Props = {
   title: string;
@@ -20,6 +20,7 @@ const palette: Record<Variant, { bg: string; fg: string }> = {
   soft: { bg: colors.primarySoft, fg: colors.primary },
   ghost: { bg: 'transparent', fg: colors.primary },
   danger: { bg: colors.dangerSoft, fg: colors.danger },
+  outline: { bg: colors.surface, fg: colors.primary },
 };
 
 export default function Button({ title, onPress, variant = 'primary', loading, disabled, icon, style }: Props) {
@@ -33,6 +34,7 @@ export default function Button({ title, onPress, variant = 'primary', loading, d
         styles.base,
         { backgroundColor: p.bg, opacity: inactive ? 0.55 : pressed ? 0.88 : 1 },
         variant === 'primary' && shadow.raised,
+        variant === 'outline' && { borderWidth: 1.5, borderColor: colors.primary },
         pressed && { transform: [{ scale: 0.985 }] },
         style,
       ]}>

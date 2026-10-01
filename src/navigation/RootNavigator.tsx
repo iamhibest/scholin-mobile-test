@@ -4,7 +4,13 @@ import { RootStackParamList } from './types';
 import { colors, fonts } from '../theme';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
-import HomeScreen from '../screens/HomeScreen';
+import SplashScreen from '../screens/SplashScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import ParentLoginScreen from '../screens/ParentLoginScreen';
+import ParentRegisterScreen from '../screens/ParentRegisterScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import TermsScreen from '../screens/TermsScreen';
+import RoleHomeScreen from '../screens/RoleHomeScreen';
 import DeveloperScreen from '../screens/DeveloperScreen';
 import LogsScreen from '../screens/LogsScreen';
 import ScanTestScreen from '../screens/ScanTestScreen';
@@ -24,10 +30,19 @@ const headerOptions = {
 
 export default function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Home" component={HomeScreen} />
+    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack.Screen name="Splash" component={SplashScreen} options={{ animation: 'none' }} />
+      <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ParentLogin" component={ParentLoginScreen} />
+      <Stack.Screen name="ParentRegister" component={ParentRegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="Terms" component={TermsScreen} options={{ ...headerOptions, title: 'Terms and About' }} />
+      <Stack.Screen name="Home" component={RoleHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="ParentHome" component={RoleHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="SuperAdminHome" component={RoleHomeScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Onboarding" component={RoleHomeScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

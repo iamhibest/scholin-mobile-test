@@ -4,6 +4,7 @@ import { Button, Icon, Screen } from '../components';
 import { IconName } from '../components/Icon';
 import { colors, radius, shadow, spacing, text } from '../theme';
 import { env } from '../config/env';
+import { markWelcomeSeen } from '../lib/storage';
 
 const features: { label: string; icon: IconName; tint: string; color: string }[] = [
   { label: 'Students', icon: 'users', tint: colors.primarySoft, color: colors.primary },
@@ -13,6 +14,11 @@ const features: { label: string; icon: IconName; tint: string; color: string }[]
 ];
 
 export default function WelcomeScreen({ navigation }: any) {
+  async function go(target: string) {
+    await markWelcomeSeen();
+    navigation.reset({ index: 1, routes: [{ name: 'Login' }, { name: target }] });
+  }
+
   return (
     <Screen scroll background={colors.surface}>
       <View style={styles.top}>
@@ -36,11 +42,11 @@ export default function WelcomeScreen({ navigation }: any) {
         ))}
       </View>
 
-      <Button title="Get started" icon="arrowRight" onPress={() => navigation.navigate('Login')} />
+      <Button title="Get started" icon="arrowRight" onPress={() => go('Register')} />
 
       <View style={styles.signin}>
         <Text style={[text.body, { color: colors.textMuted }]}>Already have an account? </Text>
-        <Pressable onPress={() => navigation.navigate('Login')} hitSlop={10}>
+        <Pressable onPress={async () => { await markWelcomeSeen(); navigation.reset({ index: 0, routes: [{ name: 'Login' }] }); }} hitSlop={10}>
           <Text style={[text.bodyStrong, { color: colors.primary }]}>Sign in</Text>
         </Pressable>
       </View>

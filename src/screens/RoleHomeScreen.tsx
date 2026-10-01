@@ -4,9 +4,17 @@ import { Avatar, Button, Card, ListRow, Screen, ScreenHeader, Skeleton } from '.
 import { colors, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 
-export default function HomeScreen({ navigation }: any) {
+const copy: Record<string, { title: string; subtitle: string }> = {
+  Home: { title: 'School dashboard', subtitle: 'Your role dashboard arrives in the next phase.' },
+  ParentHome: { title: 'Parent portal', subtitle: 'Your child overview arrives in the next phase.' },
+  SuperAdminHome: { title: 'Super admin', subtitle: 'The super admin suite arrives in a later phase.' },
+  Onboarding: { title: 'Set up your school', subtitle: 'Create or join a school. This screen arrives in the next phase.' },
+};
+
+export default function RoleHomeScreen({ navigation, route }: any) {
   const [email, setEmail] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
+  const info = copy[route.name] || copy.Home;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -17,22 +25,18 @@ export default function HomeScreen({ navigation }: any) {
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   }
 
   return (
     <Screen scroll>
-      <ScreenHeader title="Home" subtitle="Role dashboards arrive in the next phase." />
+      <ScreenHeader title={info.title} subtitle={info.subtitle} />
       <Card>
         <View style={styles.row}>
           <Avatar name={email || ''} size={52} />
           <View style={styles.flex}>
             <Text style={[text.small, { color: colors.textMuted }]}>Signed in as</Text>
-            {checked ? (
-              <Text style={[text.bodyStrong, { color: colors.text }]}>{email || 'Not signed in'}</Text>
-            ) : (
-              <Skeleton width={180} height={16} />
-            )}
+            {checked ? <Text style={[text.bodyStrong, { color: colors.text }]}>{email || 'Not signed in'}</Text> : <Skeleton width={180} height={16} />}
           </View>
         </View>
       </Card>

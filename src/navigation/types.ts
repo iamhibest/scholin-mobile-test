@@ -1,7 +1,16 @@
 export type RootStackParamList = {
+  Splash: undefined;
   Welcome: undefined;
   Login: undefined;
+  Register: undefined;
+  ParentLogin: undefined;
+  ParentRegister: undefined;
+  ForgotPassword: undefined;
+  Terms: undefined;
   Home: undefined;
+  ParentHome: undefined;
+  SuperAdminHome: undefined;
+  Onboarding: undefined;
   Developer: undefined;
   Logs: undefined;
   Scan: undefined;

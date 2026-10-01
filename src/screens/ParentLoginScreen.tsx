@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { AuthHeader, Button, Icon, Input, Notice, Screen } from '../components';
-import { colors, radius, shadow, spacing, text } from '../theme';
+import { AuthHeader, Button, Input, Notice, Screen } from '../components';
+import { colors, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
-import { recordTerms, resolveDestination } from '../lib/session';
+import { recordTerms } from '../lib/session';
+import { saveLastDestination } from '../lib/storage';
 
-export default function LoginScreen({ navigation }: any) {
+export default function ParentLoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,7 @@ export default function LoginScreen({ navigation }: any) {
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Request timed out after 15 seconds. Check your internet connection.')), 15000),
       );
-      const { data, error: authError } = (await Promise.race([
+      const { error: authError } = (await Promise.race([
         supabase.auth.signInWithPassword({ email: email.trim(), password }),
         timeout,
       ])) as any;
@@ -28,11 +29,11 @@ export default function LoginScreen({ navigation }: any) {
         return;
       }
       await recordTerms();
-      const dest = await resolveDestination(data.user.id);
-      navigation.reset({ index: 0, routes: [{ name: dest }] });
+      await saveLastDestination('ParentHome');
+      navigation.reset({ index: 0, routes: [{ name: 'ParentHome' }] });
     } catch (e: any) {
-      logger.error('Sign in failed: ' + e.message);
-      setError('Error: ' + (e.message || String(e)));
+      logger.error('Parent sign in failed: ' + e.message);
+      setError('Error. ' + (e.message || String(e)));
     } finally {
       setLoading(false);
     }
@@ -40,14 +41,7 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <Screen scroll background={colors.surface}>
-      <View style={styles.corner}>
-        <Pressable onPress={() => navigation.navigate('ParentLogin')} style={[styles.pill, shadow.soft]}>
-          <Icon name="user" size={16} color={colors.primary} />
-          <Text style={[text.caption, { color: colors.primary }]}>Parent portal</Text>
-        </Pressable>
-      </View>
-
-      <AuthHeader title="Welcome back" subtitle="Sign in to your school's dashboard." />
+      <AuthHeader title="Parent portal" subtitle="Sign in to see your child's attendance, results, fees, and school announcements." />
       <Notice message={error} />
 
       <Input label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
@@ -64,15 +58,21 @@ export default function LoginScreen({ navigation }: any) {
         <Text style={[text.small, { color: colors.textMuted }]}>New to Scholin?</Text>
         <View style={styles.line} />
       </View>
-      <Button title="Create an account" variant="outline" onPress={() => navigation.navigate('Register')} />
+      <Button title="Create a parent account" variant="outline" onPress={() => navigation.navigate('ParentRegister')} />
+
+      <View style={styles.footer}>
+        <Text style={[text.small, { color: colors.textMuted }]}>Are you a teacher or school admin? </Text>
+        <Pressable onPress={() => navigation.navigate('Login')} hitSlop={8}>
+          <Text style={[text.small, { color: colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Sign in here instead</Text>
+        </Pressable>
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  corner: { alignItems: 'flex-end' },
-  pill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: radius.pill, backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.primaryLight },
   link: { alignItems: 'center', marginTop: spacing.xl },
   divider: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginVertical: spacing.xl },
   line: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+  footer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: spacing.xl },
 });
