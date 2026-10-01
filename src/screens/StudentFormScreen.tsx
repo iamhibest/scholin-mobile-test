@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Input, Notice, OptionField, Screen, Skeleton } from '../components';
+import { Button, DateField, Input, Notice, OptionField, PhotoField, Screen, Skeleton } from '../components';
 import { spacing } from '../theme';
 import { useStaff } from '../lib/useStaff';
-import { displayToIso, isoToDisplay, maskDate } from '../lib/date';
+import { photosAllowed } from '../lib/upload';
 import { classLabel, createStudent, fetchClasses, fetchStudent, SchoolClass, updateStudent } from '../lib/school';
 
 export default function StudentFormScreen({ navigation, route }: any) {
@@ -15,6 +15,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
   const [admission, setAdmission] = useState('');
   const [gender, setGender] = useState('');
   const [dob, setDob] = useState('');
+  const [photo, setPhoto] = useState('');
+  const [allowPhotos, setAllowPhotos] = useState(true);
   const [parentName, setParentName] = useState('');
   const [parentPhone, setParentPhone] = useState('');
   const [classId, setClassId] = useState('');
@@ -25,6 +27,10 @@ export default function StudentFormScreen({ navigation, route }: any) {
   useEffect(() => {
     navigation.setOptions({ title: editing ? 'Edit student' : 'Add student' });
   }, [navigation, editing]);
+
+  useEffect(() => {
+    photosAllowed().then(setAllowPhotos);
+  }, []);
 
   useEffect(() => {
     if (sessionId && !editing) {
@@ -41,7 +47,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
         setName(s.full_name || '');
         setAdmission(s.admission_no || '');
         setGender(s.gender || '');
-        setDob(isoToDisplay(s.dob));
+        setDob(s.dob ? s.dob.slice(0, 10) : '');
+        setPhoto(s.photo_url || '');
         setParentName(s.parent_name || '');
         setParentPhone(s.parent_phone || '');
         setReady(true);
@@ -60,12 +67,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
       setError('Full name is required.');
       return;
     }
-    const iso = displayToIso(dob);
-    if (iso === undefined) {
-      setError('Enter the date of birth as DD/MM/YYYY.');
-      return;
-    }
-    const form = { full_name: name, admission_no: admission, gender, dob: iso || '', parent_name: parentName, parent_phone: parentPhone };
+    const form = { full_name: name, admission_no: admission, gender, dob, parent_name: parentName, parent_phone: parentPhone, photo_url: photo };
     setSaving(true);
     try {
       if (editing) {
@@ -95,6 +97,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
   return (
     <Screen scroll>
       <Notice message={error} />
+      {allowPhotos ? <PhotoField name={name} url={photo} schoolId={ctx ? ctx.schoolId : null} onChange={setPhoto} label="student photo" /> : null}
       <Input label="Full name" value={name} onChangeText={setName} placeholder="e.g. Oluwadamilola Michael" icon="user" autoCapitalize="words" />
       <Input
         label="Admission number"
@@ -111,7 +114,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
         placeholder="Select gender"
         onChange={setGender}
       />
-      <Input label="Date of birth" value={dob} onChangeText={t => setDob(maskDate(t))} placeholder="DD/MM/YYYY" icon="calendar" keyboardType="number-pad" maxLength={10} />
+      <DateField label="Date of birth" value={dob} onChange={setDob} placeholder="Select date of birth" />
       <Input label="Parent or guardian name" value={parentName} onChangeText={setParentName} icon="user" autoCapitalize="words" />
       <Input label="Parent or guardian phone" value={parentPhone} onChangeText={setParentPhone} icon="phone" keyboardType="phone-pad" />
       {!editing ? (

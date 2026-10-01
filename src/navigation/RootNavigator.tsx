@@ -34,6 +34,9 @@ import { PortalSessionsScreen, PortalTermsScreen } from '../screens/PortalScreen
 import PortalClassesScreen from '../screens/PortalClassesScreen';
 import ClassDetailScreen from '../screens/ClassDetailScreen';
 import ClassFormScreen from '../screens/ClassFormScreen';
+import ClockScreen from '../screens/ClockScreen';
+import ClassAttendanceScreen from '../screens/ClassAttendanceScreen';
+import MyClassesScreen from '../screens/MyClassesScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -75,6 +78,9 @@ export default function RootNavigator() {
       <Stack.Screen name="PortalClasses" component={PortalClassesScreen} options={{ ...headerOptions, title: 'Classes' }} />
       <Stack.Screen name="ClassDetail" component={ClassDetailScreen} options={{ ...headerOptions, title: 'Class' }} />
       <Stack.Screen name="ClassForm" component={ClassFormScreen} options={{ ...headerOptions, title: 'Add class' }} />
+      <Stack.Screen name="Clock" component={ClockScreen} options={{ ...headerOptions, title: 'Clock In and Out' }} />
+      <Stack.Screen name="ClassAttendance" component={ClassAttendanceScreen} options={{ ...headerOptions, title: 'Attendance' }} />
+      <Stack.Screen name="MyClasses" component={MyClassesScreen} options={{ ...headerOptions, title: 'My Classes' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

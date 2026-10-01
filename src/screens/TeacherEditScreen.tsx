@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Avatar, Button, Input, Notice, Screen } from '../components';
+import { Button, Input, Notice, PhotoField, Screen } from '../components';
+import { useStaff } from '../lib/useStaff';
 import { spacing } from '../theme';
 import { saveTeacherProfile } from '../lib/school';
 
@@ -8,6 +8,8 @@ export default function TeacherEditScreen({ navigation, route }: any) {
   const { profileId, name: initialName, phone: initialPhone, avatar } = route.params;
   const [name, setName] = useState(initialName || '');
   const [phone, setPhone] = useState(initialPhone || '');
+  const [photo, setPhoto] = useState(avatar || '');
+  const { ctx } = useStaff();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,7 +21,7 @@ export default function TeacherEditScreen({ navigation, route }: any) {
     }
     setSaving(true);
     try {
-      await saveTeacherProfile(profileId, name.trim(), phone.trim(), avatar || null);
+      await saveTeacherProfile(profileId, name.trim(), phone.trim(), photo || null);
       navigation.goBack();
     } catch (e: any) {
       setError(e.message);
@@ -29,9 +31,7 @@ export default function TeacherEditScreen({ navigation, route }: any) {
 
   return (
     <Screen scroll>
-      <View style={styles.avatar}>
-        <Avatar name={name} uri={avatar || undefined} size={96} />
-      </View>
+      <PhotoField name={name} url={photo} schoolId={ctx ? ctx.schoolId : null} onChange={setPhoto} label="profile photo" />
       <Notice message={error} />
       <Input label="Full name" value={name} onChangeText={setName} icon="user" autoCapitalize="words" />
       <Input label="Phone number" value={phone} onChangeText={setPhone} icon="phone" keyboardType="phone-pad" />
@@ -39,7 +39,3 @@ export default function TeacherEditScreen({ navigation, route }: any) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: { alignItems: 'center', marginBottom: spacing.xl },
-});

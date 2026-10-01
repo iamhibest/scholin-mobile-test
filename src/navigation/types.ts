@@ -25,6 +25,9 @@ export type RootStackParamList = {
   PortalTerms: { sessionId: string; sessionName: string };
   PortalClasses: { sessionId: string; sessionName: string; termId: string; termName: string };
   ClassDetail: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string };
+  Clock: undefined;
+  MyClasses: undefined;
+  ClassAttendance: { classId: string; sessionId: string; termId: string; className: string };
   ClassForm: { sessionId: string; classId?: string; name?: string; arm?: string };
   Developer: undefined;
   Logs: undefined;

@@ -6,6 +6,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { logger } from './src/lib/logger';
 import { navigationRef, startDeepLinks } from './src/lib/deeplink';
+import { startQueueSync } from './src/lib/offlineQueue';
 import './src/lib/supabase';
 
 export default function App() {
@@ -19,6 +20,8 @@ export default function App() {
   }, []);
 
   useEffect(() => startDeepLinks(), []);
+
+  useEffect(() => startQueueSync(), []);
 
   return (
     <SafeAreaProvider>

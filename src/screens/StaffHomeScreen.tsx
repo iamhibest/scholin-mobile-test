@@ -34,6 +34,8 @@ const featureRoutes: Record<string, string> = {
   'Students': 'Students',
   'Teachers and Roles': 'Teachers',
   'School Portal': 'Portal',
+  'Clock In and Out': 'Clock',
+  'My Classes': 'MyClasses',
 };
 
 export default function StaffHomeScreen({ navigation }: any) {

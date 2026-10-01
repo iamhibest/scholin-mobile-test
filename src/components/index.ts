@@ -26,3 +26,5 @@ export { default as MoreToolsSheet } from './MoreToolsSheet';
 export { default as SearchBar } from './SearchBar';
 export { default as Fab } from './Fab';
 export { default as OptionField } from './OptionField';
+export { default as PhotoField } from './PhotoField';
+export { default as DateField } from './DateField';

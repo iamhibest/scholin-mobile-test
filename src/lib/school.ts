@@ -32,6 +32,7 @@ export type StudentForm = {
   dob: string;
   parent_name: string;
   parent_phone: string;
+  photo_url: string;
 };
 
 export type SchoolClass = { id: string; name: string; arm: string | null; class_teacher_id?: string | null; class_teacher?: { full_name: string } | null };
@@ -203,6 +204,7 @@ function studentPayload(form: StudentForm) {
     dob: form.dob || null,
     parent_name: form.parent_name.trim() || null,
     parent_phone: form.parent_phone.trim() || null,
+    photo_url: form.photo_url || null,
   };
 }
 
