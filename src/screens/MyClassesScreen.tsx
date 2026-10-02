@@ -57,11 +57,14 @@ export default function MyClassesScreen({ navigation }: any) {
 
   const open = async (c: any) => {
     let term: any = null;
+    let sessionName = '';
     try {
+      const { data: sess } = await supabase.from('sessions').select('name').eq('id', c.session_id).single();
+      sessionName = sess ? sess.name : '';
       const terms = await fetchTerms(c.session_id);
       term = terms.find((t: any) => t.is_current) || terms[terms.length - 1];
     } catch {}
-    navigation.navigate('ClassDetail', { classId: c.id, sessionId: c.session_id, sessionName: '', termId: term ? term.id : '', termName: term ? term.name : '' });
+    navigation.navigate('ClassDetail', { classId: c.id, sessionId: c.session_id, sessionName, termId: term ? term.id : '', termName: term ? term.name : '' });
   };
 
   if (ctxLoading || (!items && !failed)) {

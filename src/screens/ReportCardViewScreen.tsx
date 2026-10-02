@@ -1,0 +1,93 @@
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Button, EmptyState, Screen } from '../components';
+import { colors, shadow, spacing, text } from '../theme';
+import { useStaff } from '../lib/useStaff';
+import { showError } from '../lib/confirm';
+import { buildReportCardHtml, exportReportCardPdf } from '../lib/reportCardDoc';
+
+export default function ReportCardViewScreen({ navigation, route }: any) {
+  const { studentId, studentName, classId, termId, sessionId, sessionName, termName } = route.params;
+  const { ctx } = useStaff();
+  const insets = useSafeAreaInsets();
+  const [html, setHtml] = useState('');
+  const [state, setState] = useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({ title: studentName });
+  }, [navigation, studentName]);
+
+  useEffect(() => {
+    if (!ctx) {
+      return;
+    }
+    buildReportCardHtml({ studentId, classId, termId, sessionId, sessionName, termName, school: ctx.school })
+      .then(r => {
+        if (r.error === 'no_published_subjects') {
+          setState('empty');
+        } else {
+          setHtml(r.html || '');
+          setState('ready');
+        }
+      })
+      .catch(e => {
+        setMessage(e.message || 'Could not generate this report card.');
+        setState('error');
+      });
+  }, [ctx, studentId, classId, termId, sessionId, sessionName, termName]);
+
+  const exportPdf = async () => {
+    setBusy(true);
+    try {
+      await exportReportCardPdf(html, studentName, true);
+    } catch (e: any) {
+      showError('Could not generate PDF: ' + (e.message || 'Unknown error'));
+    }
+    setBusy(false);
+  };
+
+  if (state === 'loading') {
+    return (
+      <Screen>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[text.body, { color: colors.textMuted, marginTop: spacing.lg }]}>Generating report card</Text>
+        </View>
+      </Screen>
+    );
+  }
+
+  if (state === 'empty') {
+    return (
+      <Screen>
+        <EmptyState icon="file" title="No published subjects yet" message='Scores must be marked "published" in Edit / Add Results before they appear on the report card.' />
+      </Screen>
+    );
+  }
+
+  if (state === 'error') {
+    return (
+      <Screen>
+        <EmptyState icon="info" title="Could not generate this report card" message={message} />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen padded={false} background="#E5E7EB">
+      <WebView originWhitelist={['*']} source={{ html }} style={{ flex: 1, backgroundColor: '#E5E7EB' }} scalesPageToFit startInLoadingState bounces={false} />
+      <View style={[styles.bar, shadow.raised, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
+        <Button title="Save or share PDF" icon="arrowRight" loading={busy} onPress={exportPdf} />
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  bar: { backgroundColor: colors.surface, paddingHorizontal: spacing.xl, paddingTop: spacing.md, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+});

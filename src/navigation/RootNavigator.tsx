@@ -32,7 +32,17 @@ import TeachersScreen from '../screens/TeachersScreen';
 import TeacherEditScreen from '../screens/TeacherEditScreen';
 import { PortalSessionsScreen, PortalTermsScreen } from '../screens/PortalScreen';
 import PortalClassesScreen from '../screens/PortalClassesScreen';
-import ClassDetailScreen from '../screens/ClassDetailScreen';
+import ClassWorkspaceScreen from '../screens/ClassWorkspaceScreen';
+import ClassResultsScreen from '../screens/ClassResultsScreen';
+import ClassReportCardsScreen from '../screens/ClassReportCardsScreen';
+import ReportCardViewScreen from '../screens/ReportCardViewScreen';
+import ClassCommentsScreen from '../screens/ClassCommentsScreen';
+import ClassSubjectsScreen from '../screens/ClassSubjectsScreen';
+import ArrangeSubjectsScreen from '../screens/ArrangeSubjectsScreen';
+import RemoveFromExamScreen from '../screens/RemoveFromExamScreen';
+import PublishReportsScreen from '../screens/PublishReportsScreen';
+import ClassSettingsScreen from '../screens/ClassSettingsScreen';
+import AttendanceSummaryScreen from '../screens/AttendanceSummaryScreen';
 import ClassFormScreen from '../screens/ClassFormScreen';
 import ClockScreen from '../screens/ClockScreen';
 import ClassAttendanceScreen from '../screens/ClassAttendanceScreen';
@@ -76,11 +86,21 @@ export default function RootNavigator() {
       <Stack.Screen name="Portal" component={PortalSessionsScreen} options={{ ...headerOptions, title: 'School Portal' }} />
       <Stack.Screen name="PortalTerms" component={PortalTermsScreen} options={{ ...headerOptions, title: 'Terms' }} />
       <Stack.Screen name="PortalClasses" component={PortalClassesScreen} options={{ ...headerOptions, title: 'Classes' }} />
-      <Stack.Screen name="ClassDetail" component={ClassDetailScreen} options={{ ...headerOptions, title: 'Class' }} />
+      <Stack.Screen name="ClassDetail" component={ClassWorkspaceScreen} options={{ ...headerOptions, title: 'Class' }} />
       <Stack.Screen name="ClassForm" component={ClassFormScreen} options={{ ...headerOptions, title: 'Add class' }} />
       <Stack.Screen name="Clock" component={ClockScreen} options={{ ...headerOptions, title: 'Clock In and Out' }} />
       <Stack.Screen name="ClassAttendance" component={ClassAttendanceScreen} options={{ ...headerOptions, title: 'Attendance' }} />
       <Stack.Screen name="MyClasses" component={MyClassesScreen} options={{ ...headerOptions, title: 'My Classes' }} />
+      <Stack.Screen name="ClassResults" component={ClassResultsScreen} options={{ ...headerOptions, title: 'Edit / Add Results' }} />
+      <Stack.Screen name="ClassReportCards" component={ClassReportCardsScreen} options={{ ...headerOptions, title: 'Report Cards' }} />
+      <Stack.Screen name="ReportCardView" component={ReportCardViewScreen} options={{ ...headerOptions, title: 'Report Card' }} />
+      <Stack.Screen name="ClassComments" component={ClassCommentsScreen} options={{ ...headerOptions, title: 'Comments and Ratings' }} />
+      <Stack.Screen name="ClassSubjects" component={ClassSubjectsScreen} options={{ ...headerOptions, title: 'Class Subjects' }} />
+      <Stack.Screen name="ArrangeSubjects" component={ArrangeSubjectsScreen} options={{ ...headerOptions, title: 'Arrange Subjects' }} />
+      <Stack.Screen name="RemoveFromExam" component={RemoveFromExamScreen} options={{ ...headerOptions, title: 'Remove Student from Exam' }} />
+      <Stack.Screen name="PublishReports" component={PublishReportsScreen} options={{ ...headerOptions, title: 'Publish Report Cards' }} />
+      <Stack.Screen name="ClassSettings" component={ClassSettingsScreen} options={{ ...headerOptions, title: 'Class Settings' }} />
+      <Stack.Screen name="AttendanceSummary" component={AttendanceSummaryScreen} options={{ ...headerOptions, title: 'Weekly Summary' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

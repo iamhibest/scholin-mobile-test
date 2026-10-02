@@ -145,3 +145,25 @@ export async function submitClock(body: any): Promise<any> {
   }
   return data;
 }
+
+export function computeDayValue(marks: Record<string, string>, mode: Mode) {
+  if (mode === 'separate') {
+    const m = marks.morning;
+    const a = marks.afternoon;
+    if (!m && !a) {
+      return null;
+    }
+    let value = 0;
+    if (m === 'present') {
+      value += 1;
+    }
+    if (a === 'present') {
+      value += 1;
+    }
+    return value;
+  }
+  if (!marks.combined) {
+    return null;
+  }
+  return marks.combined === 'present' ? 2 : 0;
+}

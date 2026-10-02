@@ -28,6 +28,16 @@ export type RootStackParamList = {
   Clock: undefined;
   MyClasses: undefined;
   ClassAttendance: { classId: string; sessionId: string; termId: string; className: string };
+  ClassResults: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  ClassReportCards: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  ReportCardView: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string } & { studentId: string; studentName: string };
+  ClassComments: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  ClassSubjects: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  ArrangeSubjects: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  RemoveFromExam: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  PublishReports: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
+  ClassSettings: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string } & { arm: string; rawName: string };
+  AttendanceSummary: { classId: string; sessionId: string; sessionName: string; termId: string; termName: string; className: string };
   ClassForm: { sessionId: string; classId?: string; name?: string; arm?: string };
   Developer: undefined;
   Logs: undefined;

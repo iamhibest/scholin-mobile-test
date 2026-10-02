@@ -15,6 +15,7 @@ const PERMISSIONS: Perm[] = [
   { field: 'can_edit_results', label: 'Edit results', desc: "Can edit students' results", icon: 'file', tone: 'blue' },
   { field: 'can_generate_report_cards', label: 'Generate report cards', desc: 'Can generate report cards', icon: 'fileCheck', tone: 'purple' },
   { field: 'can_add_comments', label: 'Add comments', desc: 'Can add comments on results', icon: 'chat', tone: 'green' },
+  { field: 'can_manage_permissions', label: "Manage teachers' permissions", desc: 'Can change the permissions of regular teachers. Only the school owner can switch this on.', icon: 'shieldCheck', tone: 'rose', adminOnly: true },
   { field: 'can_manage_events_fees', label: 'Manage events and fees', desc: 'Can view and manage Events and Fees, including recording payments', icon: 'wallet', tone: 'teal', adminOnly: true },
   { field: 'can_mark_attendance', label: 'Mark attendance register', desc: 'Can mark the attendance register', icon: 'calendarCheck', tone: 'amber' },
   { field: 'can_manage_attendance', label: 'Manage staff attendance', desc: 'Can manage staff attendance', icon: 'users', tone: 'teal' },
@@ -103,7 +104,9 @@ export default function TeachersScreen({ navigation }: any) {
     const myRole = ctx ? ctx.role : 'teacher';
     const canManage = (myRole === 'owner' && m.role !== 'owner') || (myRole === 'teacher_admin' && m.role === 'teacher');
     const hasPerms = m.role === 'teacher' || m.role === 'teacher_admin';
-    const perms = PERMISSIONS.filter(p => (m.role === 'teacher_admin' ? p.adminOnly === true : !p.adminOnly));
+    const perms = PERMISSIONS.filter(p => (m.role === 'teacher_admin' ? p.adminOnly === true : !p.adminOnly)).filter(p => p.field !== 'can_manage_permissions' || myRole === 'owner');
+    const delegated = ctx ? ctx.membership.can_manage_permissions === true : false;
+    const canEditPerms = myRole === 'owner' ? m.role !== 'owner' : myRole === 'teacher_admin' && delegated && m.role === 'teacher' && !isMe;
     const expanded = !!open[m.id];
     return (
       <Card key={m.id} style={styles.card}>
@@ -168,6 +171,11 @@ export default function TeachersScreen({ navigation }: any) {
                 <Icon name="chevronDown" size={20} color={colors.textMuted} />
               </View>
             </Pressable>
+            {expanded && !canEditPerms ? (
+              <Text style={[text.small, { color: colors.textMuted, marginTop: spacing.sm }]}>
+                {isMe ? 'You cannot change your own permissions. Only the school owner can.' : 'Only the school owner, or a teacher admin the owner has allowed, can change permissions.'}
+              </Text>
+            ) : null}
             {expanded
               ? perms.map(p => {
                   const t = toneColors[p.tone];
@@ -183,6 +191,7 @@ export default function TeachersScreen({ navigation }: any) {
                       <Switch
                         value={!!m[p.field]}
                         onValueChange={v => toggle(m, p.field, v)}
+                        disabled={!canEditPerms}
                         trackColor={{ false: '#D5D8DE', true: colors.primaryLight }}
                         thumbColor={m[p.field] ? colors.primary : '#FFFFFF'}
                       />

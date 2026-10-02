@@ -49,7 +49,7 @@ jobs:
           npm install react-native-screens react-native-safe-area-context
           npm install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill
           npm install lucide-react-native react-native-svg
-          npm install react-native-image-picker @react-native-community/datetimepicker
+          npm install react-native-image-picker @react-native-community/datetimepicker react-native-webview
           npm install @expo-google-fonts/inter @expo-google-fonts/lora
 
       - name: Bundle fonts

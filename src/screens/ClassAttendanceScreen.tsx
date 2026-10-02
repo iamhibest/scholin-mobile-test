@@ -12,6 +12,7 @@ import { toISODateLocal } from '../lib/format';
 
 export default function ClassAttendanceScreen({ navigation, route }: any) {
   const { classId, sessionId, termId, className } = route.params;
+  const params = route.params;
   const { ctx } = useStaff();
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('combined');
@@ -170,6 +171,8 @@ export default function ClassAttendanceScreen({ navigation, route }: any) {
         <Text style={[text.small, { color: colors.textMuted, marginTop: 2 }]}>
           {mode === 'separate' ? 'Morning and afternoon are marked separately.' : 'One combined register per day.'}
         </Text>
+
+        <Button title="Weekly summary" icon="trend" variant="outline" onPress={() => navigation.navigate('AttendanceSummary', params)} style={{ marginTop: spacing.md, height: 46 }} />
 
         {pending > 0 ? (
           <View style={styles.pending}>
