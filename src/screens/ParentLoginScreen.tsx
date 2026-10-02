@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AuthHeader, Button, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
@@ -8,6 +9,7 @@ import { recordTerms } from '../lib/session';
 import { saveLastDestination } from '../lib/storage';
 
 export default function ParentLoginScreen({ navigation }: any) {
+  const chain = useChain(2);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,8 +46,8 @@ export default function ParentLoginScreen({ navigation }: any) {
       <AuthHeader title="Parent portal" subtitle="Sign in to see your child's attendance, results, fees, and school announcements." />
       <Notice message={error} />
 
-      <Input label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
-      <Input label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="password" placeholder="Your password" />
+      <Input {...chain(0)} label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
+      <Input {...chain(1)} label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="password" placeholder="Your password" />
 
       <Button title="Sign in" onPress={signIn} loading={loading} disabled={!email.trim() || !password} />
 

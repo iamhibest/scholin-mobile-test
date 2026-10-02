@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AuthHeader, Button, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
@@ -11,6 +12,7 @@ function defaultSessionName() {
 }
 
 export default function RegisterSchoolScreen({ navigation }: any) {
+  const chain = useChain(6);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
@@ -87,12 +89,12 @@ export default function RegisterSchoolScreen({ navigation }: any) {
     <Screen scroll background={colors.surface}>
       <AuthHeader title="Register your school" subtitle="You can edit all of this later from Settings. Only the school name is required to continue." />
       <Notice message={error} />
-      <Input label="School name *" icon="school" value={name} onChangeText={setName} placeholder="e.g. Radiance Bright Stars Academy" />
-      <Input label="Address" icon="pin" value={address} onChangeText={setAddress} placeholder="e.g. 12 Knowledge Avenue, Mowe, Ogun State" />
-      <Input label="School phone" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="e.g. 08123456789" />
-      <Input label="School email" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="e.g. info@school.edu.ng" />
-      <Input label="Motto" value={motto} onChangeText={setMotto} placeholder="e.g. Raising Stars, Building Futures" />
-      <Input label="Referral code (optional)" value={referral} onChangeText={v => setReferral(v.toUpperCase())} autoCapitalize="characters" placeholder="e.g. A1B2C3" />
+      <Input {...chain(0)} label="School name *" icon="school" value={name} onChangeText={setName} placeholder="e.g. Radiance Bright Stars Academy" />
+      <Input {...chain(1)} label="Address" icon="pin" value={address} onChangeText={setAddress} placeholder="e.g. 12 Knowledge Avenue, Mowe, Ogun State" />
+      <Input {...chain(2)} label="School phone" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="e.g. 08123456789" />
+      <Input {...chain(3)} label="School email" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="e.g. info@school.edu.ng" />
+      <Input {...chain(4)} label="Motto" value={motto} onChangeText={setMotto} placeholder="e.g. Raising Stars, Building Futures" />
+      <Input {...chain(5)} label="Referral code (optional)" value={referral} onChangeText={v => setReferral(v.toUpperCase())} autoCapitalize="characters" placeholder="e.g. A1B2C3" />
       <Button title="Register school and continue" onPress={submit} loading={loading} />
     </Screen>
   );

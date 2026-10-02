@@ -4,6 +4,7 @@ import { Button, DateField, Input, Notice, OptionField, PhotoField, Screen, Skel
 import { spacing } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { photosAllowed } from '../lib/upload';
+import { useChain } from '../lib/useChain';
 import { classLabel, createStudent, fetchClasses, fetchStudent, SchoolClass, updateStudent } from '../lib/school';
 
 export default function StudentFormScreen({ navigation, route }: any) {
@@ -60,6 +61,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
   }, [editing, studentId]);
 
   const lockAdmission = !editing && !!ctx && ctx.autoAdmission;
+  const chain = useChain(lockAdmission ? 3 : 4);
 
   const save = async () => {
     setError('');
@@ -98,8 +100,9 @@ export default function StudentFormScreen({ navigation, route }: any) {
     <Screen scroll>
       <Notice message={error} />
       {allowPhotos ? <PhotoField name={name} url={photo} schoolId={ctx ? ctx.schoolId : null} onChange={setPhoto} label="student photo" /> : null}
-      <Input label="Full name" value={name} onChangeText={setName} placeholder="e.g. Oluwadamilola Michael" icon="user" autoCapitalize="words" />
+      <Input {...chain(0)} label="Full name" value={name} onChangeText={setName} placeholder="e.g. Oluwadamilola Michael" icon="user" autoCapitalize="words" />
       <Input
+        {...(lockAdmission ? {} : chain(1))}
         label="Admission number"
         value={admission}
         onChangeText={setAdmission}
@@ -115,8 +118,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
         onChange={setGender}
       />
       <DateField label="Date of birth" value={dob} onChange={setDob} placeholder="Select date of birth" />
-      <Input label="Parent or guardian name" value={parentName} onChangeText={setParentName} icon="user" autoCapitalize="words" />
-      <Input label="Parent or guardian phone" value={parentPhone} onChangeText={setParentPhone} icon="phone" keyboardType="phone-pad" />
+      <Input {...chain(lockAdmission ? 1 : 2)} label="Parent or guardian name" value={parentName} onChangeText={setParentName} icon="user" autoCapitalize="words" />
+      <Input {...chain(lockAdmission ? 2 : 3)} label="Parent or guardian phone" value={parentPhone} onChangeText={setParentPhone} icon="phone" keyboardType="phone-pad" />
       {!editing ? (
         <OptionField
           label="Assign to class this session"

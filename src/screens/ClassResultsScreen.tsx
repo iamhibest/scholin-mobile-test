@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar, BottomSheet, Button, Card, Checkbox, EmptyState, Icon, Notice, OptionField, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -21,6 +21,8 @@ export default function ClassResultsScreen({ navigation, route }: any) {
   const [scores, setScores] = useState<Record<string, Record<string, string>>>({});
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(false);
+  const inputRefs = useRef<Record<string, TextInput | null>>({});
+  const listRef = useRef<FlatList<any>>(null);
   const [sortKey, setSortKey] = useState<'name' | 'total'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [sheet, setSheet] = useState(false);
@@ -69,12 +71,16 @@ export default function ClassResultsScreen({ navigation, route }: any) {
 
   const setScore = (studentId: string, comp: Component, raw: string) => {
     let value = raw.replace(/[^0-9.]/g, '');
-    const num = parseFloat(value);
-    const max = parseFloat(String(comp.max_score));
-    if (!isNaN(num) && num > max) {
-      value = String(max);
+    const firstDot = value.indexOf('.');
+    if (firstDot !== -1) {
+      value = value.slice(0, firstDot + 1) + value.slice(firstDot + 1).replace(/\./g, '');
     }
     setScores(s => ({ ...s, [studentId]: { ...(s[studentId] || {}), [comp.id]: value } }));
+  };
+
+  const isOver = (studentId: string, comp: Component) => {
+    const v = parseFloat((scores[studentId] || {})[comp.id]);
+    return !isNaN(v) && v > parseFloat(String(comp.max_score));
   };
 
   const totalOf = (studentId: string) => {
@@ -102,6 +108,52 @@ export default function ClassResultsScreen({ navigation, route }: any) {
     });
     return list;
   }, [roster, scores, components, sortKey, sortDir]);
+
+  const overs = useMemo(() => {
+    const list: { id: string; name: string; comp: string; value: string; max: string }[] = [];
+    roster.forEach(st => {
+      components.forEach(c => {
+        const raw = (scores[st.id] || {})[c.id];
+        const v = parseFloat(raw);
+        if (!isNaN(v) && v > parseFloat(String(c.max_score))) {
+          list.push({ id: st.id + ':' + c.id, name: st.full_name, comp: c.name, value: raw, max: String(c.max_score) });
+        }
+      });
+    });
+    return list;
+  }, [roster, scores, components]);
+
+  const orderKeys = useMemo(() => {
+    const keys: string[] = [];
+    sorted.forEach(({ s }) => components.forEach(c => keys.push(s.id + ':' + c.id)));
+    return keys;
+  }, [sorted, components]);
+
+  const goNext = (key: string) => {
+    const [sid, cid] = key.split(':');
+    const comp = components.find(c => c.id === cid);
+    if (comp && isOver(sid, comp)) {
+      const st = roster.find(r => r.id === sid);
+      Alert.alert('Score is more than the assigned score', (st ? st.full_name + ': ' : '') + comp.name + ' cannot be more than ' + comp.max_score + '. Please correct it.');
+      return;
+    }
+    const at = orderKeys.indexOf(key);
+    const nextKey = orderKeys[at + 1];
+    if (!nextKey) {
+      inputRefs.current[key]?.blur();
+      return;
+    }
+    const nextStudent = nextKey.split(':')[0];
+    if (nextStudent !== sid) {
+      const row = sorted.findIndex(x => x.s.id === nextStudent);
+      if (row >= 0 && listRef.current) {
+        try {
+          listRef.current.scrollToIndex({ index: row, animated: true, viewPosition: 0.2 });
+        } catch {}
+      }
+    }
+    setTimeout(() => inputRefs.current[nextKey]?.focus(), 60);
+  };
 
   const toggleSort = (key: 'name' | 'total') => {
     if (sortKey === key) {
@@ -202,7 +254,11 @@ export default function ClassResultsScreen({ navigation, route }: any) {
   return (
     <Screen padded={false}>
       <FlatList
+        ref={listRef}
         data={showList ? sorted : []}
+        initialNumToRender={Math.max(12, roster.length)}
+        removeClippedSubviews={false}
+        onScrollToIndexFailed={info => listRef.current && listRef.current.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true })}
         keyExtractor={i => i.s.id}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.list, { paddingBottom: 120 + insets.bottom }]}
@@ -227,25 +283,46 @@ export default function ClassResultsScreen({ navigation, route }: any) {
                 </View>
               </View>
               <View style={styles.inputs}>
-                {components.map(c => (
-                  <View key={c.id} style={styles.inputBox}>
-                    <Text style={[text.caption, { color: colors.textMuted }]} numberOfLines={1}>{c.name + ' /' + c.max_score}</Text>
-                    <TextInput
-                      value={(scores[s.id] || {})[c.id] ?? ''}
-                      onChangeText={v => setScore(s.id, c, v)}
-                      keyboardType="decimal-pad"
-                      placeholder="-"
-                      placeholderTextColor="#9CA3AF"
-                      style={styles.input}
-                      selectTextOnFocus
-                    />
-                  </View>
-                ))}
+                {components.map(c => {
+                  const key = s.id + ':' + c.id;
+                  const over = isOver(s.id, c);
+                  const last = orderKeys[orderKeys.length - 1] === key;
+                  return (
+                    <View key={c.id} style={styles.inputBox}>
+                      <Text style={[text.caption, { color: over ? colors.danger : colors.textMuted }]} numberOfLines={1}>{c.name + ' /' + c.max_score}</Text>
+                      <TextInput
+                        ref={r => {
+                          inputRefs.current[key] = r;
+                        }}
+                        value={(scores[s.id] || {})[c.id] ?? ''}
+                        onChangeText={v => setScore(s.id, c, v)}
+                        keyboardType="decimal-pad"
+                        returnKeyType={last ? 'done' : 'next'}
+                        blurOnSubmit={last}
+                        onSubmitEditing={() => goNext(key)}
+                        placeholder="-"
+                        placeholderTextColor="#9CA3AF"
+                        style={[styles.input, over && styles.inputOver]}
+                        selectTextOnFocus
+                      />
+                      {over ? <Text style={[text.caption, { color: colors.danger, marginTop: 2 }]}>{'More than ' + c.max_score}</Text> : null}
+                    </View>
+                  );
+                })}
               </View>
             </Card>
           );
         }}
       />
+
+      {showList && overs.length > 0 ? (
+        <View style={[styles.overBar, { bottom: 92 + insets.bottom }]}>
+          <Icon name="info" size={18} color="#FFFFFF" />
+          <Text style={[text.small, { color: '#FFFFFF', flex: 1 }]}>
+            {overs[0].name + ': ' + overs[0].comp + ' is ' + overs[0].value + ', more than the assigned score of ' + overs[0].max + (overs.length > 1 ? '. ' + (overs.length - 1) + ' more to fix.' : '.')}
+          </Text>
+        </View>
+      ) : null}
 
       {showList && roster.length > 0 ? (
         <View style={[styles.bar, shadow.raised, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
@@ -253,6 +330,10 @@ export default function ClassResultsScreen({ navigation, route }: any) {
             title="Save scores"
             icon="arrowRight"
             onPress={() => {
+              if (overs.length > 0) {
+                Alert.alert('Score is more than the assigned score', overs.length + (overs.length === 1 ? ' entry is' : ' entries are') + ' more than the maximum. Fix the highlighted scores before saving.');
+                return;
+              }
               setPublishNow(published);
               setSheet(true);
             }}
@@ -283,5 +364,7 @@ const styles = StyleSheet.create({
   inputs: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
   inputBox: { flexGrow: 1, flexBasis: '30%', minWidth: 88 },
   input: { marginTop: 4, height: 44, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, textAlign: 'center', fontFamily: fonts.semibold, fontSize: 16, color: colors.text, paddingVertical: 0 },
+  inputOver: { borderColor: colors.danger, backgroundColor: colors.dangerSoft, color: colors.danger },
+  overBar: { position: 'absolute', left: spacing.xl, right: spacing.xl, flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: colors.danger, borderRadius: radius.md, padding: spacing.md },
   bar: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface, paddingHorizontal: spacing.xl, paddingTop: spacing.md, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
 });

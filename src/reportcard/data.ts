@@ -64,13 +64,13 @@ export async function gatherReportCardData({ studentId, classId, termId, session
   const subjectIds = publishedSubjects.map(p => p.subject_id);
   const maxPerSubject = (components || []).reduce((sum, c) => sum + parseFloat(c.max_score), 0) || 100;
 
-  const { data: allResults } = await sb
+  const { data: allResults } = await supabase
     .from('results')
     .select('student_id, subject_id, score')
     .eq('class_id', classId).eq('term_id', termId)
     .in('subject_id', subjectIds);
 
-  const { data: classHistory } = await sb
+  const { data: classHistory } = await supabase
     .from('student_class_history')
     .select('student_id')
     .eq('class_id', classId).eq('session_id', sessionId);
@@ -92,7 +92,7 @@ export async function gatherReportCardData({ studentId, classId, termId, session
     bySubject[r.subject_id].total = (bySubject[r.subject_id].total || 0) + parseFloat(r.score);
   });
 
-  const { data: myComponentScores } = await sb
+  const { data: myComponentScores } = await supabase
     .from('results')
     .select('*')
     .eq('student_id', studentId).eq('class_id', classId).eq('term_id', termId)
@@ -143,7 +143,7 @@ export async function gatherReportCardData({ studentId, classId, termId, session
   let daysPresent = attendanceRow ? (attendanceRow.days_present || 0) : 0;
 
   if (attendanceSetting && attendanceSetting.use_calculated_attendance) {
-    const { data: marks } = await sb
+    const { data: marks } = await supabase
       .from('daily_attendance_marks')
       .select('mark_date, session, status')
       .eq('student_id', studentId).eq('term_id', termId);

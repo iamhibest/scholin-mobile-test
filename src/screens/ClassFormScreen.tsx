@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { spacing } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { createClass, updateClass } from '../lib/school';
 
 export default function ClassFormScreen({ navigation, route }: any) {
+  const chain = useChain(2);
   const { sessionId, classId, name: initialName, arm: initialArm } = route.params;
   const editing = !!classId;
   const { ctx } = useStaff();
@@ -43,8 +45,8 @@ export default function ClassFormScreen({ navigation, route }: any) {
   return (
     <Screen scroll>
       <Notice message={error} />
-      <Input label="Class name" value={name} onChangeText={setName} placeholder="e.g. Primary 4" icon="cap" autoCapitalize="words" />
-      <Input label="Arm (optional)" value={arm} onChangeText={setArm} placeholder="e.g. A" autoCapitalize="characters" />
+      <Input {...chain(0)} label="Class name" value={name} onChangeText={setName} placeholder="e.g. Primary 4" icon="cap" autoCapitalize="words" />
+      <Input {...chain(1)} label="Arm (optional)" value={arm} onChangeText={setArm} placeholder="e.g. A" autoCapitalize="characters" />
       <Button title={editing ? 'Save changes' : 'Add class'} loading={saving} onPress={save} style={{ marginTop: spacing.md }} />
     </Screen>
   );

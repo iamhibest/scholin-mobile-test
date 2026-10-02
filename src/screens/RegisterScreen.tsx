@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AuthHeader, Button, Checkbox, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { isValidEmail, recordTerms } from '../lib/session';
 
 export default function RegisterScreen({ navigation }: any) {
+  const chain = useChain(4);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -68,10 +70,10 @@ export default function RegisterScreen({ navigation }: any) {
       <AuthHeader title="Create your account" subtitle="This is your personal login. You'll set up or join a school next." />
       <Notice message={msg} tone={ok ? 'success' : 'error'} />
 
-      <Input label="Full name" icon="user" value={fullName} onChangeText={setFullName} autoComplete="name" placeholder="e.g. Adaeze Balogun" />
-      <Input label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
-      <Input label="Phone number" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" placeholder="e.g. 08012345678" />
-      <Input label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
+      <Input {...chain(0)} label="Full name" icon="user" value={fullName} onChangeText={setFullName} autoComplete="name" placeholder="e.g. Adaeze Balogun" />
+      <Input {...chain(1)} label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
+      <Input {...chain(2)} label="Phone number" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" placeholder="e.g. 08012345678" />
+      <Input {...chain(3)} label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
 
       <Checkbox checked={terms} onChange={setTerms}>
         <Text style={[text.small, { color: colors.text }]}>

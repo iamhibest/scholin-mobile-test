@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 import { colors, radius, spacing, text } from '../theme';
 import Icon, { IconName } from './Icon';
@@ -10,7 +10,7 @@ type Props = TextInputProps & {
   secure?: boolean;
 };
 
-export default function Input({ label, error, icon, secure, style, ...rest }: Props) {
+const Input = forwardRef<TextInput, Props>(function Input({ label, error, icon, secure, style, ...rest }, ref) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
@@ -22,6 +22,7 @@ export default function Input({ label, error, icon, secure, style, ...rest }: Pr
         {icon ? <Icon name={icon} size={20} color={colors.textMuted} /> : null}
         <TextInput
           {...rest}
+          ref={ref}
           style={[styles.input, style]}
           secureTextEntry={hidden}
           placeholderTextColor="#9CA3AF"
@@ -37,7 +38,9 @@ export default function Input({ label, error, icon, secure, style, ...rest }: Pr
       {error ? <Text style={[text.small, styles.error]}>{error}</Text> : null}
     </View>
   );
-}
+});
+
+export default Input;
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: spacing.lg },

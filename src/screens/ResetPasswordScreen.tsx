@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { AuthHeader, Button, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors } from '../theme';
 import { supabase } from '../lib/supabase';
 
 export default function ResetPasswordScreen({ navigation }: any) {
+  const chain = useChain(2);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,8 +40,8 @@ export default function ResetPasswordScreen({ navigation }: any) {
     <Screen scroll background={colors.surface}>
       <AuthHeader title="Set a new password" subtitle="Choose a new password for your account." />
       <Notice message={msg} tone={ok ? 'success' : 'error'} />
-      <Input label="New password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
-      <Input label="Confirm new password" icon="lock" secure value={confirm} onChangeText={setConfirm} autoComplete="new-password" placeholder="Re-enter password" />
+      <Input {...chain(0)} label="New password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
+      <Input {...chain(1)} label="Confirm new password" icon="lock" secure value={confirm} onChangeText={setConfirm} autoComplete="new-password" placeholder="Re-enter password" />
       <Button title="Update password" onPress={submit} loading={loading} disabled={!password || !confirm} />
     </Screen>
   );

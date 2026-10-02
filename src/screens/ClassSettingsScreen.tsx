@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors, radius, spacing, text } from '../theme';
 import { showError } from '../lib/confirm';
 import { updateClass } from '../lib/school';
 import { deleteClass } from '../lib/portal';
 
 export default function ClassSettingsScreen({ navigation, route }: any) {
+  const chain = useChain(2);
   const { classId, rawName, arm: initialArm } = route.params;
   const [name, setName] = useState(rawName || '');
   const [arm, setArm] = useState(initialArm || '');
@@ -46,8 +48,8 @@ export default function ClassSettingsScreen({ navigation, route }: any) {
   return (
     <Screen scroll>
       <Notice message={notice.message} tone={notice.tone} />
-      <Input label="Class name" value={name} onChangeText={setName} icon="cap" autoCapitalize="words" />
-      <Input label="Arm (optional)" value={arm} onChangeText={setArm} placeholder="e.g. A" autoCapitalize="characters" />
+      <Input {...chain(0)} label="Class name" value={name} onChangeText={setName} icon="cap" autoCapitalize="words" />
+      <Input {...chain(1)} label="Arm (optional)" value={arm} onChangeText={setArm} placeholder="e.g. A" autoCapitalize="characters" />
       <Button title="Save changes" loading={saving} onPress={save} style={{ marginTop: spacing.sm }} />
       <View style={styles.danger}>
         <Text style={[text.h3, { color: colors.danger }]}>Delete class</Text>

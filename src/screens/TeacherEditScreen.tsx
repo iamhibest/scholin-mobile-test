@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Button, Input, Notice, PhotoField, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { useStaff } from '../lib/useStaff';
 import { spacing } from '../theme';
 import { saveTeacherProfile } from '../lib/school';
 
 export default function TeacherEditScreen({ navigation, route }: any) {
+  const chain = useChain(2);
   const { profileId, name: initialName, phone: initialPhone, avatar } = route.params;
   const [name, setName] = useState(initialName || '');
   const [phone, setPhone] = useState(initialPhone || '');
@@ -33,8 +35,8 @@ export default function TeacherEditScreen({ navigation, route }: any) {
     <Screen scroll>
       <PhotoField name={name} url={photo} schoolId={ctx ? ctx.schoolId : null} onChange={setPhoto} label="profile photo" />
       <Notice message={error} />
-      <Input label="Full name" value={name} onChangeText={setName} icon="user" autoCapitalize="words" />
-      <Input label="Phone number" value={phone} onChangeText={setPhone} icon="phone" keyboardType="phone-pad" />
+      <Input {...chain(0)} label="Full name" value={name} onChangeText={setName} icon="user" autoCapitalize="words" />
+      <Input {...chain(1)} label="Phone number" value={phone} onChangeText={setPhone} icon="phone" keyboardType="phone-pad" />
       <Button title="Save changes" loading={saving} onPress={save} style={{ marginTop: spacing.md }} />
     </Screen>
   );

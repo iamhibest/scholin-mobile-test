@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AuthHeader, Button, Checkbox, Input, Notice, Screen, SelectField } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
@@ -10,6 +11,7 @@ import { saveLastDestination } from '../lib/storage';
 const titles = ['Mr', 'Mrs', 'Miss', 'Ms', 'Dr', 'Prof', 'Engr', 'Chief', 'Alhaji', 'Alhaja', 'Rev', 'Pastor'];
 
 export default function ParentRegisterScreen({ navigation }: any) {
+  const chain = useChain(4);
   const [title, setTitle] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -104,10 +106,10 @@ export default function ParentRegisterScreen({ navigation }: any) {
       <Notice message={msg} tone={ok ? 'success' : 'error'} />
 
       <SelectField label="Title" value={title} options={titles} placeholder="Select a title" hint="How would you like Scholin to address you?" onChange={setTitle} />
-      <Input label="Full name" icon="user" value={fullName} onChangeText={setFullName} autoComplete="name" placeholder="e.g. Adaeze Balogun" />
-      <Input label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
-      <Input label="Phone number" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" placeholder="e.g. 08012345678" />
-      <Input label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
+      <Input {...chain(0)} label="Full name" icon="user" value={fullName} onChangeText={setFullName} autoComplete="name" placeholder="e.g. Adaeze Balogun" />
+      <Input {...chain(1)} label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
+      <Input {...chain(2)} label="Phone number" icon="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" placeholder="e.g. 08012345678" />
+      <Input {...chain(3)} label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="new-password" placeholder="At least 6 characters" />
 
       <View style={styles.codeWrap}>
         <Text style={[text.caption, styles.label]}>Child's invite code</Text>

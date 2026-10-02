@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, EmptyState, Notice, OptionField, Screen, Skeleton } from '../components';
@@ -35,6 +35,7 @@ export default function ClassCommentsScreen({ navigation, route }: any) {
   const [pr, setPr] = useState('');
   const [promoted, setPromoted] = useState('');
   const [hint, setHint] = useState('');
+  const presentRef = useRef<TextInput>(null);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ message: string; tone: 'error' | 'success' }>({ message: '', tone: 'success' });
 
@@ -167,11 +168,11 @@ export default function ClassCommentsScreen({ navigation, route }: any) {
               <View style={{ flexDirection: 'row', gap: spacing.md }}>
                 <View style={{ flex: 1 }}>
                   <Text style={[text.caption, styles.label]}>Days school opened</Text>
-                  <TextInput value={opened} onChangeText={setOpened} keyboardType="number-pad" style={styles.num} />
+                  <TextInput value={opened} onChangeText={setOpened} keyboardType="number-pad" returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => presentRef.current && presentRef.current.focus()} style={styles.num} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[text.caption, styles.label]}>Days present</Text>
-                  <TextInput value={present} onChangeText={setPresent} keyboardType="number-pad" style={styles.num} />
+                  <TextInput ref={presentRef} value={present} onChangeText={setPresent} keyboardType="number-pad" returnKeyType="done" style={styles.num} />
                 </View>
               </View>
             </Card>

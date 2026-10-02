@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AuthHeader, Button, Icon, Input, Notice, Screen } from '../components';
+import { useChain } from '../lib/useChain';
 import { colors, radius, shadow, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { recordTerms, resolveDestination } from '../lib/session';
 
 export default function LoginScreen({ navigation }: any) {
+  const chain = useChain(2);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,8 +52,8 @@ export default function LoginScreen({ navigation }: any) {
       <AuthHeader title="Welcome back" subtitle="Sign in to your school's dashboard." />
       <Notice message={error} />
 
-      <Input label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
-      <Input label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="password" placeholder="Your password" />
+      <Input {...chain(0)} label="Email address" icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
+      <Input {...chain(1)} label="Password" icon="lock" secure value={password} onChangeText={setPassword} autoComplete="password" placeholder="Your password" />
 
       <Button title="Sign in" onPress={signIn} loading={loading} disabled={!email.trim() || !password} />
 
