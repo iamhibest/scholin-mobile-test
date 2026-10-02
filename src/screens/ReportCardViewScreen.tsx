@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, EmptyState, Screen } from '../components';
-import { colors, shadow, spacing, text } from '../theme';
+import { colors, fonts, shadow, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { showError } from '../lib/confirm';
 import { buildReportCardHtml, exportReportCardPdf } from '../lib/reportCardDoc';
@@ -12,7 +12,11 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
   const { studentId, studentName, classId, termId, sessionId, sessionName, termName } = route.params;
   const { ctx } = useStaff();
   const insets = useSafeAreaInsets();
+  const webRef = useRef<any>(null);
   const [html, setHtml] = useState('');
+  const [printHtml, setPrintHtml] = useState('');
+  const [pageCount, setPageCount] = useState(1);
+  const [page, setPage] = useState(0);
   const [state, setState] = useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -31,6 +35,7 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
           setState('empty');
         } else {
           setHtml(r.html || '');
+          setPrintHtml(r.printHtml || '');
           setState('ready');
         }
       })
@@ -43,11 +48,27 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
   const exportPdf = async () => {
     setBusy(true);
     try {
-      await exportReportCardPdf(html, studentName, true);
+      await exportReportCardPdf(printHtml, studentName, true);
     } catch (e: any) {
       showError('Could not generate PDF: ' + (e.message || 'Unknown error'));
     }
     setBusy(false);
+  };
+
+  const onMessage = (e: any) => {
+    try {
+      const m = JSON.parse(e.nativeEvent.data);
+      if (m.type === 'pages') {
+        setPageCount(m.count);
+      } else if (m.type === 'page') {
+        setPage(m.index);
+      }
+    } catch {}
+  };
+
+  const goTo = (i: number) => {
+    setPage(i);
+    webRef.current?.injectJavaScript('window.showPage(' + i + ');true;');
   };
 
   if (state === 'loading') {
@@ -79,8 +100,17 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
 
   return (
     <Screen padded={false} background="#E5E7EB">
-      <WebView originWhitelist={['*']} source={{ html }} style={{ flex: 1, backgroundColor: '#E5E7EB' }} scalesPageToFit startInLoadingState bounces={false} />
+      <WebView ref={webRef} originWhitelist={['*']} source={{ html }} style={{ flex: 1, backgroundColor: '#E5E7EB' }} onMessage={onMessage} scalesPageToFit startInLoadingState bounces={false} />
       <View style={[styles.bar, shadow.raised, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
+        {pageCount > 1 ? (
+          <View style={styles.pager}>
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <Pressable key={i} onPress={() => goTo(i)} style={[styles.pill, page === i && styles.pillOn]}>
+                <Text style={[text.body, styles.pillText, page === i && styles.pillTextOn]}>{'Page ' + (i + 1)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
         <Button title="Save or share PDF" icon="arrowRight" loading={busy} onPress={exportPdf} />
       </View>
     </Screen>
@@ -88,6 +118,11 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
+  pager: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.md },
+  pill: { paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20, backgroundColor: '#EEF1F6' },
+  pillOn: { backgroundColor: colors.primary },
+  pillText: { fontFamily: fonts.semibold, color: colors.textMuted },
+  pillTextOn: { color: '#FFFFFF' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bar: { backgroundColor: colors.surface, paddingHorizontal: spacing.xl, paddingTop: spacing.md, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
 });
