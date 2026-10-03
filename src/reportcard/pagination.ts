@@ -458,7 +458,7 @@ export const PAGE_DRIVER_JS = String.raw`
   try { ReportCardPagination._draw(root, original); } catch (e) { root.innerHTML = original; }
 
   var first = root.querySelector('.rc-page');
-  if (!first) { post({ type: 'pages', count: 1 }); return; }
+  if (!first) { document.body.className = 'rc-ready'; post({ type: 'pages', count: 1 }); return; }
   var pages = ReportCardPagination.pagesOf(first);
   var W = first.offsetWidth;
   var pageH = W * RATIO;
@@ -493,6 +493,7 @@ export const PAGE_DRIVER_JS = String.raw`
   var view = document.createElement('div');
   view.id = 'view';
   root.appendChild(view);
+  document.body.className = 'rc-ready';
   for (var b = 0; b < sheets.length; b++) { sheets[b].style.display = 'none'; view.appendChild(sheets[b]); }
 
   var current = 0;
@@ -537,7 +538,7 @@ const BASE_CSS = '*{box-sizing:border-box;} html,body{margin:0;padding:0;} *{-we
 
 const PRINT_CSS = '@page{size:794px 1122px;margin:0;} html,body{background:#ffffff;} .sheet{page-break-after:always;break-after:page;} .sheet:last-child{page-break-after:auto;break-after:auto;}';
 
-const PREVIEW_CSS = 'html,body{height:100%;overflow:hidden;background:#E5E7EB;} #rc-root{position:fixed;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;} #view{position:relative;overflow:hidden;background:#ffffff;box-shadow:0 2px 14px rgba(0,0,0,0.22);} .sheet{transform-origin:0 0;}';
+const PREVIEW_CSS = 'html,body{height:100%;overflow:hidden;background:#E5E7EB;} body.rc-ready #rc-root{position:fixed;left:0;top:0;right:0;bottom:0;width:auto;display:flex;align-items:center;justify-content:center;} body:not(.rc-ready) #rc-root{position:absolute;left:0;top:0;width:1000px;visibility:hidden;} #view{position:relative;overflow:hidden;background:#ffffff;box-shadow:0 2px 14px rgba(0,0,0,0.22);} .sheet{transform-origin:0 0;}';
 
 export function buildPagedDocument(css: string, body: string, mode: 'preview' | 'print') {
   const viewport = mode === 'print' ? 'width=794' : 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes';

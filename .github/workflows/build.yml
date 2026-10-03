@@ -24,10 +24,16 @@ jobs:
         run: npx --yes @react-native-community/cli@latest init ScholinMobile --pm npm --skip-git-init
 
       - name: Copy test kit into project
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           cp App.tsx ScholinMobile/App.tsx
           cp -r src ScholinMobile/src
-          cp google-services.json ScholinMobile/android/app/google-services.json
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > ScholinMobile/android/app/google-services.json
+          else
+            cp google-services.json ScholinMobile/android/app/google-services.json
+          fi
 
       - name: Apply branding
         working-directory: ScholinMobile/android/app/src/main/res

@@ -59,4 +59,10 @@ export type RootStackParamList = {
   Location: undefined;
   Push: undefined;
   Pdf: undefined;
+  Subscription: undefined;
+  Events: undefined;
+  EventForm: undefined;
+  EventDetail: { eventId: string };
+  Receipt: { html: string; fileName: string };
+  PaymentCheckout: { kind: 'subscription'; url: string; reference: string; paymentId: string; amountLabel?: string };
 };

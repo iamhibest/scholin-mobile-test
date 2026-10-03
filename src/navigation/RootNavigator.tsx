@@ -55,6 +55,12 @@ import TemplatePreviewScreen from '../screens/TemplatePreviewScreen';
 import TemplateCustomizeScreen from '../screens/TemplateCustomizeScreen';
 import QrCodesScreen from '../screens/QrCodesScreen';
 import StaffAttendanceScreen from '../screens/StaffAttendanceScreen';
+import SubscriptionScreen from '../screens/SubscriptionScreen';
+import EventsScreen from '../screens/EventsScreen';
+import EventFormScreen from '../screens/EventFormScreen';
+import EventDetailScreen from '../screens/EventDetailScreen';
+import ReceiptScreen from '../screens/ReceiptScreen';
+import PaymentCheckoutScreen from '../screens/PaymentCheckoutScreen';
 import StaffAttendanceDetailScreen from '../screens/StaffAttendanceDetailScreen';
 import StudentAttendanceScreen from '../screens/StudentAttendanceScreen';
 import SchoolSettingsScreen from '../screens/SchoolSettingsScreen';
@@ -129,6 +135,12 @@ export default function RootNavigator() {
       <Stack.Screen name="StaffAttendanceDetail" component={StaffAttendanceDetailScreen} options={{ ...headerOptions, title: 'Attendance record' }} />
       <Stack.Screen name="StudentAttendance" component={StudentAttendanceScreen} options={{ ...headerOptions, title: 'Student Attendance' }} />
       <Stack.Screen name="SchoolSettings" component={SchoolSettingsScreen} options={{ ...headerOptions, title: 'School Settings' }} />
+      <Stack.Screen name="Events" component={EventsScreen} options={{ ...headerOptions, title: 'Events and Fees' }} />
+      <Stack.Screen name="EventForm" component={EventFormScreen} options={{ ...headerOptions, title: 'New event' }} />
+      <Stack.Screen name="EventDetail" component={EventDetailScreen} options={{ ...headerOptions, title: 'Event' }} />
+      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{ ...headerOptions, title: 'Receipt' }} />
+      <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ ...headerOptions, title: 'Subscription' }} />
+      <Stack.Screen name="PaymentCheckout" component={PaymentCheckoutScreen} options={{ ...headerOptions, title: 'Secure payment', gestureEnabled: false }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

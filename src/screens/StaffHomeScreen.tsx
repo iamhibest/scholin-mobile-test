@@ -48,6 +48,8 @@ const featureRoutes: Record<string, string> = {
   'Auto Comments': 'AutoComments',
   'Archived Sessions': 'ArchivedSessions',
   'School Settings': 'SchoolSettings',
+  'Subscription': 'Subscription',
+  'Events and Fees': 'Events',
 };
 
 export default function StaffHomeScreen({ navigation }: any) {
