@@ -36,6 +36,18 @@ const featureRoutes: Record<string, string> = {
   'School Portal': 'Portal',
   'Clock In and Out': 'Clock',
   'My Classes': 'MyClasses',
+  'Subjects': 'Subjects',
+  'Class Subjects': 'ClassSubjects',
+  'Student Promotion': 'Promotion',
+  'Student Migration': 'Migration',
+  'Report Card Templates': 'ReportTemplates',
+  'Staff Attendance': 'StaffAttendance',
+  'Student Attendance': 'StudentAttendance',
+  'Attendance QR Codes': 'QrCodes',
+  'Sessions and Terms': 'SessionsTerms',
+  'Auto Comments': 'AutoComments',
+  'Archived Sessions': 'ArchivedSessions',
+  'School Settings': 'SchoolSettings',
 };
 
 export default function StaffHomeScreen({ navigation }: any) {

@@ -8,12 +8,12 @@ import { classLabel, fetchClasses, fetchSessions, SchoolClass } from '../lib/sch
 import { fetchAssignedSubjectIds, fetchSchoolSubjects, toggleClassSubject } from '../lib/portal';
 
 export default function ClassSubjectsScreen({ navigation, route }: any) {
-  const { classId: startClass, sessionId: startSession } = route.params;
+  const { classId: startClass, sessionId: startSession } = route.params || {};
   const { ctx } = useStaff();
   const [sessions, setSessions] = useState<any[]>([]);
-  const [sessionId, setSessionId] = useState(startSession);
+  const [sessionId, setSessionId] = useState(startSession || '');
   const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [classId, setClassId] = useState(startClass);
+  const [classId, setClassId] = useState(startClass || '');
   const [subjects, setSubjects] = useState<any[] | null>(null);
   const [assigned, setAssigned] = useState<Set<string>>(new Set());
 
@@ -23,7 +23,15 @@ export default function ClassSubjectsScreen({ navigation, route }: any) {
 
   useEffect(() => {
     if (ctx) {
-      fetchSessions(ctx.schoolId).then(setSessions).catch(() => {});
+      fetchSessions(ctx.schoolId).then(list => {
+        setSessions(list);
+        if (!startSession) {
+          const cur = list.find((x: any) => x.is_current) || list[0];
+          if (cur) {
+            setSessionId(cur.id);
+          }
+        }
+      }).catch(() => {});
       fetchSchoolSubjects(ctx.schoolId).then(setSubjects).catch(e => {
         setSubjects([]);
         showError(e.message);
@@ -32,6 +40,9 @@ export default function ClassSubjectsScreen({ navigation, route }: any) {
   }, [ctx]);
 
   useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
     fetchClasses(sessionId).then(list => {
       setClasses(list);
       if (!list.find(c => c.id === classId) && list.length) {

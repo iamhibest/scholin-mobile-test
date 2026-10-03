@@ -6,15 +6,15 @@ import { isoToDisplay } from '../lib/date';
 import { toISODateLocal } from '../lib/format';
 import Icon from './Icon';
 
-type Props = { label: string; value: string; onChange: (iso: string) => void; maximumDate?: Date; placeholder?: string };
+type Props = { label: string; value: string; onChange: (iso: string) => void; maximumDate?: Date; allowFuture?: boolean; placeholder?: string; clearable?: boolean };
 
-export default function DateField({ label, value, onChange, maximumDate, placeholder = 'Select date' }: Props) {
+export default function DateField({ label, value, onChange, maximumDate, allowFuture, placeholder = 'Select date', clearable = true }: Props) {
   const open = () => {
     const start = value ? new Date(value + 'T00:00:00') : new Date(2015, 0, 1);
     DateTimePickerAndroid.open({
       value: start,
       mode: 'date',
-      maximumDate: maximumDate || new Date(),
+      ...(allowFuture ? {} : { maximumDate: maximumDate || new Date() }),
       onChange: (event, date) => {
         if (event.type === 'set' && date) {
           onChange(toISODateLocal(date));
@@ -29,7 +29,7 @@ export default function DateField({ label, value, onChange, maximumDate, placeho
       <Pressable onPress={open} style={styles.field}>
         <Icon name="calendar" size={20} color={colors.textMuted} />
         <Text style={[text.body, { flex: 1, color: value ? colors.text : '#9CA3AF' }]}>{value ? isoToDisplay(value) : placeholder}</Text>
-        {value ? (
+        {value && clearable ? (
           <Pressable onPress={() => onChange('')} hitSlop={10}>
             <Icon name="close" size={18} color={colors.textMuted} />
           </Pressable>

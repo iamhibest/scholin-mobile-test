@@ -1,5 +1,4 @@
-import * as HtmlToPdfModule from 'react-native-html-to-pdf';
-import Share from 'react-native-share';
+import { makePdf } from './pdfDoc';
 import { supabase } from './supabase';
 import { gatherReportCardData } from '../reportcard/data';
 import { resolveTheme } from '../reportcard/themes';
@@ -58,19 +57,6 @@ export async function buildReportCardHtml(args: ReportCardArgs): Promise<{ error
   };
 }
 
-export async function exportReportCardPdf(html: string, studentName: string, share: boolean) {
-  const mod: any = HtmlToPdfModule;
-  const generate = mod.generatePDF || (mod.default && mod.default.generatePDF) || mod.convert || (mod.default && mod.default.convert);
-  if (typeof generate !== 'function') {
-    throw new Error('PDF tools are not available in this build.');
-  }
-  const safe = studentName.replace(/[^A-Za-z0-9]+/g, '_') + '_ReportCard';
-  const file = await generate({ html, fileName: safe, width: 595, height: 842, padding: 0 });
-  const path = file && (file.filePath || file.path);
-  if (!path) {
-    throw new Error('The PDF could not be created.');
-  }
-  const url = path.startsWith('file://') ? path : 'file://' + path;
-  await Share.open({ url, type: 'application/pdf', title: safe, failOnCancel: false });
-  return path as string;
+export async function createReportCardPdf(html: string, studentName: string) {
+  return makePdf(html, studentName + ' ReportCard', { width: 595, height: 842, padding: 0 });
 }

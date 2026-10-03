@@ -28,3 +28,6 @@ export { default as Fab } from './Fab';
 export { default as OptionField } from './OptionField';
 export { default as PhotoField } from './PhotoField';
 export { default as DateField } from './DateField';
+export { default as TimeField } from './TimeField';
+export { default as SwitchRow } from './SwitchRow';
+export { default as PeriodControls } from './PeriodControls';

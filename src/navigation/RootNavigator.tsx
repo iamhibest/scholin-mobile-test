@@ -44,6 +44,20 @@ import PublishReportsScreen from '../screens/PublishReportsScreen';
 import ClassSettingsScreen from '../screens/ClassSettingsScreen';
 import AttendanceSummaryScreen from '../screens/AttendanceSummaryScreen';
 import ClassFormScreen from '../screens/ClassFormScreen';
+import SubjectsScreen from '../screens/SubjectsScreen';
+import AutoCommentsScreen from '../screens/AutoCommentsScreen';
+import ArchivedSessionsScreen from '../screens/ArchivedSessionsScreen';
+import PromotionScreen from '../screens/PromotionScreen';
+import MigrationScreen from '../screens/MigrationScreen';
+import SessionsTermsScreen from '../screens/SessionsTermsScreen';
+import ReportTemplatesScreen from '../screens/ReportTemplatesScreen';
+import TemplatePreviewScreen from '../screens/TemplatePreviewScreen';
+import TemplateCustomizeScreen from '../screens/TemplateCustomizeScreen';
+import QrCodesScreen from '../screens/QrCodesScreen';
+import StaffAttendanceScreen from '../screens/StaffAttendanceScreen';
+import StaffAttendanceDetailScreen from '../screens/StaffAttendanceDetailScreen';
+import StudentAttendanceScreen from '../screens/StudentAttendanceScreen';
+import SchoolSettingsScreen from '../screens/SchoolSettingsScreen';
 import ClockScreen from '../screens/ClockScreen';
 import ClassAttendanceScreen from '../screens/ClassAttendanceScreen';
 import MyClassesScreen from '../screens/MyClassesScreen';
@@ -101,6 +115,20 @@ export default function RootNavigator() {
       <Stack.Screen name="PublishReports" component={PublishReportsScreen} options={{ ...headerOptions, title: 'Publish Report Cards' }} />
       <Stack.Screen name="ClassSettings" component={ClassSettingsScreen} options={{ ...headerOptions, title: 'Class Settings' }} />
       <Stack.Screen name="AttendanceSummary" component={AttendanceSummaryScreen} options={{ ...headerOptions, title: 'Weekly Summary' }} />
+      <Stack.Screen name="Subjects" component={SubjectsScreen} options={{ ...headerOptions, title: 'Subjects' }} />
+      <Stack.Screen name="AutoComments" component={AutoCommentsScreen} options={{ ...headerOptions, title: 'Auto Comments' }} />
+      <Stack.Screen name="ArchivedSessions" component={ArchivedSessionsScreen} options={{ ...headerOptions, title: 'Archived Sessions' }} />
+      <Stack.Screen name="Promotion" component={PromotionScreen} options={{ ...headerOptions, title: 'Student Promotion' }} />
+      <Stack.Screen name="Migration" component={MigrationScreen} options={{ ...headerOptions, title: 'Student Migration' }} />
+      <Stack.Screen name="SessionsTerms" component={SessionsTermsScreen} options={{ ...headerOptions, title: 'Sessions and Terms' }} />
+      <Stack.Screen name="ReportTemplates" component={ReportTemplatesScreen} options={{ ...headerOptions, title: 'Report Card Templates' }} />
+      <Stack.Screen name="TemplatePreview" component={TemplatePreviewScreen} options={{ ...headerOptions, title: 'Preview' }} />
+      <Stack.Screen name="TemplateCustomize" component={TemplateCustomizeScreen} options={{ ...headerOptions, title: 'Customise' }} />
+      <Stack.Screen name="QrCodes" component={QrCodesScreen} options={{ ...headerOptions, title: 'Attendance QR Codes' }} />
+      <Stack.Screen name="StaffAttendance" component={StaffAttendanceScreen} options={{ ...headerOptions, title: 'Staff Attendance' }} />
+      <Stack.Screen name="StaffAttendanceDetail" component={StaffAttendanceDetailScreen} options={{ ...headerOptions, title: 'Attendance record' }} />
+      <Stack.Screen name="StudentAttendance" component={StudentAttendanceScreen} options={{ ...headerOptions, title: 'Student Attendance' }} />
+      <Stack.Screen name="SchoolSettings" component={SchoolSettingsScreen} options={{ ...headerOptions, title: 'School Settings' }} />
       <Stack.Screen name="Developer" component={DeveloperScreen} options={{ ...headerOptions, title: 'Developer tools' }} />
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import Share from 'react-native-share';
+import { Alert } from 'react-native';
+import { safeName, saveToDownloads, shareFile, writeTempFile } from '../lib/files';
 import { Button, Card, EmptyState, Notice, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
@@ -9,25 +10,6 @@ import { fetchSummary, setCalculatedAttendance } from '../lib/portal';
 
 function num(n: number) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
-}
-
-const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-function toBase64(input: string) {
-  const bytes: number[] = [];
-  const utf8 = unescape(encodeURIComponent(input));
-  for (let i = 0; i < utf8.length; i++) {
-    bytes.push(utf8.charCodeAt(i));
-  }
-  let out = '';
-  for (let i = 0; i < bytes.length; i += 3) {
-    const a = bytes[i];
-    const b = bytes[i + 1];
-    const c = bytes[i + 2];
-    out += B64[a >> 2] + B64[((a & 3) << 4) | ((b || 0) >> 4)];
-    out += b === undefined ? '=' : B64[((b & 15) << 2) | ((c || 0) >> 6)];
-    out += c === undefined ? '=' : B64[c & 63];
-  }
-  return out;
 }
 
 export default function AttendanceSummaryScreen({ navigation, route }: any) {
@@ -75,7 +57,7 @@ export default function AttendanceSummaryScreen({ navigation, route }: any) {
   const { roster, weekData } = data;
   const totalPossible = weekData.reduce((sum: number, w: any) => sum + w.daysOpen, 0) * 2;
 
-  const exportCsv = async () => {
+  const buildCsv = () => {
     const head = ['Student', 'Admission No.', ...weekData.map((w: any) => 'Week of ' + w.weekStart + ' (of ' + w.daysOpen * 2 + ')'), 'Total Present', 'Total Absent'];
     const rows = [head];
     roster.forEach((s: any) => {
@@ -89,14 +71,20 @@ export default function AttendanceSummaryScreen({ navigation, route }: any) {
       row.push(num(present), num(Math.max(0, totalPossible - present)));
       rows.push(row);
     });
-    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+    return '\ufeff' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  };
+
+  const csvName = safeName(className + ' ' + termName + ' Attendance') + '.csv';
+
+  const exportCsv = async (mode: 'share' | 'download') => {
     try {
-      await Share.open({
-        url: 'data:text/csv;base64,' + toBase64('\ufeff' + csv),
-        filename: (className + '_' + termName + '_Attendance').replace(/\s+/g, '_'),
-        type: 'text/csv',
-        failOnCancel: false,
-      });
+      const path = await writeTempFile(csvName, buildCsv(), 'utf8');
+      if (mode === 'share') {
+        await shareFile(path, 'text/csv', csvName);
+      } else {
+        const where = await saveToDownloads(path, csvName, 'text/csv');
+        Alert.alert('Saved', 'The attendance sheet was saved to ' + where + ' as ' + csvName);
+      }
     } catch (e: any) {
       setNotice({ message: 'Could not export attendance: ' + (e.message || e), tone: 'error' });
     }
@@ -148,7 +136,10 @@ export default function AttendanceSummaryScreen({ navigation, route }: any) {
                 })}
               </View>
             </ScrollView>
-            <Button title="Export as CSV" variant="soft" onPress={exportCsv} style={{ marginTop: spacing.xl }} />
+            <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl }}>
+              <Button title="Share CSV" icon="send" variant="outline" onPress={() => exportCsv('share')} style={{ flex: 1 }} />
+              <Button title="Download CSV" icon="down" onPress={() => exportCsv('download')} style={{ flex: 1 }} />
+            </View>
           </View>
         )}
       </ScrollView>

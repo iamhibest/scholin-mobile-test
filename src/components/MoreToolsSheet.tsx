@@ -25,7 +25,6 @@ const sections: Section[] = [
     tools: [
       { label: 'Staff Attendance', icon: 'clock', tone: 'amber' },
       { label: 'Student Attendance', icon: 'clipboard', tone: 'green' },
-      { label: 'Teacher Attendance', icon: 'checklist', tone: 'blue' },
       { label: 'Attendance QR Codes', icon: 'qr', tone: 'purple' },
     ],
   },

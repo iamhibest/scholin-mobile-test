@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, EmptyState, Screen } from '../components';
 import { colors, fonts, shadow, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { showError } from '../lib/confirm';
-import { buildReportCardHtml, exportReportCardPdf } from '../lib/reportCardDoc';
+import { buildReportCardHtml, createReportCardPdf } from '../lib/reportCardDoc';
+import { downloadPdf, sharePdf } from '../lib/pdfDoc';
 
 export default function ReportCardViewScreen({ navigation, route }: any) {
   const { studentId, studentName, classId, termId, sessionId, sessionName, termName } = route.params;
@@ -19,7 +20,7 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
   const [page, setPage] = useState(0);
   const [state, setState] = useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
   const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState('');
 
   useEffect(() => {
     navigation.setOptions({ title: studentName });
@@ -45,14 +46,36 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
       });
   }, [ctx, studentId, classId, termId, sessionId, sessionName, termName]);
 
-  const exportPdf = async () => {
-    setBusy(true);
-    try {
-      await exportReportCardPdf(printHtml, studentName, true);
-    } catch (e: any) {
-      showError('Could not generate PDF: ' + (e.message || 'Unknown error'));
+  const pdfRef = useRef<{ path: string; fileName: string } | null>(null);
+
+  const ensurePdf = async () => {
+    if (!pdfRef.current) {
+      pdfRef.current = await createReportCardPdf(printHtml, studentName);
     }
-    setBusy(false);
+    return pdfRef.current;
+  };
+
+  const doShare = async () => {
+    setBusy('share');
+    try {
+      const pdf = await ensurePdf();
+      await sharePdf(pdf.path, studentName + ' Report Card');
+    } catch (e: any) {
+      showError('Could not share the PDF: ' + (e.message || 'Unknown error'));
+    }
+    setBusy('');
+  };
+
+  const doDownload = async () => {
+    setBusy('download');
+    try {
+      const pdf = await ensurePdf();
+      const where = await downloadPdf(pdf.path, pdf.fileName);
+      Alert.alert('Saved', 'The report card was saved to ' + where + ' as ' + pdf.fileName);
+    } catch (e: any) {
+      showError('Could not save the PDF: ' + (e.message || 'Unknown error'));
+    }
+    setBusy('');
   };
 
   const onMessage = (e: any) => {
@@ -111,13 +134,17 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
             ))}
           </View>
         ) : null}
-        <Button title="Save or share PDF" icon="arrowRight" loading={busy} onPress={exportPdf} />
+        <View style={styles.actions}>
+          <Button title="Share" icon="send" variant="outline" loading={busy === 'share'} disabled={busy !== '' && busy !== 'share'} onPress={doShare} style={{ flex: 1 }} />
+          <Button title="Download" icon="down" loading={busy === 'download'} disabled={busy !== '' && busy !== 'download'} onPress={doDownload} style={{ flex: 1 }} />
+        </View>
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  actions: { flexDirection: 'row', gap: spacing.md },
   pager: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.md },
   pill: { paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20, backgroundColor: '#EEF1F6' },
   pillOn: { backgroundColor: colors.primary },
