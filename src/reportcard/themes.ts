@@ -66,8 +66,14 @@ export function darken(hex, amount) {
  * template has to compute contrast itself and no admin can produce an
  * unreadable combination.
  */
-export function resolveTheme(rawTheme) {
-  const t = rawTheme || {};
+export const REPORT_CARD_DEFAULTS = {
+  royal: { primary_color: '#0F4A3A', secondary_color: '#4E7A3A', accent_color: '#C9A24A', background_color: '#FBF9F3' },
+  prestige: { primary_color: '#0B2A5B', secondary_color: '#1F6B45', accent_color: '#C9A24A', background_color: '#FBF9F4' },
+  modern: { primary_color: '#0B2A5B', secondary_color: '#1F6B45', accent_color: '#C9A24A', background_color: '#FFFFFF' },
+};
+
+export function resolveTheme(rawTheme, templateKey) {
+  const t = rawTheme && rawTheme.primary_color ? rawTheme : Object.assign({}, rawTheme || {}, (templateKey && REPORT_CARD_DEFAULTS[templateKey]) || {});
   const bw = !!t.black_and_white;
 
   const primary = bw ? '#000000' : (t.primary_color || '#1B2A4A');
@@ -93,10 +99,10 @@ export function resolveTheme(rawTheme) {
 
 export const REPORT_CARD_TEMPLATES = [
   { key: 'classic',     name: 'Scholin Classic',       description: 'The original Scholin design — navy header, wine-red accents, formal ledger styling.' },
-  { key: 'modern',      name: 'Scholin Modern',        description: 'Card-based layout with icons and soft rounded sections.' },
-  { key: 'royal',       name: 'Scholin Royal',         description: 'Premium cream and gold, ornate corner flourishes.' },
+  { key: 'modern',      name: 'Scholin Navy Gold',     description: 'Navy and gold with a full width title band and sweeping curves.' },
+  { key: 'royal',       name: 'Scholin Emerald',       description: 'Deep green and gold with a slanted title band and books motif.' },
   { key: 'british',     name: 'Scholin British',       description: 'Formal boxed layout in the style of traditional academic reports.' },
-  { key: 'prestige',    name: 'Scholin Prestige',      description: 'Luxury certificate design with a dark sidebar crest.' },
+  { key: 'prestige',    name: 'Scholin Heritage',      description: 'Navy, green and gold with large title and corner swooshes.' },
   { key: 'minimal',     name: 'Scholin Minimal',       description: 'Clean, spacious, distraction-free white layout.' },
   { key: 'primary',     name: 'Scholin Primary',       description: 'Bright, friendly design suitable for nursery and primary schools.' },
   { key: 'monochrome',  name: 'Scholin Black & White', description: 'Professional monochrome layout, optimized for black & white printing.' }

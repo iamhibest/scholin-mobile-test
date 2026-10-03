@@ -6,7 +6,7 @@ import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { useStaff } from '../lib/useStaff';
 import { saveTemplate } from '../lib/admin';
-import { REPORT_CARD_TEMPLATES, resolveTheme } from '../reportcard/themes';
+import { REPORT_CARD_DEFAULTS, REPORT_CARD_TEMPLATES, resolveTheme } from '../reportcard/themes';
 
 export default function ReportTemplatesScreen({ navigation }: any) {
   const { ctx, loading: ctxLoading } = useStaff();
@@ -34,14 +34,15 @@ export default function ReportTemplatesScreen({ navigation }: any) {
     }
     setBusy(key);
     try {
+      const own: any = (REPORT_CARD_DEFAULTS as any)[key];
       await saveTemplate(ctx.schoolId, ctx.userId, {
         report_template: key,
-        primary_color: row.primary_color || '#064C42',
-        secondary_color: row.secondary_color || '#7a1f2b',
-        accent_color: row.accent_color || '#F7C95A',
-        background_color: row.background_color || '#FFFFFF',
+        primary_color: own ? own.primary_color : row.primary_color || '#064C42',
+        secondary_color: own ? own.secondary_color : row.secondary_color || '#7a1f2b',
+        accent_color: own ? own.accent_color : row.accent_color || '#F7C95A',
+        background_color: own ? own.background_color : row.background_color || '#FFFFFF',
         black_and_white: row.black_and_white || false,
-        theme_name: row.theme_name || null,
+        theme_name: own ? null : row.theme_name || null,
       });
       setNotice({ message: 'Template activated. Every report card generated from now on will use this design.', tone: 'success' });
       await load();
@@ -74,7 +75,7 @@ export default function ReportTemplatesScreen({ navigation }: any) {
         <Notice message={notice.message} tone={notice.tone} />
         {REPORT_CARD_TEMPLATES.map((t: any) => {
           const active = row.report_template === t.key;
-          const theme = resolveTheme(active ? row : {});
+          const theme = resolveTheme(active ? row : {}, t.key);
           return (
             <Card key={t.key} style={[styles.card, active && { borderColor: colors.primary, borderWidth: 2 }]}>
               <View style={styles.swatchRow}>

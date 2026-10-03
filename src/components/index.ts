@@ -31,3 +31,4 @@ export { default as DateField } from './DateField';
 export { default as TimeField } from './TimeField';
 export { default as SwitchRow } from './SwitchRow';
 export { default as PeriodControls } from './PeriodControls';
+export { default as ColorPicker } from './ColorPicker';

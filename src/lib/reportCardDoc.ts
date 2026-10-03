@@ -46,7 +46,7 @@ export async function buildReportCardHtml(args: ReportCardArgs): Promise<{ error
   if (error) {
     throw new Error(error.message || 'Could not load the report card template.');
   }
-  const theme = resolveTheme(templateRow);
+  const theme = resolveTheme(templateRow, templateRow.report_template);
   const { css, html } = renderReportCardTemplate(templateRow.report_template, data, theme);
   const body = await inlineImages(html);
   return {

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Button, Card, Notice, Screen, Skeleton, SwitchRow } from '../components';
+import { Button, Card, ColorPicker, Notice, Screen, Skeleton, SwitchRow } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { useStaff } from '../lib/useStaff';
 import { saveTemplate } from '../lib/admin';
 import { getSampleData, templateHtml } from '../lib/templateSample';
-import { REPORT_CARD_PRESETS } from '../reportcard/themes';
+import { REPORT_CARD_DEFAULTS, REPORT_CARD_PRESETS } from '../reportcard/themes';
 
 type State = { primary_color: string; secondary_color: string; accent_color: string; background_color: string; black_and_white: boolean; theme_name: string | null };
 
@@ -26,6 +26,7 @@ export default function TemplateCustomizeScreen({ navigation, route }: any) {
   const [state, setState] = useState<State | null>(null);
   const [sample, setSample] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [picking, setPicking] = useState<keyof State | null>(null);
   const [notice, setNotice] = useState<{ message: string; tone: 'error' | 'success' }>({ message: '', tone: 'success' });
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function TemplateCustomizeScreen({ navigation, route }: any) {
               black_and_white: !!row.black_and_white,
               theme_name: row.theme_name || null,
             }
-          : { primary_color: '#064C42', secondary_color: '#7a1f2b', accent_color: '#F7C95A', background_color: '#FFFFFF', black_and_white: false, theme_name: null },
+          : { ...((REPORT_CARD_DEFAULTS as any)[templateKey] || { primary_color: '#064C42', secondary_color: '#7a1f2b', accent_color: '#F7C95A', background_color: '#FFFFFF' }), black_and_white: false, theme_name: null },
       );
       setSample(await getSampleData(ctx.school));
     })();
@@ -119,21 +120,23 @@ export default function TemplateCustomizeScreen({ navigation, route }: any) {
             {FIELDS.map(f => {
               const v = String(state[f.key]);
               return (
-                <View key={f.key} style={styles.colorRow}>
+                <Pressable key={f.key} onPress={() => setPicking(f.key)} style={styles.colorRow}>
                   <View style={[styles.dot, { backgroundColor: valid(v) ? v : '#FFFFFF' }]} />
                   <Text style={[text.bodyStrong, { color: colors.text, flex: 1 }]}>{f.label}</Text>
-                  <TextInput
-                    value={v}
-                    onChangeText={t => setState({ ...state, [f.key]: t.startsWith('#') ? t.slice(0, 7) : '#' + t.slice(0, 6), theme_name: null } as State)}
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                    style={[styles.hex, !valid(v) && { borderColor: colors.danger }]}
-                  />
-                </View>
+                  <Text style={[text.small, { color: colors.textMuted, marginRight: 4 }]}>{v.toUpperCase()}</Text>
+                  <Text style={[text.small, { color: colors.primary }]}>Change</Text>
+                </Pressable>
               );
             })}
           </View>
         </Card>
+        <ColorPicker
+          visible={picking !== null}
+          title={picking ? 'Pick ' + FIELDS.find(f => f.key === picking)!.label.toLowerCase() + ' colour' : ''}
+          value={picking ? String(state[picking]) : '#000000'}
+          onClose={() => setPicking(null)}
+          onPick={hex => picking && setState({ ...state, [picking]: hex, theme_name: null } as State)}
+        />
         <Button title="Save and activate" loading={saving} onPress={save} style={{ marginTop: spacing.lg }} />
       </ScrollView>
     </Screen>
@@ -146,6 +149,6 @@ const styles = StyleSheet.create({
   preset: { width: 92, padding: 6, borderRadius: radius.md, borderWidth: 2, borderColor: 'transparent' },
   presetBars: { flexDirection: 'row', height: 44, borderRadius: 10, overflow: 'hidden' },
   colorRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm },
-  dot: { width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: colors.border },
+  dot: { width: 34, height: 34, borderRadius: 15, borderWidth: 1, borderColor: colors.border },
   hex: { width: 110, height: 44, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, textAlign: 'center', fontFamily: fonts.semibold, fontSize: 15, color: colors.text, paddingVertical: 0 },
 });

@@ -281,7 +281,7 @@ export default function SessionsTermsScreen() {
                 title="Delete"
                 icon="trash"
                 variant="danger"
-                style={styles.action}
+                style={[styles.action, { flexBasis: '100%' }]}
                 onPress={() => {
                   setDeleting(s);
                   setTyped('');
@@ -370,8 +370,8 @@ const styles = StyleSheet.create({
   block: { marginBottom: spacing.lg },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
-  action: { flexGrow: 1, flexBasis: '30%', height: 42, paddingHorizontal: 10 },
-  smallAction: { flexGrow: 1, height: 40, paddingHorizontal: 12 },
+  action: { flexGrow: 1, flexBasis: '46%', minWidth: 0, height: 44, paddingHorizontal: 10 },
+  smallAction: { flexGrow: 1, flexBasis: '46%', minWidth: 0, height: 42, paddingHorizontal: 10 },
   term: { marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   comp: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm },
   backdrop: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.xl },

@@ -81,7 +81,7 @@ export async function getSampleData(school: any) {
 }
 
 export function templateHtml(templateKey: string, data: any, themeRow: any) {
-  const theme = resolveTheme(themeRow || {});
+  const theme = resolveTheme(themeRow || {}, templateKey);
   const { css, html } = renderReportCardTemplate(templateKey, data, theme);
   return (
     '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=840, initial-scale=1">' +

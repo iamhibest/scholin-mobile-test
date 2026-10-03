@@ -48,7 +48,7 @@ export const PAGINATION_JS = String.raw`/* =====================================
   // Only templates listed here are paginated. Any other template is left
   // exactly as it was. (Classic first; the others are added once each has
   // been checked.)
-  var config = { maxRowsPage1: 18, enabled: ['classic', 'modern', 'royal', 'british', 'prestige', 'minimal', 'primary', 'monochrome'] };
+  var config = { maxRowsPage1: 20, enabled: ['classic', 'modern', 'royal', 'british', 'prestige', 'minimal', 'primary', 'monochrome'] };
 
   // Two things are tightened together, mildest step first:
   //   rows  - the SUBJECT ROWS: padding, text size and line height, as a
@@ -543,6 +543,8 @@ export function buildPagedDocument(css: string, body: string, mode: 'preview' | 
   const viewport = mode === 'print' ? 'width=794' : 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes';
   return (
     '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="' + viewport + '">' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Lora:wght@600;700;800&display=swap">' +
     '<style>' + BASE_CSS + ' ' + css + ' ' + (mode === 'print' ? PRINT_CSS : PREVIEW_CSS) + '</style></head><body>' +
     '<div id="rc-root">' + body + '</div>' +
     '<script>window.__RC_MODE=' + JSON.stringify(mode) + ';</script>' +

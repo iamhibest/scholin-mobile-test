@@ -42,7 +42,7 @@ export default function Button({ title, onPress, variant = 'primary', loading, d
         <ActivityIndicator color={p.fg} />
       ) : (
         <View style={styles.row}>
-          <Text style={[text.button, { color: p.fg }]}>{title}</Text>
+          <Text style={[text.button, { color: p.fg, flexShrink: 1 }]} numberOfLines={1}>{title}</Text>
           {icon ? <Icon name={icon} size={20} color={p.fg} /> : null}
         </View>
       )}

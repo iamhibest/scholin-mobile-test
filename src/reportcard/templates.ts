@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { escapeHtmlRC, ordinalRC } from './helpers';
+import { renderEmeraldTemplate, renderHeritageTemplate, renderNavyGoldTemplate } from './premium';
 /* =========================================================
    Report Card — Template Renderers (1 of 2): shared blocks + Classic + Modern
    =========================================================
@@ -968,14 +969,26 @@ export function renderMonochromeTemplate(data, theme) {
 export function renderReportCardTemplate(templateKey, data, theme) {
   const renderers = {
     classic: renderClassicTemplate,
-    modern: renderModernTemplate,
-    royal: renderRoyalTemplate,
+    modern: renderNavyGoldTemplate,
+    royal: renderEmeraldTemplate,
     british: renderBritishTemplate,
-    prestige: renderPrestigeTemplate,
+    prestige: renderHeritageTemplate,
     minimal: renderMinimalTemplate,
     primary: renderPrimaryTemplate,
     monochrome: renderMonochromeTemplate
   };
   const renderer = renderers[templateKey] || renderClassicTemplate;
-  return renderer(data, theme);
+  const out = renderer(data, theme);
+  if (templateKey === 'royal' || templateKey === 'prestige' || templateKey === 'modern') {
+    return out;
+  }
+  const n = String((data.school && data.school.name) || '').length;
+  const size = n <= 20 ? 1.9 : n <= 26 ? 1.6 : n <= 34 ? 1.35 : 1.2;
+  const k = '.rc-tpl-' + (renderers[templateKey] ? templateKey : 'classic');
+  const header =
+    k + ' .rc2-school-info{ text-align:left !important; }' +
+    k + ' .rc2-school-name{ font-weight:900 !important; font-size:' + size + 'rem !important; line-height:1.1 !important; text-align:left !important; overflow-wrap:break-word; }' +
+    k + ' .rc2-motto{ font-size:0.98rem !important; font-weight:700 !important; text-align:left !important; }' +
+    k + ' .rc2-address{ font-size:0.86rem !important; font-weight:600 !important; line-height:1.4 !important; text-align:left !important; }';
+  return { css: out.css + header, html: out.html };
 }
