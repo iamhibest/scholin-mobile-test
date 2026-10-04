@@ -421,3 +421,18 @@ export async function saveTemplate(schoolId: string, userId: string, payload: an
     fail(error, 'Could not save your template.');
   }
 }
+
+export async function fetchPaymentTerms(userId: string) {
+  const { data: settings } = await supabase.from('app_settings').select('payment_terms_and_conditions, payment_terms_version').limit(1).maybeSingle();
+  const text = settings ? (settings.payment_terms_and_conditions as string | null) : null;
+  const version = settings ? settings.payment_terms_version : null;
+  if (!text) {
+    return { text: null as string | null, version, accepted: true };
+  }
+  const { data: me } = await supabase.from('profiles').select('payment_terms_accepted_version').eq('id', userId).single();
+  return { text, version, accepted: !!me && me.payment_terms_accepted_version === version };
+}
+
+export async function acceptPaymentTerms(userId: string, version: any) {
+  await supabase.from('profiles').update({ payment_terms_accepted_version: version, payment_terms_accepted_at: new Date().toISOString() }).eq('id', userId);
+}

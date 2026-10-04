@@ -5,14 +5,15 @@ import { supabase } from './supabase';
 // returns, and asks the server to confirm the result. No keys, prices or
 // payment addresses live in the app.
 
-export type PayKind = 'subscription';
+export type PayKind = 'subscription' | 'fee';
 
 export type Checkout = { url: string; reference: string; paymentId: string; amount?: number };
 
-type Kind = { table: string; verifyFn: string };
+type Kind = { table: string; verifyFn: string; idField: string };
 
 const KINDS: Record<PayKind, Kind> = {
-  subscription: { table: 'subscription_payments', verifyFn: 'verify-subscription-payment' },
+  subscription: { table: 'subscription_payments', verifyFn: 'verify-subscription-payment', idField: 'payment_id' },
+  fee: { table: 'event_payment_intents', verifyFn: 'verify-fee-payment', idField: 'intent_id' },
 };
 
 export async function functionError(error: any, fallback: string) {
@@ -53,7 +54,7 @@ export async function readPaymentStatus(kind: PayKind, paymentId: string) {
 }
 
 export async function verifyPayment(kind: PayKind, reference: string, paymentId: string) {
-  await callFunction(KINDS[kind].verifyFn, { reference, payment_id: paymentId }, 'Payment could not be verified. Please try again.');
+  await callFunction(KINDS[kind].verifyFn, { reference, [KINDS[kind].idField]: paymentId }, 'Payment could not be verified. Please try again.');
 }
 
 export async function requeryPayment(kind: PayKind, paymentId: string) {

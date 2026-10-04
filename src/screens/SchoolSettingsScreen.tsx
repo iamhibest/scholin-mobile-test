@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, PermissionsAndroid, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, PermissionsAndroid, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
 import { Avatar, Button, Card, EmptyState, Icon, Input, Notice, OptionField, Screen, Skeleton, SwitchRow, TimeField } from '../components';
@@ -8,7 +8,9 @@ import { useStaff } from '../lib/useStaff';
 import { useChain } from '../lib/useChain';
 import { confirmAction } from '../lib/confirm';
 import { pickAndUploadImage } from '../lib/upload';
-import { addGrade, deleteGrade, fetchGrades, fetchSchoolRow, updateSchool } from '../lib/admin';
+import { acceptPaymentTerms, addGrade, deleteGrade, fetchGrades, fetchPaymentTerms, fetchSchoolRow, updateSchool } from '../lib/admin';
+import { NIGERIAN_BANKS } from '../lib/banks';
+import { callFunction } from '../lib/payments';
 
 type Msg = { message: string; tone: 'error' | 'success' };
 const none: Msg = { message: '', tone: 'success' };
@@ -95,6 +97,12 @@ export default function SchoolSettingsScreen() {
   const [gMsg, setGMsg] = useState<Msg>(none);
   const gradeChain = useChain(4);
 
+  const [bankCode, setBankCode] = useState('');
+  const [acctNo, setAcctNo] = useState('');
+  const [payMsg, setPayMsg] = useState<Msg>(none);
+  const [terms, setTerms] = useState<{ text: string; version: any } | null>(null);
+  const [termsOpen, setTermsOpen] = useState(false);
+
   const [saving, setSaving] = useState('');
 
   const isOwner = !!ctx && ctx.role === 'owner';
@@ -119,6 +127,8 @@ export default function SchoolSettingsScreen() {
       setLateT((s.attendance_late_time || '08:00').slice(0, 5));
       setClosing((s.attendance_closing_time || '16:00').slice(0, 5));
       setFeeGate(s.fee_gated_report_release === true);
+      setBankCode(s.paystack_bank_code || '');
+      setAcctNo(s.paystack_account_number || '');
       setToggles({
         show_position_class: s.show_position_class !== false,
         show_position_arm: s.show_position_arm !== false,
@@ -178,6 +188,86 @@ export default function SchoolSettingsScreen() {
       () => setAttMsg({ message: 'Could not get your location. Please enable GPS and try again.', tone: 'error' }),
       { enableHighAccuracy: true, timeout: 15000 },
     );
+  };
+
+
+  const verifyAndSave = async () => {
+    if (!ctx) {
+      return;
+    }
+    const bank = NIGERIAN_BANKS.find(b => b.code === bankCode);
+    setSaving('payout');
+    setPayMsg(none);
+    try {
+      const r = await callFunction('create-subaccount', { school_id: ctx.schoolId, bank_code: bankCode, bank_name: bank ? bank.name : '', account_number: acctNo.trim() }, "That didn't go through. Please check the details and try again.");
+      setPayMsg({ message: 'Verified. Account name: ' + r.account_name + '. Bank account saved.', tone: 'success' });
+      await load();
+    } catch (e: any) {
+      setPayMsg({ message: e.message, tone: 'error' });
+    }
+    setSaving('');
+  };
+
+  const startPayout = async () => {
+    if (!ctx) {
+      return;
+    }
+    setPayMsg(none);
+    if (!bankCode) {
+      setPayMsg({ message: 'Please select a bank.', tone: 'error' });
+      return;
+    }
+    if (!/^\d{10}$/.test(acctNo.trim())) {
+      setPayMsg({ message: 'Account number must be exactly 10 digits.', tone: 'error' });
+      return;
+    }
+    setSaving('payout');
+    try {
+      const t = await fetchPaymentTerms(ctx.userId);
+      if (t.text && !t.accepted) {
+        setTerms({ text: t.text, version: t.version });
+        setTermsOpen(true);
+        setSaving('');
+        return;
+      }
+    } catch {}
+    setSaving('');
+    await verifyAndSave();
+  };
+
+  const acceptTerms = async () => {
+    if (!ctx || !terms) {
+      return;
+    }
+    setTermsOpen(false);
+    try {
+      await acceptPaymentTerms(ctx.userId, terms.version);
+    } catch {}
+    await verifyAndSave();
+  };
+
+  const declineTerms = () => {
+    setTermsOpen(false);
+    setPayMsg({ message: 'You must accept the Payment Terms of Use to add or update a payout bank account.', tone: 'error' });
+  };
+
+  const removePayout = () => {
+    confirmAction('Remove bank account', 'Remove this payout bank account? Online fee payments for this school will stop working until a new one is added.', 'Remove', async () => {
+      if (!ctx) {
+        return;
+      }
+      setSaving('payout');
+      setPayMsg(none);
+      try {
+        await callFunction('delete-subaccount', { school_id: ctx.schoolId }, "That didn't go through. Please try again.");
+        setBankCode('');
+        setAcctNo('');
+        await load();
+      } catch (e: any) {
+        setPayMsg({ message: e.message, tone: 'error' });
+      }
+      setSaving('');
+    });
   };
 
   const addGradeBand = async () => {
@@ -372,6 +462,28 @@ export default function SchoolSettingsScreen() {
           <Button title="Save display options" loading={saving === 'tog'} onPress={() => save('tog', toggles, setTogMsg, 'Display options saved.')} style={{ marginTop: spacing.md }} />
         </Section>
 
+
+        {isOwner ? (
+          <Section title="Payout bank account" hint="Add your school's bank account to receive online fee payments directly. Owner only.">
+            <View style={[styles.payBanner, { backgroundColor: school.paystack_subaccount_code ? colors.successSoft : colors.accentSoft }]}>
+              <Icon name={school.paystack_subaccount_code ? 'check' : 'info'} size={20} color={school.paystack_subaccount_code ? colors.success : colors.accentDark} />
+              <View style={{ flex: 1 }}>
+                <Text style={[text.bodyStrong, { color: school.paystack_subaccount_code ? colors.success : colors.accentDark }]}>{school.paystack_subaccount_code ? 'Verified' : 'Not set up yet'}</Text>
+                <Text style={[text.small, { color: colors.textMuted }]}>
+                  {school.paystack_subaccount_code
+                    ? (school.paystack_bank_name || '') + ', account ending ' + String(school.paystack_account_number || '').slice(-4) + ' (' + (school.paystack_account_name || '') + ')'
+                    : "Online fee payments won't be available for this school until this is added."}
+                </Text>
+              </View>
+            </View>
+            <Notice message={payMsg.message} tone={payMsg.tone} />
+            <OptionField label="Bank" value={bankCode} options={NIGERIAN_BANKS.map(b => ({ value: b.code, label: b.name }))} placeholder="Select bank" onChange={setBankCode} />
+            <Input label="Account number" value={acctNo} onChangeText={t => setAcctNo(t.replace(/\D/g, '').slice(0, 10))} keyboardType="number-pad" placeholder="10 digit account number" icon="card" maxLength={10} />
+            <Button title={school.paystack_subaccount_code ? 'Verify and update bank account' : 'Verify and save bank account'} loading={saving === 'payout'} onPress={startPayout} />
+            {school.paystack_subaccount_code ? <Button title="Delete bank account" variant="danger" onPress={removePayout} style={{ marginTop: spacing.md }} /> : null}
+          </Section>
+        ) : null}
+
         <Section title="Report card release">
           <Notice message={feeMsg.message} tone={feeMsg.tone} />
           <SwitchRow label="Hold report cards until fees are paid" desc="Parents only see a report card once the student has no outstanding fees, unless you release it early." value={feeGate} onChange={setFeeGate} />
@@ -400,6 +512,22 @@ export default function SchoolSettingsScreen() {
           <Button title="Add grade band" icon="plus" onPress={addGradeBand} />
         </Section>
       </ScrollView>
+
+      <Modal visible={termsOpen} transparent animationType="fade" onRequestClose={declineTerms}>
+        <View style={styles.backdrop}>
+          <View style={styles.dialog}>
+            <Text style={[text.h3, { color: colors.text }]}>Payment Terms of Use</Text>
+            <Text style={[text.small, { color: colors.textMuted, marginTop: 2, marginBottom: spacing.md }]}>Please read and accept before adding a payout bank account.</Text>
+            <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator>
+              <Text style={[text.body, { color: colors.text }]}>{terms ? terms.text : ''}</Text>
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg }}>
+              <Button title="Decline" variant="soft" onPress={declineTerms} style={{ flex: 1 }} />
+              <Button title="Accept" onPress={acceptTerms} style={{ flex: 1 }} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 }
@@ -409,5 +537,8 @@ const styles = StyleSheet.create({
   card: { marginBottom: spacing.lg },
   slot: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
   slotBox: { width: 84, height: 84, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+  payBanner: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.lg },
+  backdrop: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.xl },
+  dialog: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xl },
   grade: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });

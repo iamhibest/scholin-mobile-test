@@ -60,6 +60,7 @@ import EventsScreen from '../screens/EventsScreen';
 import EventFormScreen from '../screens/EventFormScreen';
 import EventDetailScreen from '../screens/EventDetailScreen';
 import ReceiptScreen from '../screens/ReceiptScreen';
+import ParentFeeDetailScreen from '../screens/ParentFeeDetailScreen';
 import PaymentCheckoutScreen from '../screens/PaymentCheckoutScreen';
 import StaffAttendanceDetailScreen from '../screens/StaffAttendanceDetailScreen';
 import StudentAttendanceScreen from '../screens/StudentAttendanceScreen';
@@ -138,6 +139,8 @@ export default function RootNavigator() {
       <Stack.Screen name="Events" component={EventsScreen} options={{ ...headerOptions, title: 'Events and Fees' }} />
       <Stack.Screen name="EventForm" component={EventFormScreen} options={{ ...headerOptions, title: 'New event' }} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} options={{ ...headerOptions, title: 'Event' }} />
+      <Stack.Screen name="ParentFeeDetail" component={ParentFeeDetailScreen} options={{ ...headerOptions, title: 'Fee details' }} />
+      <Stack.Screen name="ParentReportCard" component={ReportCardViewScreen} options={{ ...headerOptions, title: 'Report Card' }} />
       <Stack.Screen name="Receipt" component={ReceiptScreen} options={{ ...headerOptions, title: 'Receipt' }} />
       <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ ...headerOptions, title: 'Subscription' }} />
       <Stack.Screen name="PaymentCheckout" component={PaymentCheckoutScreen} options={{ ...headerOptions, title: 'Secure payment', gestureEnabled: false }} />

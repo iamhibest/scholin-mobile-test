@@ -31,3 +31,26 @@ If your Supabase project is missing any of them, run the SQL in the migrations f
 2. events-fees-permission-migration.sql
 3. online-fee-payments-stage-b1-migration.sql (adds the online payment method, needed for Phase 6c)
 4. fee-gated-report-release-migration.sql
+
+# Phase 6c: Parents pay online, payout bank account
+
+## Run this once if not done yet (Supabase SQL editor)
+1. online-fee-payments-stage-b1-migration.sql
+2. school-payout-account-migration.sql
+3. payment-terms-migration.sql
+4. parent-events-access-migration.sql
+5. parent-report-card-renderer-access-migration.sql
+(All five are in your original web project folder. The first is also in migrations here.)
+
+## Redeploy one function
+- create-fee-payment (replace with create-fee-payment.ts from this folder).
+  The only change: it now also returns the checkout link and reference, so the app never builds a payment address.
+
+## Already deployed, nothing to change
+create-subaccount, delete-subaccount, verify-fee-payment, paystack-webhook, sync-paystack-settlements.
+
+## Test in Paystack test mode first
+1. As the school owner: School Settings > Payout bank account. Pick a bank, enter a 10 digit account number, Verify and save.
+2. As admin: Events and Fees > create a fee and assign it to a student.
+3. As the parent linked to that student: Fees tab > tap the fee > Pay now. Pay with a Paystack test card.
+4. Confirm the balance updates and a receipt appears under Payment history.

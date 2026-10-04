@@ -5,13 +5,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, EmptyState, Screen } from '../components';
 import { colors, fonts, shadow, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
+import { supabase } from '../lib/supabase';
 import { showError } from '../lib/confirm';
 import { buildReportCardHtml, createReportCardPdf } from '../lib/reportCardDoc';
 import { downloadPdf, sharePdf } from '../lib/pdfDoc';
 
 export default function ReportCardViewScreen({ navigation, route }: any) {
-  const { studentId, studentName, classId, termId, sessionId, sessionName, termName } = route.params;
-  const { ctx } = useStaff();
+  const { studentId, studentName, classId, termId, sessionId, sessionName, termName, schoolId } = route.params;
+  const { ctx, loading: ctxLoading } = useStaff();
+  const [school, setSchool] = useState<any>(null);
   const insets = useSafeAreaInsets();
   const webRef = useRef<any>(null);
   const [html, setHtml] = useState('');
@@ -27,10 +29,25 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
   }, [navigation, studentName]);
 
   useEffect(() => {
-    if (!ctx) {
+    if (ctx) {
+      setSchool(ctx.school);
+    } else if (!ctxLoading && schoolId) {
+      supabase.from('schools').select('*').eq('id', schoolId).single().then(({ data }) => {
+        if (data) {
+          setSchool(data);
+        } else {
+          setMessage('Could not load the school details for this report card.');
+          setState('error');
+        }
+      });
+    }
+  }, [ctx, ctxLoading, schoolId]);
+
+  useEffect(() => {
+    if (!school) {
       return;
     }
-    buildReportCardHtml({ studentId, classId, termId, sessionId, sessionName, termName, school: ctx.school })
+    buildReportCardHtml({ studentId, classId, termId, sessionId, sessionName, termName, school })
       .then(r => {
         if (r.error === 'no_published_subjects') {
           setState('empty');
@@ -44,7 +61,7 @@ export default function ReportCardViewScreen({ navigation, route }: any) {
         setMessage(e.message || 'Could not generate this report card.');
         setState('error');
       });
-  }, [ctx, studentId, classId, termId, sessionId, sessionName, termName]);
+  }, [school, studentId, classId, termId, sessionId, sessionName, termName]);
 
   const pdfRef = useRef<{ path: string; fileName: string } | null>(null);
 

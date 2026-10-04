@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, BottomSheet, BottomTabs, Button, Card, EmptyState, FadeIn, Icon, Input, ListRow, Notice, RoundButton, SectionTitle, Skeleton, StatCard, TopBar } from '../components';
@@ -70,7 +71,6 @@ export default function ParentHomeScreen({ navigation }: any) {
   const [code, setCode] = useState('');
   const [addMsg, setAddMsg] = useState('');
   const [adding, setAdding] = useState(false);
-  const [fee, setFee] = useState<FeeRow | null>(null);
   const [userId, setUserId] = useState('');
 
   const child = children.find(c => c.id === childId);
@@ -162,6 +162,19 @@ export default function ParentHomeScreen({ navigation }: any) {
     }
   }
 
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      if (child) {
+        loadOverview(child, sessionId);
+      }
+    }, [child, sessionId, loadOverview]),
+  );
+
   const soon = (title: string) => navigation.navigate('Feature', { title });
 
   function ReportRows({ items }: { items: ReportRow[] }) {
@@ -178,7 +191,7 @@ export default function ParentHomeScreen({ navigation }: any) {
               : r.state === 'locked'
               ? 'Results are ready. Outstanding: ' + r.outstanding.map(o => o.name + ' (' + naira(o.balance) + ')').join(', ')
               : 'Not published yet';
-          return <Row key={r.termId} icon="file" label={ordinal(i)} title={r.termName + ' Report Card'} sub={sub} right={badge} onPress={r.state === 'available' ? () => soon('Report Card') : undefined} />;
+          return <Row key={r.termId} icon="file" label={ordinal(i)} title={r.termName + ' Report Card'} sub={sub} right={badge} onPress={r.state === 'available' && child ? () => navigation.navigate('ParentReportCard', { studentId: child.id, studentName: child.full_name, schoolId: child.school_id, classId: r.classId, termId: r.termId, sessionId: r.sessionId, sessionName: (sessions.find(x => x.id === r.sessionId) || { name: '' }).name, termName: r.termName }) : undefined} />;
         })}
       </View>
     );
@@ -196,7 +209,7 @@ export default function ParentHomeScreen({ navigation }: any) {
             icon={feeIcons[f.type] || 'receipt'}
             title={f.name}
             sub={f.dueDate ? 'Due ' + shortDate(f.dueDate) : 'No due date set'}
-            onPress={() => setFee(f)}
+            onPress={() => child && navigation.navigate('ParentFeeDetail', { eventId: f.eventId, studentId: child.id, studentName: child.full_name, schoolId: child.school_id })}
             right={
               <View style={{ alignItems: 'flex-end', gap: 4 }}>
                 <Text style={[text.bodyStrong, { color: f.owed > 0 ? colors.danger : colors.success }]}>{naira(f.due)}</Text>
@@ -467,18 +480,6 @@ export default function ParentHomeScreen({ navigation }: any) {
 
       {addChildSheet}
 
-      <BottomSheet visible={!!fee} onClose={() => setFee(null)} title={fee ? fee.name : ''}>
-        {fee ? (
-          <View style={{ gap: spacing.md }}>
-            {fee.description ? <Text style={[text.body, { color: colors.textMuted }]}>{fee.description}</Text> : null}
-            <View style={styles.detail}><Text style={[text.body, { color: colors.textMuted }]}>Due date</Text><Text style={text.bodyStrong}>{fee.dueDate ? shortDate(fee.dueDate) : 'Not set'}</Text></View>
-            <View style={styles.detail}><Text style={[text.body, { color: colors.textMuted }]}>Amount</Text><Text style={text.bodyStrong}>{naira(fee.due)}</Text></View>
-            <View style={styles.detail}><Text style={[text.body, { color: colors.textMuted }]}>Paid</Text><Text style={[text.bodyStrong, { color: colors.success }]}>{naira(fee.paid)}</Text></View>
-            <View style={styles.detail}><Text style={[text.body, { color: colors.textMuted }]}>Balance</Text><Text style={[text.bodyStrong, { color: fee.owed > 0 ? colors.danger : colors.success }]}>{naira(fee.owed)}</Text></View>
-            {fee.owed > 0 ? <Button title="Pay online" icon="arrowRight" onPress={() => { setFee(null); setTimeout(() => soon('Pay online'), 250); }} /> : null}
-          </View>
-        ) : null}
-      </BottomSheet>
     </SafeAreaView>
   );
 }

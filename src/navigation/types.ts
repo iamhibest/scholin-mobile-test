@@ -64,5 +64,7 @@ export type RootStackParamList = {
   EventForm: undefined;
   EventDetail: { eventId: string };
   Receipt: { html: string; fileName: string };
-  PaymentCheckout: { kind: 'subscription'; url: string; reference: string; paymentId: string; amountLabel?: string };
+  ParentFeeDetail: { eventId: string; studentId: string; studentName: string; schoolId: string };
+  ParentReportCard: { studentId: string; studentName: string; schoolId: string; classId: string; termId: string; sessionId: string; sessionName: string; termName: string };
+  PaymentCheckout: { kind: 'subscription' | 'fee'; url: string; reference: string; paymentId: string; amountLabel?: string };
 };
