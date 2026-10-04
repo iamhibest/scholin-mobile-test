@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { verifiedUpdate } from './verifiedUpdate';
 import { addDays, weekStartOf } from './attendance';
 import { toISODateLocal } from './format';
 
@@ -390,10 +391,7 @@ export async function fetchSchoolRow(schoolId: string) {
 }
 
 export async function updateSchool(schoolId: string, patch: Record<string, any>) {
-  const { error } = await supabase.from('schools').update(patch).eq('id', schoolId);
-  if (error) {
-    fail(error, 'Could not save.');
-  }
+  await verifiedUpdate('schools', patch, { id: schoolId }, 'school settings');
 }
 
 export async function fetchGrades(schoolId: string) {

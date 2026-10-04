@@ -20,14 +20,25 @@ export type Vacancy = {
   payment_status: string;
   payment_reference?: string | null;
   posted_by?: string;
+  posting_type?: 'school' | 'personal' | null;
+  profiles?: { full_name?: string | null; email?: string | null; phone?: string | null; avatar_url?: string | null } | null;
   school_id?: string;
   schools?: { name?: string; logo_url?: string | null; address?: string | null; phone?: string | null; email?: string | null } | null;
 };
 
+export function posterOf(v: Vacancy) {
+  const person = (v.profiles && v.profiles.full_name) || '';
+  const personal = v.posting_type === 'personal' || !v.schools || !v.schools.name;
+  if (personal) {
+    return { personal: true, name: person || 'Scholin member', logo: (v.profiles && v.profiles.avatar_url) || null, person };
+  }
+  return { personal: false, name: (v.schools && v.schools.name) || 'School', logo: (v.schools && v.schools.logo_url) || null, person };
+}
+
 export async function fetchOpenVacancies() {
   const { data, error } = await supabase
     .from('vacancies')
-    .select('*, schools(name, logo_url)')
+    .select('*, schools(name, logo_url), profiles!posted_by(full_name, avatar_url)')
     .eq('is_active', true)
     .in('payment_status', ['paid', 'free'])
     .gt('expires_at', new Date().toISOString())
@@ -39,7 +50,7 @@ export async function fetchOpenVacancies() {
 }
 
 export async function fetchVacancy(id: string) {
-  const { data, error } = await supabase.from('vacancies').select('*, schools(name, address, phone, email, logo_url)').eq('id', id).single();
+  const { data, error } = await supabase.from('vacancies').select('*, schools(name, address, logo_url), profiles!posted_by(full_name, email, phone, avatar_url)').eq('id', id).single();
   if (error || !data) {
     return null;
   }
@@ -92,10 +103,10 @@ export function vacancyPrice(days: number, pricePerDay: number, tiers: { min_day
 
 export type PostResult = { free: true } | { free: false; checkout: Checkout };
 
-export async function postVacancy(form: { title: string; description: string; applyLink: string; days: number }): Promise<PostResult> {
+export async function postVacancy(form: { title: string; description: string; applyLink: string; days: number; postingType: 'school' | 'personal' }): Promise<PostResult> {
   const r = await callFunction(
     'create-vacancy-payment',
-    { title: form.title, description: form.description, apply_link: form.applyLink || null, days: form.days },
+    { title: form.title, description: form.description, apply_link: form.applyLink || null, days: form.days, posting_type: form.postingType },
     'Could not start your posting. Please try again.',
   );
   if (r.free) {
@@ -118,8 +129,8 @@ export async function restartVacancyPayment(vacancyId: string): Promise<Checkout
   return { url: r.authorization_url, reference: r.reference, paymentId: vacancyId };
 }
 
-export async function updateVacancy(id: string, patch: { title: string; description: string; applyLink: string }) {
-  const { error } = await supabase.from('vacancies').update({ title: patch.title, description: patch.description, apply_link: patch.applyLink || null }).eq('id', id);
+export async function updateVacancy(id: string, patch: { title: string; description: string; applyLink: string; postingType: 'school' | 'personal' }) {
+  const { error } = await supabase.from('vacancies').update({ title: patch.title, description: patch.description, apply_link: patch.applyLink || null, posting_type: patch.postingType }).eq('id', id);
   if (error) {
     fail(error, 'Could not save changes.');
   }

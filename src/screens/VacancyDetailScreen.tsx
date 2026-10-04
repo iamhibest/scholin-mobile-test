@@ -4,7 +4,7 @@ import Share from 'react-native-share';
 import { AdSlot, Button, EmptyState, LinkedText, Notice, PressableScale, Screen, SchoolMark, ShineButton, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
-import { canSeePostingDetail, daysLeft, fetchVacancy, loadSaved, postedAgo, toggleSaved, Vacancy } from '../lib/vacancies';
+import { canSeePostingDetail, daysLeft, fetchVacancy, loadSaved, postedAgo, posterOf, toggleSaved, Vacancy } from '../lib/vacancies';
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -63,12 +63,14 @@ export default function VacancyDetailScreen({ route }: any) {
   }
 
   const school = v.schools || {};
+  const poster = posterOf(v);
+  const contact = v.profiles || {};
   const left = daysLeft(v);
   const link = v.apply_link || '';
 
   const share = async () => {
     try {
-      await Share.open({ title: v.title, message: v.title + (school.name ? ' at ' + school.name : '') + (link ? '\nApply: ' + link : '') + '\nFound on Scholin', failOnCancel: false });
+      await Share.open({ title: v.title, message: v.title + (poster.name ? ' at ' + poster.name : '') + (link ? '\nApply: ' + link : '') + '\nFound on Scholin', failOnCancel: false });
     } catch {}
   };
 
@@ -80,10 +82,10 @@ export default function VacancyDetailScreen({ route }: any) {
         <Animated.View style={[styles.hero, slide]}>
           <View style={styles.orb} />
           <View style={styles.heroTop}>
-            <SchoolMark name={school.name || 'Scholin'} uri={school.logo_url} size={60} />
+            <SchoolMark name={poster.name} uri={poster.logo} size={60} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.heroSchool} numberOfLines={2}>{school.name || 'Scholin'}</Text>
-              <Text style={styles.heroPosted}>{'Posted ' + postedAgo(v.created_at)}</Text>
+              <Text style={styles.heroSchool} numberOfLines={2}>{poster.name}</Text>
+              <Text style={styles.heroPosted}>{(!poster.personal && poster.person ? 'Posted by ' + poster.person + '  |  ' : '') + 'Posted ' + postedAgo(v.created_at)}</Text>
             </View>
           </View>
           <Text style={styles.heroTitle}>{v.title}</Text>
@@ -131,16 +133,27 @@ export default function VacancyDetailScreen({ route }: any) {
             </View>
           ) : null}
 
-          {school.name && (school.address || school.phone || school.email) ? (
+          {!poster.personal && school.address ? (
             <View style={styles.card}>
               <Text style={[text.h3, { color: colors.text, marginBottom: spacing.md }]}>About the school</Text>
-              {school.address ? <Text style={[text.body, { color: colors.text, marginBottom: spacing.sm }]}>{school.address}</Text> : null}
-              <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm }}>
-                {school.phone ? <Button title="Call" variant="soft" onPress={() => Linking.openURL('tel:' + school.phone)} style={{ flex: 1 }} /> : null}
-                {school.email ? <Button title="Email" variant="soft" onPress={() => Linking.openURL('mailto:' + school.email)} style={{ flex: 1 }} /> : null}
-              </View>
+              <Text style={[text.body, { color: colors.text }]}>{school.address}</Text>
             </View>
           ) : null}
+
+          <View style={styles.card}>
+            <Text style={[text.h3, { color: colors.text }]}>Message the poster</Text>
+            <Text style={[text.small, { color: colors.textMuted, marginTop: 2, marginBottom: spacing.md }]}>
+              {(poster.person || 'The poster') + (poster.personal ? ' posted this vacancy personally.' : ' posted this vacancy.')}
+            </Text>
+            {contact.phone || contact.email ? (
+              <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                {contact.phone ? <Button title="Call" variant="soft" onPress={() => Linking.openURL('tel:' + contact.phone)} style={{ flex: 1 }} /> : null}
+                {contact.email ? <Button title="Email" variant="soft" onPress={() => Linking.openURL('mailto:' + contact.email)} style={{ flex: 1 }} /> : null}
+              </View>
+            ) : (
+              <Text style={[text.small, { color: colors.textMuted }]}>The poster has not shared a phone number or email address.</Text>
+            )}
+          </View>
         </Animated.View>
       </ScrollView>
 

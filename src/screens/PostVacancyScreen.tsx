@@ -16,6 +16,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
+  const [postingType, setPostingType] = useState<'school' | 'personal'>('school');
   const [days, setDays] = useState('14');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +34,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
           setTitle(v.title);
           setDescription(v.description);
           setLink(v.apply_link || '');
+          setPostingType(v.posting_type === 'personal' ? 'personal' : 'school');
           setDays(String(v.days_purchased));
         }
         setLoaded(true);
@@ -95,7 +97,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
     setBusy(true);
     try {
       if (editId) {
-        await updateVacancy(editId, { title: t, description: d, applyLink: normalized });
+        await updateVacancy(editId, { title: t, description: d, applyLink: normalized, postingType });
         navigation.goBack();
         return;
       }
@@ -104,7 +106,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
         setBusy(false);
         return;
       }
-      const result = await postVacancy({ title: t, description: d, applyLink: normalized, days: dayCount });
+      const result = await postVacancy({ title: t, description: d, applyLink: normalized, days: dayCount, postingType });
       if (result.free) {
         navigation.replace('MyVacancies');
         return;
@@ -123,6 +125,24 @@ export default function PostVacancyScreen({ navigation, route }: any) {
     <Screen padded={false}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Notice message={error} tone="error" />
+        <Text style={[text.caption, { color: colors.textMuted, marginBottom: 8 }]}>Who is posting this vacancy</Text>
+        <View style={styles.typeRow}>
+          {([
+            { key: 'school', label: 'For my school', note: ctx.school.name },
+            { key: 'personal', label: 'Personal', note: 'Only your name shows' },
+          ] as const).map(o => {
+            const on = postingType === o.key;
+            return (
+              <PressableScale key={o.key} onPress={() => setPostingType(o.key)} style={[styles.typeBox, on && styles.typeBoxOn]}>
+                <Text style={[styles.typeTitle, on && { color: colors.primary }]} numberOfLines={1}>{o.label}</Text>
+                <Text style={styles.typeNote} numberOfLines={2}>{o.note}</Text>
+              </PressableScale>
+            );
+          })}
+        </View>
+        <Text style={[text.small, { color: colors.textMuted, marginBottom: spacing.lg }]}>
+          {postingType === 'school' ? 'The school name and logo will show at the top of the vacancy.' : 'Your name and photo will show at the top of the vacancy. The school name will not appear.'}
+        </Text>
         <Input label="Job title" value={title} onChangeText={setTitle} maxLength={120} placeholder="For example Mathematics Teacher" icon="briefcase" />
         <Input label="Description" value={description} onChangeText={setDescription} multiline maxLength={5000} placeholder="Describe the role, requirements and how to apply" style={{ minHeight: 150, textAlignVertical: 'top' }} />
         <Input label="Application link (optional)" value={link} onChangeText={setLink} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
@@ -172,6 +192,11 @@ export default function PostVacancyScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
+  typeRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.sm },
+  typeBox: { flex: 1, minHeight: 74, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: spacing.md, justifyContent: 'center' },
+  typeBoxOn: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  typeTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
+  typeNote: { fontFamily: fonts.body, fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
   quick: { flexDirection: 'row', gap: 8, marginBottom: spacing.md },
   dayChip: { flex: 1, height: 42, borderRadius: radius.lg, backgroundColor: '#EEF1F6', alignItems: 'center', justifyContent: 'center' },
   dayChipOn: { backgroundColor: colors.primary },

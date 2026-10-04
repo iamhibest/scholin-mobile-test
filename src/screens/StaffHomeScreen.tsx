@@ -1,7 +1,9 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomSheet, Button, FadeIn, Icon, InfoBanner, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
+import { SchoolMark } from '../components/JobCard';
+import { Avatar, BottomSheet, Button, FadeIn, Icon, InfoBanner, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
 import { MenuGroup } from '../components/SideMenu';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -106,6 +108,17 @@ export default function StaffHomeScreen({ navigation }: any) {
     load();
   }, [load]);
 
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      load();
+    }, [load]),
+  );
+
   useEffect(() => {
     if (!data || data.vacancies.length < 2) {
       return;
@@ -198,6 +211,13 @@ export default function StaffHomeScreen({ navigation }: any) {
 
   const schoolHeader = (
     <View style={styles.schools}>
+      <View style={styles.menuSchool}>
+        <SchoolMark name={school.name} uri={school.logo_url} size={52} />
+        <View style={{ flex: 1 }}>
+          <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={2}>{school.name}</Text>
+          <Text style={[text.small, { color: colors.textMuted }]}>{roleLabel[role]}</Text>
+        </View>
+      </View>
       <Text style={[text.caption, { color: colors.textMuted, letterSpacing: 1 }]}>MY SCHOOLS</Text>
       {data.allMemberships.map((m: any) => {
         const current = m.school_id === school.id;
@@ -256,7 +276,7 @@ export default function StaffHomeScreen({ navigation }: any) {
             </View>
             <Pressable onPress={() => navigation.navigate('MyProfile')} hitSlop={8}>
               <View style={styles.avatar}>
-                <Text style={[styles.initial]}>{initial}</Text>
+                <Avatar name={data.profile.full_name} uri={data.profile.avatar_url || undefined} size={58} />
               </View>
               <View style={styles.dot} />
             </Pressable>
@@ -355,6 +375,7 @@ export default function StaffHomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xxxl },
+  menuSchool: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg },
   hero: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xl },
   name: { fontFamily: fonts.headingBold, fontSize: 26, lineHeight: 34, color: colors.text, marginVertical: 2 },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.surface },

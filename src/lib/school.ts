@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { verifiedUpdate } from './verifiedUpdate';
 import { getActiveSchoolContext } from './dashboard';
 
 export type StaffRole = 'owner' | 'teacher_admin' | 'teacher';
@@ -231,10 +232,7 @@ export async function createStudent(ctx: StaffContext, form: StudentForm, sessio
 }
 
 export async function updateStudent(studentId: string, form: StudentForm) {
-  const { error } = await supabase.from('students').update(studentPayload(form)).eq('id', studentId);
-  if (error) {
-    fail(error, 'Could not save changes.');
-  }
+  await verifiedUpdate('students', studentPayload(form), { id: studentId }, 'student');
 }
 
 export async function removeStudent(studentId: string) {
@@ -311,8 +309,5 @@ export async function approveRequest(memberId: string) {
 }
 
 export async function saveTeacherProfile(profileId: string, name: string, phone: string, avatarUrl: string | null) {
-  const { error } = await supabase.from('profiles').update({ full_name: name, phone: phone || null, avatar_url: avatarUrl }).eq('id', profileId);
-  if (error) {
-    fail(error, 'Could not save changes.');
-  }
+  await verifiedUpdate('profiles', { full_name: name, phone: phone || null, avatar_url: avatarUrl }, { id: profileId }, 'teacher profile');
 }

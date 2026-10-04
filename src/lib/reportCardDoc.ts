@@ -20,7 +20,12 @@ async function inlineImages(html: string) {
   for (const url of urls) {
     try {
       const response = await fetch(url);
-      const dataUrl = await blobToDataUrl(await response.blob());
+      let dataUrl = await blobToDataUrl(await response.blob());
+      if (dataUrl.indexOf('data:image') !== 0) {
+        const ext = (url.split('?')[0].split('.').pop() || 'jpeg').toLowerCase();
+        const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+        dataUrl = dataUrl.replace(/^data:[^;,]*/, 'data:' + mime);
+      }
       out = out.split('src="' + url + '"').join('src="' + dataUrl + '"');
     } catch {}
   }

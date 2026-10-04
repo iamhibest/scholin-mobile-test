@@ -34,7 +34,26 @@ export async function pickAndUploadImage(schoolId: string | null): Promise<PickR
   if (error || !data || data.error || !data.url) {
     throw new Error((data && data.error) || 'Upload failed. Check your connection and try again.');
   }
+  const problem = await linkProblem(data.url as string);
+  if (problem) {
+    throw new Error(problem);
+  }
   return { uri: asset.uri, url: data.url as string };
+}
+
+async function linkProblem(url: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, { method: 'HEAD', signal: controller.signal });
+    clearTimeout(timer);
+    if (res.status === 401 || res.status === 403 || res.status === 404) {
+      return 'The picture was uploaded, but its link cannot be opened (code ' + res.status + '). Please check the delivery settings of your Cloudinary account.';
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export async function photosAllowed() {

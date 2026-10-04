@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { verifiedUpdate } from './verifiedUpdate';
 import { getActiveSchoolContext, switchActiveSchool } from './dashboard';
 
 function fail(error: any, fallback: string): never {
@@ -16,10 +17,7 @@ export async function fetchMyProfile(userId: string) {
 }
 
 export async function saveMyProfile(userId: string, name: string, phone: string, avatarUrl: string | null) {
-  const { error } = await supabase.from('profiles').update({ full_name: name, phone: phone || null, avatar_url: avatarUrl }).eq('id', userId);
-  if (error) {
-    fail(error, 'Could not save right now. Please try again.');
-  }
+  await verifiedUpdate('profiles', { full_name: name, phone: phone || null, avatar_url: avatarUrl }, { id: userId }, 'profile');
 }
 
 export async function fetchMySchools(userId: string) {

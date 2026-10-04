@@ -18,12 +18,12 @@ const Input = forwardRef<TextInput, Props>(function Input({ label, error, icon, 
   return (
     <View style={styles.wrap}>
       <Text style={[text.caption, styles.label]}>{label}</Text>
-      <View style={[styles.field, { borderColor, borderWidth: focused ? 1.5 : 1 }]}>
+      <View style={[styles.field, rest.multiline && styles.fieldMulti, { borderColor, borderWidth: focused ? 1.5 : 1 }]}>
         {icon ? <Icon name={icon} size={20} color={colors.textMuted} /> : null}
         <TextInput
           {...rest}
           ref={ref}
-          style={[styles.input, style]}
+          style={[styles.input, rest.multiline && styles.inputMulti, style]}
           secureTextEntry={hidden}
           placeholderTextColor="#9CA3AF"
           onFocus={() => setFocused(true)}
@@ -52,8 +52,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     paddingHorizontal: 14,
-    height: 54,
+    minHeight: 54,
   },
+  fieldMulti: { alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14 },
+  inputMulti: { textAlignVertical: 'top', paddingVertical: 0 },
   input: { flex: 1, ...text.body, color: colors.text, paddingVertical: 0 },
   error: { color: colors.danger, marginTop: 6 },
 });

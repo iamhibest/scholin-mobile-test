@@ -77,3 +77,15 @@ record-attendance (Clock a Friend), activity_log and mark_activity_seen (Activit
 referral_commissions and referral_payouts (Referrals).
 If Activity Log rows do not open, run the activity-log migrations from your original web folder:
 activity-log-migration.sql, activity-log-payments-teachers-migration.sql, activity-log-tappable-migration.sql.
+
+# Pictures, vacancies and font size fixes
+
+## Run once in the Supabase SQL editor
+- vacancy-posting-type-migration.sql  (adds the "for my school or personal" choice to vacancies)
+
+## Redeploy one function
+- create-vacancy-payment (replace with create-vacancy-payment.ts from this folder).
+  It now saves whether the vacancy is for a school or a personal posting.
+
+## Nothing else changes on the server
+upload-image stays exactly as it is.

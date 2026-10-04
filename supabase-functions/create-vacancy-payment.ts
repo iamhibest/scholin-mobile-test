@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
     const description = typeof body.description === 'string' ? body.description.trim() : '';
     let applyLink = typeof body.apply_link === 'string' ? body.apply_link.trim() : '';
     const days = Number.isInteger(body.days) ? body.days : parseInt(body.days);
+    const postingType = body.posting_type === 'personal' ? 'personal' : 'school';
 
     if (!title || !description) return fail(400, 'Title and description are required');
     if (!Number.isInteger(days) || days < 1) return fail(400, 'days must be a whole number of 1 or more');
@@ -122,6 +123,7 @@ Deno.serve(async (req) => {
       .insert({
         school_id: schoolId,
         posted_by: callerId,
+        posting_type: postingType,
         title, description,
         apply_link: applyLink || null,
         days_purchased: days,

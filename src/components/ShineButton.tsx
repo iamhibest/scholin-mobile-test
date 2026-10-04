@@ -28,7 +28,7 @@ export default function ShineButton({ title, onPress, icon, loading, disabled }:
     <PressableScale onPress={disabled || loading ? undefined : onPress} to={0.98} style={[styles.btn, disabled && { opacity: 0.5 }]}>
       <View style={styles.row}>
         {loading ? <ActivityIndicator color="#FFFFFF" /> : icon ? <Icon name={icon} size={20} color="#FFFFFF" /> : null}
-        <Text style={styles.label}>{title}</Text>
+        <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{title}</Text>
       </View>
       <Animated.View pointerEvents="none" style={[styles.shine, { transform: [{ translateX: x }, { skewX: '-20deg' }] }]} />
     </PressableScale>
@@ -36,7 +36,7 @@ export default function ShineButton({ title, onPress, icon, loading, disabled }:
 }
 
 const styles = StyleSheet.create({
-  btn: { height: 54, borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  btn: { minHeight: 54, paddingHorizontal: 18, borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   label: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },
   shine: { position: 'absolute', top: 0, bottom: 0, width: 60, backgroundColor: 'rgba(255,255,255,0.22)' },

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import PressableScale from './PressableScale';
-import { closingSoon, daysLeft, isNew, postedAgo, snippet, Vacancy } from '../lib/vacancies';
+import { closingSoon, daysLeft, isNew, postedAgo, posterOf, snippet, Vacancy } from '../lib/vacancies';
 
 const TINTS = [
   { bg: '#E8F0FF', fg: '#1A56DB' },
@@ -57,7 +57,8 @@ export default function JobCard({ vacancy: v, index, saved, onPress, onToggleSav
     }
   }, [saved, pop]);
 
-  const school = (v.schools && v.schools.name) || 'Scholin';
+  const poster = posterOf(v);
+  const school = poster.name;
   const left = daysLeft(v);
   const urgent = closingSoon(v);
 
@@ -65,7 +66,7 @@ export default function JobCard({ vacancy: v, index, saved, onPress, onToggleSav
     <Animated.View style={{ opacity: enter, transform: [{ translateY: enter.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) }] }}>
       <PressableScale onPress={onPress} style={styles.card}>
         <View style={styles.top}>
-          <SchoolMark name={school} uri={v.schools && v.schools.logo_url} />
+          <SchoolMark name={school} uri={poster.logo} />
           <View style={{ flex: 1 }}>
             <Text style={[text.bodyStrong, styles.title]} numberOfLines={2}>{v.title}</Text>
             <Text style={[text.small, styles.school]} numberOfLines={1}>{school}</Text>
