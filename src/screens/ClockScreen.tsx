@@ -14,7 +14,7 @@ import { fetchTodayRecord, hoursLabel, parseQr, submitClock, timeLabel } from '.
 type Action = 'clock_in' | 'clock_out';
 type Step = 'photo' | 'qr' | 'verifying' | 'result';
 
-function getBestLocation(onProgress: (text: string) => void): Promise<{ latitude: number; longitude: number; accuracy: number }> {
+export function getBestLocation(onProgress: (text: string) => void): Promise<{ latitude: number; longitude: number; accuracy: number }> {
   return new Promise((resolve, reject) => {
     let best: any = null;
     let finished = false;
@@ -50,7 +50,7 @@ function getBestLocation(onProgress: (text: string) => void): Promise<{ latitude
   });
 }
 
-async function ensureLocationPermission() {
+export async function ensureLocationPermission() {
   if (Platform.OS !== 'android') {
     return true;
   }
@@ -247,7 +247,7 @@ function Check({ icon, label, sub }: { icon: IconName; label: string; sub: strin
   );
 }
 
-export default function ClockScreen() {
+export default function ClockScreen({ navigation }: any) {
   const { ctx, loading: ctxLoading } = useStaff();
   const [record, setRecord] = useState<any>(undefined);
   const [flow, setFlow] = useState<Action | null>(null);
@@ -349,6 +349,8 @@ export default function ClockScreen() {
         </View>
       </Card>
 
+      <Button title="Clock a friend" variant="soft" icon="users" onPress={() => navigation.navigate('ClockFriend')} style={{ marginTop: spacing.lg }} />
+
       {flow ? <ClockFlow visible action={flow} schoolId={ctx.schoolId} onClose={() => setFlow(null)} onDone={load} /> : null}
     </Screen>
   );
@@ -381,3 +383,5 @@ const styles = StyleSheet.create({
   resultIcon: { width: 84, height: 84, borderRadius: 42, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.lg },
   resultTitle: { fontFamily: fonts.headingBold, fontSize: 28, lineHeight: 36, color: '#FFFFFF', marginBottom: spacing.sm },
 });
+
+export const flowStyles = styles;

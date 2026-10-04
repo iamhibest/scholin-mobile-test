@@ -50,6 +50,14 @@ const featureRoutes: Record<string, string> = {
   'School Settings': 'SchoolSettings',
   'Subscription': 'Subscription',
   'Events and Fees': 'Events',
+  'My Profile': 'MyProfile',
+  'Recent Activity': 'ActivityLog',
+  'Results Status': 'ResultsStatus',
+  'Refer and Earn': 'Referral',
+  'My Schools': 'MySchools',
+  'Job Vacancies': 'Vacancies',
+  'My Postings': 'MyVacancies',
+  'My Posting': 'MyVacancies',
 };
 
 export default function StaffHomeScreen({ navigation }: any) {
@@ -123,7 +131,10 @@ export default function StaffHomeScreen({ navigation }: any) {
   }
 
   const go = (title: string) => {
-    const route = featureRoutes[title];
+    let route = featureRoutes[title];
+    if (title === 'Announcements') {
+      route = data && data.isAdmin ? 'AdminAnnouncements' : 'Announcements';
+    }
     if (route) {
       navigation.navigate(route);
     } else {
@@ -169,6 +180,8 @@ export default function StaffHomeScreen({ navigation }: any) {
         { label: 'Job Vacancies', icon: 'briefcase', onPress: () => go('Job Vacancies') },
         { label: 'My Postings', icon: 'file', onPress: () => go('My Postings') },
         { label: 'Subscription', icon: 'card', hidden: !isAdmin, onPress: () => go('Subscription') },
+        { label: 'My Profile', icon: 'user', onPress: () => navigation.navigate('MyProfile') },
+        { label: 'My Schools', icon: 'school', onPress: () => navigation.navigate('MySchools') },
         { label: 'Terms and About', icon: 'info', onPress: () => navigation.navigate('Terms') },
         { label: 'Developer tools', icon: 'bug', onPress: () => navigation.navigate('Developer') },
       ],
@@ -177,7 +190,7 @@ export default function StaffHomeScreen({ navigation }: any) {
       title: 'Administration',
       items: [
         { label: 'Teachers and Roles', icon: 'userCog', hidden: !isAdmin, onPress: () => go('Teachers and Roles') },
-        { label: 'Announcements', icon: 'megaphone', hidden: !isAdmin, onPress: () => go('Announcements') },
+        { label: 'Announcements', icon: 'megaphone', onPress: () => go('Announcements') },
         { label: 'More Admin Tools', icon: 'grid', hidden: !(isAdmin && access.active), onPress: () => setTools(true) },
       ],
     },
@@ -196,7 +209,7 @@ export default function StaffHomeScreen({ navigation }: any) {
           </Pressable>
         );
       })}
-      <Pressable onPress={() => { setMenu(false); setTimeout(() => navigation.navigate('JoinSchool'), 260); }} style={styles.schoolRow}>
+      <Pressable onPress={() => { setMenu(false); setTimeout(() => navigation.navigate('JoinAnotherSchool'), 260); }} style={styles.schoolRow}>
         <Icon name="plus" size={18} color={colors.success} />
         <Text style={[text.bodyStrong, { color: colors.success }]}>Join another school</Text>
       </Pressable>
@@ -241,12 +254,12 @@ export default function StaffHomeScreen({ navigation }: any) {
               <Text style={styles.name} numberOfLines={2}>{data.profile.full_name}</Text>
               <Text style={[text.body, { color: colors.textMuted }]} numberOfLines={2}>{school.name + ' \u2022 ' + roleLabel[role]}</Text>
             </View>
-            <View>
+            <Pressable onPress={() => navigation.navigate('MyProfile')} hitSlop={8}>
               <View style={styles.avatar}>
                 <Text style={[styles.initial]}>{initial}</Text>
               </View>
               <View style={styles.dot} />
-            </View>
+            </Pressable>
           </View>
         </FadeIn>
 

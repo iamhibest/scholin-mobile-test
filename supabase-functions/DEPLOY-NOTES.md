@@ -54,3 +54,26 @@ create-subaccount, delete-subaccount, verify-fee-payment, paystack-webhook, sync
 2. As admin: Events and Fees > create a fee and assign it to a student.
 3. As the parent linked to that student: Fees tab > tap the fee > Pay now. Pay with a Paystack test card.
 4. Confirm the balance updates and a receipt appears under Payment history.
+
+# Phase 7a: Vacancy board, announcements, profile and schools
+
+## Redeploy two functions (they now also return the checkout link and reference)
+- create-vacancy-payment
+- reinitialize-vacancy-payment
+(verify-paystack-payment is unchanged, included for reference.)
+
+## Ads (optional, off by default)
+See ADS-SETUP.md. Run migrations/ad-config-migration.sql only when you are ready to switch ads on.
+
+## Nothing else to deploy
+Announcements, profile, schools and roster use tables and rules you already have from the HTML app.
+If announcement edit or delete fails for school admins, run admin-announcements-rls-migration.sql
+(from your original web folder) once.
+
+# Phase 7b: Clock a Friend, Results Status, Activity Log, Referrals
+
+No new server functions and no new SQL. These screens use tables and functions you already have:
+record-attendance (Clock a Friend), activity_log and mark_activity_seen (Activity Log),
+referral_commissions and referral_payouts (Referrals).
+If Activity Log rows do not open, run the activity-log migrations from your original web folder:
+activity-log-migration.sql, activity-log-payments-teachers-migration.sql, activity-log-tappable-migration.sql.

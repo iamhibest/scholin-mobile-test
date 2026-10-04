@@ -56,6 +56,21 @@ import TemplateCustomizeScreen from '../screens/TemplateCustomizeScreen';
 import QrCodesScreen from '../screens/QrCodesScreen';
 import StaffAttendanceScreen from '../screens/StaffAttendanceScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
+import ClockFriendScreen from '../screens/ClockFriendScreen';
+import ResultsStatusScreen from '../screens/ResultsStatusScreen';
+import ActivityLogScreen from '../screens/ActivityLogScreen';
+import ReferralScreen from '../screens/ReferralScreen';
+import MyProfileScreen from '../screens/MyProfileScreen';
+import MySchoolsScreen from '../screens/MySchoolsScreen';
+import JoinAnotherSchoolScreen from '../screens/JoinAnotherSchoolScreen';
+import RosterListScreen from '../screens/RosterListScreen';
+import AnnouncementsScreen from '../screens/AnnouncementsScreen';
+import AnnouncementDetailScreen from '../screens/AnnouncementDetailScreen';
+import AdminAnnouncementsScreen from '../screens/AdminAnnouncementsScreen';
+import VacanciesScreen from '../screens/VacanciesScreen';
+import VacancyDetailScreen from '../screens/VacancyDetailScreen';
+import PostVacancyScreen from '../screens/PostVacancyScreen';
+import MyVacanciesScreen from '../screens/MyVacanciesScreen';
 import EventsScreen from '../screens/EventsScreen';
 import EventFormScreen from '../screens/EventFormScreen';
 import EventDetailScreen from '../screens/EventDetailScreen';
@@ -136,6 +151,21 @@ export default function RootNavigator() {
       <Stack.Screen name="StaffAttendanceDetail" component={StaffAttendanceDetailScreen} options={{ ...headerOptions, title: 'Attendance record' }} />
       <Stack.Screen name="StudentAttendance" component={StudentAttendanceScreen} options={{ ...headerOptions, title: 'Student Attendance' }} />
       <Stack.Screen name="SchoolSettings" component={SchoolSettingsScreen} options={{ ...headerOptions, title: 'School Settings' }} />
+      <Stack.Screen name="ClockFriend" component={ClockFriendScreen} options={{ ...headerOptions, title: 'Clock a friend' }} />
+      <Stack.Screen name="ResultsStatus" component={ResultsStatusScreen} options={{ ...headerOptions, title: 'Results status' }} />
+      <Stack.Screen name="ActivityLog" component={ActivityLogScreen} options={{ ...headerOptions, title: 'Recent activity' }} />
+      <Stack.Screen name="Referral" component={ReferralScreen} options={{ ...headerOptions, title: 'Refer and earn' }} />
+      <Stack.Screen name="MyProfile" component={MyProfileScreen} options={{ ...headerOptions, title: 'My profile' }} />
+      <Stack.Screen name="MySchools" component={MySchoolsScreen} options={{ ...headerOptions, title: 'My schools' }} />
+      <Stack.Screen name="JoinAnotherSchool" component={JoinAnotherSchoolScreen} options={{ ...headerOptions, title: 'Join another school' }} />
+      <Stack.Screen name="Roster" component={RosterListScreen} options={{ ...headerOptions, title: 'Roster' }} />
+      <Stack.Screen name="Announcements" component={AnnouncementsScreen} options={{ ...headerOptions, title: 'Announcements' }} />
+      <Stack.Screen name="AnnouncementDetail" component={AnnouncementDetailScreen} options={{ ...headerOptions, title: 'Announcement' }} />
+      <Stack.Screen name="AdminAnnouncements" component={AdminAnnouncementsScreen} options={{ ...headerOptions, title: 'Manage announcements' }} />
+      <Stack.Screen name="Vacancies" component={VacanciesScreen} options={{ ...headerOptions, title: 'Job Vacancies' }} />
+      <Stack.Screen name="VacancyDetail" component={VacancyDetailScreen} options={{ ...headerOptions, title: 'Vacancy' }} />
+      <Stack.Screen name="PostVacancy" component={PostVacancyScreen} options={{ ...headerOptions, title: 'Post a vacancy' }} />
+      <Stack.Screen name="MyVacancies" component={MyVacanciesScreen} options={{ ...headerOptions, title: 'My postings' }} />
       <Stack.Screen name="Events" component={EventsScreen} options={{ ...headerOptions, title: 'Events and Fees' }} />
       <Stack.Screen name="EventForm" component={EventFormScreen} options={{ ...headerOptions, title: 'New event' }} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} options={{ ...headerOptions, title: 'Event' }} />

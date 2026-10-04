@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 // returns, and asks the server to confirm the result. No keys, prices or
 // payment addresses live in the app.
 
-export type PayKind = 'subscription' | 'fee';
+export type PayKind = 'subscription' | 'fee' | 'vacancy';
 
 export type Checkout = { url: string; reference: string; paymentId: string; amount?: number };
 
@@ -14,6 +14,7 @@ type Kind = { table: string; verifyFn: string; idField: string };
 const KINDS: Record<PayKind, Kind> = {
   subscription: { table: 'subscription_payments', verifyFn: 'verify-subscription-payment', idField: 'payment_id' },
   fee: { table: 'event_payment_intents', verifyFn: 'verify-fee-payment', idField: 'intent_id' },
+  vacancy: { table: 'vacancies', verifyFn: 'verify-paystack-payment', idField: 'vacancy_id' },
 };
 
 export async function functionError(error: any, fallback: string) {

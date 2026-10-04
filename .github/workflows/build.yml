@@ -58,6 +58,22 @@ jobs:
           npm install react-native-image-picker @react-native-community/datetimepicker react-native-webview react-native-blob-util react-native-qrcode-svg
           npm install @expo-google-fonts/inter @expo-google-fonts/lora
 
+      - name: Install ads library (only when ENABLE_ADS is true)
+        if: ${{ vars.ENABLE_ADS == 'true' }}
+        working-directory: ScholinMobile
+        env:
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+        run: |
+          npm install react-native-google-mobile-ads
+          python3 - <<'PYEOF'
+          import json, os
+          p = 'app.json'
+          d = json.load(open(p))
+          d['react-native-google-mobile-ads'] = {'android_app_id': os.environ.get('ADMOB_APP_ID') or 'ca-app-pub-3940256099942544~3347511713'}
+          json.dump(d, open(p, 'w'), indent=2)
+          PYEOF
+          printf "export const AdsModule: any = require('react-native-google-mobile-ads');\n" > src/lib/adsNative.ts
+
       - name: Bundle fonts
         working-directory: ScholinMobile
         run: |
