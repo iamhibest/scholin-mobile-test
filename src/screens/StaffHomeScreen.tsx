@@ -1,9 +1,10 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SchoolMark } from '../components/JobCard';
 import { Avatar, BottomSheet, Button, FadeIn, Icon, InfoBanner, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
+import VacancyBanner from '../components/VacancyBanner';
 import { MenuGroup } from '../components/SideMenu';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -70,9 +71,7 @@ export default function StaffHomeScreen({ navigation }: any) {
   const [menu, setMenu] = useState(false);
   const [tools, setTools] = useState(false);
   const [news, setNews] = useState(false);
-  const [vacancyIndex, setVacancyIndex] = useState(0);
   const userId = useRef('');
-  const fade = useRef(new Animated.Value(1)).current;
 
   const load = useCallback(async () => {
     setFailed(false);
@@ -118,19 +117,6 @@ export default function StaffHomeScreen({ navigation }: any) {
       load();
     }, [load]),
   );
-
-  useEffect(() => {
-    if (!data || data.vacancies.length < 2) {
-      return;
-    }
-    const timer = setInterval(() => {
-      Animated.timing(fade, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
-        setVacancyIndex(i => (i + 1) % data.vacancies.length);
-        Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-      });
-    }, data.rotation * 1000);
-    return () => clearInterval(timer);
-  }, [data, fade]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -179,7 +165,6 @@ export default function StaffHomeScreen({ navigation }: any) {
 
   const { school, role, isAdmin, access } = data;
   const initial = (data.profile.full_name || '?').trim().charAt(0).toUpperCase();
-  const vacancy = data.vacancies[vacancyIndex];
 
   const groups: MenuGroup[] = [
     {
@@ -343,11 +328,7 @@ export default function StaffHomeScreen({ navigation }: any) {
           <InfoBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
         ) : null}
 
-        {vacancy ? (
-          <Animated.View style={{ opacity: fade }}>
-            <InfoBanner tag="Vacancies" icon="briefcase" tone="orange" title={vacancy.title ? vacancy.title + '.' : ''} body={vacancy.poster ? 'Posted by ' + vacancy.poster : ''} onPress={() => go('Job Vacancies')} />
-          </Animated.View>
-        ) : null}
+        {data.vacancies.length ? <VacancyBanner items={data.vacancies} seconds={data.rotation} onPress={() => go('Job Vacancies')} /> : null}
 
         <SectionTitle title="Quick Access" action={isAdmin && access.active ? 'More tools' : undefined} onAction={() => setTools(true)} />
         <View style={styles.tiles}>

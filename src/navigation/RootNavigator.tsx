@@ -55,6 +55,7 @@ import TemplatePreviewScreen from '../screens/TemplatePreviewScreen';
 import TemplateCustomizeScreen from '../screens/TemplateCustomizeScreen';
 import QrCodesScreen from '../screens/QrCodesScreen';
 import QrPosterScreen from '../screens/QrPosterScreen';
+import SuperAdminVacancyScreen from '../screens/SuperAdminVacancyScreen';
 import StaffAttendanceScreen from '../screens/StaffAttendanceScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ClockFriendScreen from '../screens/ClockFriendScreen';
@@ -147,6 +148,7 @@ export default function RootNavigator() {
       <Stack.Screen name="ReportTemplates" component={ReportTemplatesScreen} options={{ ...headerOptions, title: 'Report Card Templates' }} />
       <Stack.Screen name="TemplatePreview" component={TemplatePreviewScreen} options={{ ...headerOptions, title: 'Preview' }} />
       <Stack.Screen name="TemplateCustomize" component={TemplateCustomizeScreen} options={{ ...headerOptions, title: 'Customise' }} />
+      <Stack.Screen name="SuperAdminVacancy" component={SuperAdminVacancyScreen} options={{ ...headerOptions, title: 'Vacancy settings' }} />
       <Stack.Screen name="QrPoster" component={QrPosterScreen} options={{ ...headerOptions, title: 'Attendance poster' }} />
       <Stack.Screen name="QrCodes" component={QrCodesScreen} options={{ ...headerOptions, title: 'Attendance QR Codes' }} />
       <Stack.Screen name="StaffAttendance" component={StaffAttendanceScreen} options={{ ...headerOptions, title: 'Staff Attendance' }} />

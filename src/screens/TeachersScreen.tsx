@@ -15,7 +15,7 @@ const PERMISSIONS: Perm[] = [
   { field: 'can_edit_results', label: 'Edit results', desc: "Can edit students' results", icon: 'file', tone: 'blue' },
   { field: 'can_generate_report_cards', label: 'Generate report cards', desc: 'Can generate report cards', icon: 'fileCheck', tone: 'purple' },
   { field: 'can_add_comments', label: 'Add comments', desc: 'Can add comments on results', icon: 'chat', tone: 'green' },
-  { field: 'can_manage_permissions', label: "Manage teachers' permissions", desc: 'Can change the permissions of regular teachers. Only the school owner can switch this on.', icon: 'shieldCheck', tone: 'rose', adminOnly: true },
+  { field: 'can_manage_permissions', label: "Manage teachers' permissions", desc: 'Can change the permissions of regular teachers. Only you (the school owner) can switch this on.', icon: 'shieldCheck', tone: 'rose', adminOnly: true },
   { field: 'can_manage_events_fees', label: 'Manage events and fees', desc: 'Can view and manage Events and Fees, including recording payments', icon: 'wallet', tone: 'teal', adminOnly: true },
   { field: 'can_mark_attendance', label: 'Mark attendance register', desc: 'Can mark the attendance register', icon: 'calendarCheck', tone: 'amber' },
   { field: 'can_manage_attendance', label: 'Manage staff attendance', desc: 'Can manage staff attendance', icon: 'users', tone: 'teal' },
@@ -103,10 +103,14 @@ export default function TeachersScreen({ navigation }: any) {
     const isMe = ctx ? m.id === ctx.membership.id : false;
     const myRole = ctx ? ctx.role : 'teacher';
     const canManage = (myRole === 'owner' && m.role !== 'owner') || (myRole === 'teacher_admin' && m.role === 'teacher');
-    const hasPerms = m.role === 'teacher' || m.role === 'teacher_admin';
-    const perms = PERMISSIONS.filter(p => (m.role === 'teacher_admin' ? p.adminOnly === true : !p.adminOnly)).filter(p => p.field !== 'can_manage_permissions' || myRole === 'owner');
+    // Make admin / Remove admin: owner and teacher admins, never on yourself and never on the owner.
+    const canChangeRole = !isMe && m.role !== 'owner' && (myRole === 'owner' || myRole === 'teacher_admin');
     const delegated = ctx ? ctx.membership.can_manage_permissions === true : false;
+    // Only the owner sees the owner-only switches (events and fees, manage permissions) and only for teacher admins.
+    // A teacher admin never sees permissions for themselves, for other admins, or any owner-only switch.
     const canEditPerms = myRole === 'owner' ? m.role !== 'owner' : myRole === 'teacher_admin' && delegated && m.role === 'teacher' && !isMe;
+    const hasPerms = (m.role === 'teacher' || m.role === 'teacher_admin') && canEditPerms;
+    const perms = PERMISSIONS.filter(p => (m.role === 'teacher_admin' ? p.adminOnly === true : !p.adminOnly)).filter(p => !p.adminOnly || myRole === 'owner');
     const expanded = !!open[m.id];
     return (
       <Card key={m.id} style={styles.card}>
@@ -132,10 +136,10 @@ export default function TeachersScreen({ navigation }: any) {
           </View>
         ) : null}
 
-        {canManage ? (
+        {canManage || canChangeRole ? (
           <View style={styles.actions}>
-            <Button title="Edit" icon="edit" variant="soft" style={styles.action} onPress={() => navigation.navigate('TeacherEdit', { profileId: m.profile_id, name: prof.full_name, phone: prof.phone || '', avatar: prof.avatar_url || '' })} />
-            {m.role === 'teacher' ? (
+            {canManage ? <Button title="Edit" icon="edit" variant="soft" style={styles.action} onPress={() => navigation.navigate('TeacherEdit', { profileId: m.profile_id, name: prof.full_name, phone: prof.phone || '', avatar: prof.avatar_url || '' })} /> : null}
+            {canChangeRole && m.role === 'teacher' ? (
               <Button
                 title="Make admin"
                 icon="shield"
@@ -144,7 +148,7 @@ export default function TeachersScreen({ navigation }: any) {
                 onPress={() => confirmAction('Make Teacher Admin', 'They will gain access to most administration features.', 'Make admin', () => run(() => setMemberRole(m.id, 'teacher_admin')), false)}
               />
             ) : null}
-            {m.role === 'teacher_admin' && myRole === 'owner' ? (
+            {canChangeRole && m.role === 'teacher_admin' ? (
               <Button
                 title="Remove admin access"
                 variant="outline"
@@ -152,13 +156,13 @@ export default function TeachersScreen({ navigation }: any) {
                 onPress={() => confirmAction('Remove admin access', 'They will return to a regular Teacher role.', 'Remove access', () => run(() => setMemberRole(m.id, 'teacher')))}
               />
             ) : null}
-            <Button
+            {canManage ? <Button
               title="Remove"
               icon="trash"
               variant="danger"
               style={styles.action}
               onPress={() => confirmAction('Remove from school', 'Permanently remove ' + prof.full_name + ' from this school? This cannot be undone.', 'Remove', () => run(() => removeMember(m.id)))}
-            />
+            /> : null}
           </View>
         ) : null}
 
@@ -171,11 +175,6 @@ export default function TeachersScreen({ navigation }: any) {
                 <Icon name="chevronDown" size={20} color={colors.textMuted} />
               </View>
             </Pressable>
-            {expanded && !canEditPerms ? (
-              <Text style={[text.small, { color: colors.textMuted, marginTop: spacing.sm }]}>
-                {isMe ? 'You cannot change your own permissions. Only the school owner can.' : 'Only the school owner, or a teacher admin the owner has allowed, can change permissions.'}
-              </Text>
-            ) : null}
             {expanded
               ? perms.map(p => {
                   const t = toneColors[p.tone];
@@ -191,8 +190,7 @@ export default function TeachersScreen({ navigation }: any) {
                       <Switch
                         value={!!m[p.field]}
                         onValueChange={v => toggle(m, p.field, v)}
-                        disabled={!canEditPerms}
-                        trackColor={{ false: '#D5D8DE', true: colors.primaryLight }}
+                                                trackColor={{ false: '#D5D8DE', true: colors.primaryLight }}
                         thumbColor={m[p.field] ? colors.primary : '#FFFFFF'}
                       />
                     </View>
