@@ -130,7 +130,7 @@ function Flow({ target, schoolId, onClose, onDone }: { target: Target; schoolId:
 
         {step === 'face' && hasPermission ? (
           <View style={styles.bottom}>
-            <Text style={styles.hint}>{'Step 1 of 3. Point the camera at ' + target.name + "'s face to confirm they are here in person. The photo is not saved."}</Text>
+            <Text style={styles.hint}>{'Step 1 of 3. Point the camera at ' + target.name + "'s face to confirm they are here in person."}</Text>
             <Pressable onPress={() => shoot('surroundings')} style={styles.shutter}>
               <View style={styles.shutterInner} />
             </Pressable>
@@ -139,7 +139,7 @@ function Flow({ target, schoolId, onClose, onDone }: { target: Target; schoolId:
 
         {step === 'surroundings' && hasPermission ? (
           <View style={styles.bottom}>
-            <Text style={styles.hint}>Step 2 of 3. Take a live photo that shows your surroundings. It is not saved.</Text>
+            <Text style={styles.hint}>Step 2 of 3. Take a live photo that shows your surroundings.</Text>
             <Pressable onPress={() => shoot('qr')} style={styles.shutter}>
               <View style={styles.shutterInner} />
             </Pressable>

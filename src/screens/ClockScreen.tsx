@@ -181,7 +181,7 @@ function ClockFlow({ visible, action, schoolId, onClose, onDone }: { visible: bo
 
         {step === 'photo' && hasPermission ? (
           <View style={styles.bottom}>
-            <Text style={styles.hint}>Step 1 of 2. Take a live photo that shows your surroundings. It is not saved.</Text>
+            <Text style={styles.hint}>Step 1 of 2. Take a live photo that shows your surroundings.</Text>
             <Pressable onPress={capture} style={styles.shutter}>
               <View style={styles.shutterInner} />
             </Pressable>

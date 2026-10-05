@@ -21,10 +21,39 @@ export type Vacancy = {
   payment_reference?: string | null;
   posted_by?: string;
   posting_type?: 'school' | 'personal' | null;
+  location?: string | null;
+  category?: string | null;
+  job_type?: string | null;
   profiles?: { full_name?: string | null; email?: string | null; phone?: string | null; avatar_url?: string | null } | null;
   school_id?: string;
   schools?: { name?: string; logo_url?: string | null; address?: string | null; phone?: string | null; email?: string | null } | null;
 };
+
+export const CATEGORIES = [
+  { value: 'teaching', label: 'Teaching' },
+  { value: 'administration', label: 'Administration' },
+  { value: 'support', label: 'Support Staff' },
+];
+
+export const JOB_TYPES = [
+  { value: 'full_time', label: 'Full-time' },
+  { value: 'part_time', label: 'Part-time' },
+  { value: 'contract', label: 'Contract' },
+];
+
+export function categoryLabel(value?: string | null) {
+  const c = CATEGORIES.find(x => x.value === value);
+  return c ? c.label : 'Teaching';
+}
+
+export function jobTypeLabel(value?: string | null) {
+  const c = JOB_TYPES.find(x => x.value === value);
+  return c ? c.label : 'Full-time';
+}
+
+export function deadlineLabel(v: { expires_at: string }) {
+  return new Date(v.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 export function posterOf(v: Vacancy) {
   const person = (v.profiles && v.profiles.full_name) || '';
@@ -103,10 +132,10 @@ export function vacancyPrice(days: number, pricePerDay: number, tiers: { min_day
 
 export type PostResult = { free: true } | { free: false; checkout: Checkout };
 
-export async function postVacancy(form: { title: string; description: string; applyLink: string; days: number; postingType: 'school' | 'personal' }): Promise<PostResult> {
+export async function postVacancy(form: { title: string; description: string; applyLink: string; days: number; postingType: 'school' | 'personal'; location: string; category: string; jobType: string }): Promise<PostResult> {
   const r = await callFunction(
     'create-vacancy-payment',
-    { title: form.title, description: form.description, apply_link: form.applyLink || null, days: form.days, posting_type: form.postingType },
+    { title: form.title, description: form.description, apply_link: form.applyLink || null, days: form.days, posting_type: form.postingType, location: form.location, category: form.category, job_type: form.jobType },
     'Could not start your posting. Please try again.',
   );
   if (r.free) {
@@ -129,8 +158,8 @@ export async function restartVacancyPayment(vacancyId: string): Promise<Checkout
   return { url: r.authorization_url, reference: r.reference, paymentId: vacancyId };
 }
 
-export async function updateVacancy(id: string, patch: { title: string; description: string; applyLink: string; postingType: 'school' | 'personal' }) {
-  const { error } = await supabase.from('vacancies').update({ title: patch.title, description: patch.description, apply_link: patch.applyLink || null, posting_type: patch.postingType }).eq('id', id);
+export async function updateVacancy(id: string, patch: { title: string; description: string; applyLink: string; postingType: 'school' | 'personal'; location: string; category: string; jobType: string }) {
+  const { error } = await supabase.from('vacancies').update({ title: patch.title, description: patch.description, apply_link: patch.applyLink || null, posting_type: patch.postingType, location: patch.location, category: patch.category, job_type: patch.jobType }).eq('id', id);
   if (error) {
     fail(error, 'Could not save changes.');
   }

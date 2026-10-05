@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, PermissionsAndroid, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
@@ -8,7 +8,7 @@ import { colors, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { useChain } from '../lib/useChain';
 import { confirmAction } from '../lib/confirm';
-import { safeName, saveToDownloads, shareFile, writeTempFile } from '../lib/files';
+import { buildQrPosterHtml } from '../lib/qrPoster';
 import { createPoint, deletePoint, fetchPoints, setPointActive } from '../lib/admin';
 
 function currentPosition(): Promise<{ latitude: number; longitude: number }> {
@@ -28,7 +28,7 @@ function currentPosition(): Promise<{ latitude: number; longitude: number }> {
   });
 }
 
-export default function QrCodesScreen() {
+export default function QrCodesScreen({ navigation }: any) {
   const { ctx, loading: ctxLoading } = useStaff();
   const chain = useChain(2);
   const [points, setPoints] = useState<any[] | null>(null);
@@ -37,6 +37,8 @@ export default function QrCodesScreen() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ message: string; tone: 'error' | 'success' }>({ message: '', tone: 'success' });
   const refs = useRef<Record<string, any>>({});
+  const bigRef = useRef<any>(null);
+  const [posterPoint, setPosterPoint] = useState<any>(null);
 
   const canManage = !!ctx && (ctx.role === 'owner' || (ctx.role === 'teacher_admin' && ctx.membership.can_manage_qr_codes === true));
 
@@ -80,40 +82,39 @@ export default function QrCodesScreen() {
     setBusy(false);
   };
 
-  const pngPath = (p: any) =>
-    new Promise<string>((resolve, reject) => {
-      const ref = refs.current[p.id];
+  const openPoster = (p: any) => {
+    setBusy(p.id);
+    setPosterPoint(p);
+  };
+
+  useEffect(() => {
+    if (!posterPoint) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      const ref = bigRef.current;
       if (!ref) {
-        reject(new Error('The QR code is not ready yet.'));
+        setNotice({ message: 'The QR code is not ready yet. Please try again.', tone: 'error' });
+        setBusy('');
+        setPosterPoint(null);
         return;
       }
-      ref.toDataURL(async (b64: string) => {
-        try {
-          resolve(await writeTempFile('scholin_attendance_' + safeName(p.name) + '.png', b64, 'base64'));
-        } catch (e) {
-          reject(e);
-        }
+      ref.toDataURL((b64: string) => {
+        const html = buildQrPosterHtml({
+          schoolName: ctx ? ctx.school.name : '',
+          address: ctx ? ctx.school.address || '' : '',
+          pointName: posterPoint.name,
+          logoUrl: ctx ? ctx.school.logo_url : null,
+          qrDataUrl: 'data:image/png;base64,' + b64,
+        });
+        const name = posterPoint.name;
+        setBusy('');
+        setPosterPoint(null);
+        navigation.navigate('QrPoster', { html, name });
       });
-    });
-
-  const download = async (p: any) => {
-    try {
-      const path = await pngPath(p);
-      const fileName = 'scholin_attendance_' + safeName(p.name) + '.png';
-      const where = await saveToDownloads(path, fileName, 'image/png');
-      Alert.alert('Saved', 'The QR code was saved to ' + where + ' as ' + fileName);
-    } catch (e: any) {
-      setNotice({ message: 'Could not save QR code: ' + (e.message || e), tone: 'error' });
-    }
-  };
-
-  const share = async (p: any) => {
-    try {
-      await shareFile(await pngPath(p), 'image/png', p.name + ' Scholin Attendance QR');
-    } catch (e: any) {
-      setNotice({ message: 'Could not open share options: ' + (e.message || e), tone: 'error' });
-    }
-  };
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [posterPoint]);
 
   const toggle = (p: any) => {
     const verb = p.is_active ? 'deactivate' : 'reactivate';
@@ -181,19 +182,21 @@ export default function QrCodesScreen() {
               {!p.is_active ? <Badge label="Deactivated" tone="orange" /> : null}
             </View>
             <Text style={[text.small, { color: colors.textMuted }]}>{'QR ID: ' + String(p.id).slice(0, 8).toUpperCase()}</Text>
-            <View style={styles.qr}>
-              <QRCode
-                value={'SCHOLIN-ATTEND:' + ctx!.schoolId + ':' + p.id + ':' + p.qr_token}
-                size={200}
-                backgroundColor="#FFFFFF"
-                getRef={(c: any) => {
-                  refs.current[p.id] = c;
-                }}
-              />
-            </View>
-            <View style={styles.actions}>
-              <Button title="Download" icon="down" variant="outline" style={styles.action} onPress={() => download(p)} />
-              <Button title="Print or share" icon="send" variant="outline" style={styles.action} onPress={() => share(p)} />
+            <View style={styles.qrRow}>
+              <View style={styles.qr}>
+                <QRCode
+                  value={'SCHOLIN-ATTEND:' + ctx!.schoolId + ':' + p.id + ':' + p.qr_token}
+                  size={104}
+                  backgroundColor="#FFFFFF"
+                  getRef={(c: any) => {
+                    refs.current[p.id] = c;
+                  }}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[text.small, { color: colors.textMuted, marginBottom: spacing.sm }]}>Tap the button to see the poster. From there you can print it, share it or save it.</Text>
+                <Button title="Print or share poster" icon="send" loading={busy === p.id} onPress={() => openPoster(p)} style={{ height: 46 }} />
+              </View>
             </View>
             {canManage ? (
               <View style={styles.actions}>
@@ -204,6 +207,20 @@ export default function QrCodesScreen() {
           </Card>
         ))}
       </ScrollView>
+      {posterPoint ? (
+        <View style={{ position: 'absolute', left: -3000, top: 0 }} pointerEvents="none">
+          <QRCode
+            value={'SCHOLIN-ATTEND:' + ctx!.schoolId + ':' + posterPoint.id + ':' + posterPoint.qr_token}
+            size={720}
+            ecl="M"
+            quietZone={0}
+            backgroundColor="#FFFFFF"
+            getRef={(c: any) => {
+              bigRef.current = c;
+            }}
+          />
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -212,7 +229,8 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
   point: { marginBottom: spacing.lg },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  qr: { alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 20, padding: spacing.lg, marginVertical: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  qrRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginVertical: spacing.md },
+  qr: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 10, borderWidth: 1, borderColor: colors.border },
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   action: { flex: 1, height: 44, paddingHorizontal: 8 },
 });

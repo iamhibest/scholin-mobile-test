@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Share from 'react-native-share';
-import { AdSlot, Button, EmptyState, LinkedText, Notice, PressableScale, Screen, SchoolMark, ShineButton, Skeleton } from '../components';
+import { AdSlot, Button, EmptyState, Icon, LinkedText, Notice, PressableScale, Screen, ShineButton, Skeleton } from '../components';
+import { VGREEN } from '../components/JobCard';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
-import { canSeePostingDetail, daysLeft, fetchVacancy, loadSaved, postedAgo, posterOf, toggleSaved, Vacancy } from '../lib/vacancies';
+import { canSeePostingDetail, categoryLabel, daysLeft, deadlineLabel, fetchVacancy, jobTypeLabel, loadSaved, postedAgo, posterOf, toggleSaved, Vacancy } from '../lib/vacancies';
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -70,7 +71,7 @@ export default function VacancyDetailScreen({ route }: any) {
 
   const share = async () => {
     try {
-      await Share.open({ title: v.title, message: v.title + (poster.name ? ' at ' + poster.name : '') + (link ? '\nApply: ' + link : '') + '\nFound on Scholin', failOnCancel: false });
+      await Share.open({ title: v.title, message: v.title + (!poster.personal && poster.name ? ' at ' + poster.name : '') + (v.location ? ', ' + v.location : '') + (link ? '\nApply: ' + link : '') + '\nFound on Scholin', failOnCancel: false });
     } catch {}
   };
 
@@ -81,17 +82,24 @@ export default function VacancyDetailScreen({ route }: any) {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.hero, slide]}>
           <View style={styles.orb} />
-          <View style={styles.heroTop}>
-            <SchoolMark name={poster.name} uri={poster.logo} size={60} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.heroSchool} numberOfLines={2}>{poster.name}</Text>
-              <Text style={styles.heroPosted}>{(!poster.personal && poster.person ? 'Posted by ' + poster.person + '  |  ' : '') + 'Posted ' + postedAgo(v.created_at)}</Text>
-            </View>
+          <View style={styles.catPill}>
+            <Text style={styles.catText} numberOfLines={1}>{categoryLabel(v.category)}</Text>
           </View>
           <Text style={styles.heroTitle}>{v.title}</Text>
+          {!poster.personal ? <Text style={styles.heroSchool} numberOfLines={2}>{poster.name}</Text> : null}
+          {poster.person ? <Text style={styles.heroPosted} numberOfLines={1}>{'Posted by ' + poster.person}</Text> : null}
+          <View style={styles.metaRow}>
+            {v.location ? (
+              <View style={styles.metaItem}>
+                <Icon name="pin" size={15} color={VGREEN.mid} />
+                <Text style={styles.metaText} numberOfLines={2}>{v.location}</Text>
+              </View>
+            ) : null}
+            <Text style={styles.metaText}>{jobTypeLabel(v.job_type)}</Text>
+          </View>
           <View style={styles.pills}>
             <View style={styles.pill}>
-              <Text style={styles.pillText}>{left <= 1 ? 'Closes today' : 'Closes in ' + left + ' days'}</Text>
+              <Text style={styles.pillText} numberOfLines={1}>{(left <= 1 ? 'Closes today' : 'Closes in ' + left + ' days') + '  |  ' + deadlineLabel(v)}</Text>
             </View>
             {link ? (
               <View style={styles.pill}>
@@ -99,12 +107,13 @@ export default function VacancyDetailScreen({ route }: any) {
               </View>
             ) : null}
           </View>
+          <Text style={styles.ago}>{'Posted ' + postedAgo(v.created_at)}</Text>
         </Animated.View>
 
         <Animated.View style={slide}>
           <View style={styles.actions}>
-            <PressableScale onPress={async () => setSaved((await toggleSaved(v.id)).includes(v.id))} style={[styles.action, saved && { backgroundColor: colors.primarySoft }]}>
-              <Text style={[styles.actionText, saved && { color: colors.primary }]}>{saved ? 'Saved' : 'Save job'}</Text>
+            <PressableScale onPress={async () => setSaved((await toggleSaved(v.id)).includes(v.id))} style={[styles.action, saved && { backgroundColor: VGREEN.pill }]}>
+              <Text style={[styles.actionText, saved && { color: VGREEN.dark }]}>{saved ? 'Saved' : 'Save job'}</Text>
             </PressableScale>
             <PressableScale onPress={share} style={styles.action}>
               <Text style={styles.actionText}>Share</Text>
@@ -168,21 +177,26 @@ export default function VacancyDetailScreen({ route }: any) {
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: 130 },
-  hero: { backgroundColor: colors.primary, borderRadius: radius.xl, padding: spacing.xl, overflow: 'hidden' },
-  orb: { position: 'absolute', right: -50, top: -60, width: 190, height: 190, borderRadius: 95, backgroundColor: 'rgba(255,255,255,0.10)' },
-  heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  heroSchool: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.semibold },
-  heroPosted: { color: 'rgba(255,255,255,0.8)', fontSize: 12.5, marginTop: 2, fontFamily: fonts.body },
-  heroTitle: { color: '#FFFFFF', fontSize: 25, lineHeight: 31, marginTop: spacing.lg, fontFamily: fonts.headingBold },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: spacing.lg },
-  pill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' },
-  pillText: { color: '#FFFFFF', fontSize: 12.5, fontFamily: fonts.semibold },
+  hero: { backgroundColor: VGREEN.soft, borderRadius: radius.xl, padding: spacing.xl, overflow: 'hidden', borderWidth: 1, borderColor: '#D6E8DC' },
+  orb: { position: 'absolute', right: -50, top: -60, width: 190, height: 190, borderRadius: 95, backgroundColor: '#D5E8DB' },
+  catPill: { alignSelf: 'flex-start', backgroundColor: VGREEN.dark, paddingHorizontal: 14, height: 30, borderRadius: radius.pill, justifyContent: 'center' },
+  catText: { color: '#FFFFFF', fontSize: 12.5, fontFamily: fonts.semibold },
+  heroTitle: { color: VGREEN.ink, fontSize: 26, lineHeight: 33, marginTop: spacing.md, fontFamily: fonts.headingBold },
+  heroSchool: { color: VGREEN.mid, fontSize: 16, marginTop: 4, fontFamily: fonts.semibold },
+  heroPosted: { color: colors.textMuted, fontSize: 13.5, marginTop: 2, fontFamily: fonts.body },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: spacing.lg, rowGap: 4, marginTop: spacing.md },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 1 },
+  metaText: { color: '#3F4B45', fontSize: 14, fontFamily: fonts.medium, flexShrink: 1 },
+  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: spacing.md },
+  pill: { paddingHorizontal: 12, height: 32, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: VGREEN.pill },
+  pillText: { color: VGREEN.mid, fontSize: 12.5, fontFamily: fonts.semibold },
+  ago: { color: colors.textMuted, fontSize: 12.5, marginTop: spacing.md, fontFamily: fonts.body },
   actions: { flexDirection: 'row', gap: spacing.md, marginVertical: spacing.lg },
-  action: { flex: 1, height: 46, borderRadius: radius.lg, backgroundColor: '#EEF1F6', alignItems: 'center', justifyContent: 'center' },
+  action: { flex: 1, height: 46, borderRadius: radius.pill, backgroundColor: '#EEF1EF', alignItems: 'center', justifyContent: 'center' },
   actionText: { fontSize: 14.5, color: colors.text, fontFamily: fonts.semibold },
-  card: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md, borderWidth: 1, borderColor: '#EEF1F6' },
-  noLink: { marginTop: spacing.lg, padding: spacing.md, borderRadius: radius.md, backgroundColor: '#F4F6FA' },
+  card: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md, borderWidth: 1, borderColor: '#E6ECE8' },
+  noLink: { marginTop: spacing.lg, padding: spacing.md, borderRadius: radius.md, backgroundColor: '#F2F6F3' },
   facts: { flexDirection: 'row', gap: spacing.md },
-  fact: { flex: 1, backgroundColor: '#F4F6FA', borderRadius: radius.md, padding: spacing.md },
+  fact: { flex: 1, backgroundColor: '#F2F6F3', borderRadius: radius.md, padding: spacing.md },
   bar: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: spacing.lg, paddingBottom: spacing.xl, backgroundColor: colors.surface, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });

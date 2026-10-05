@@ -4,7 +4,8 @@ import { Button, Card, EmptyState, Input, Notice, PressableScale, Screen, ShineB
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { naira } from '../lib/format';
-import { fetchVacancy, fetchVacancyFlags, fetchVacancyPricing, normalizeLink, postVacancy, updateVacancy, vacancyPrice } from '../lib/vacancies';
+import { CATEGORIES, fetchVacancy, fetchVacancyFlags, fetchVacancyPricing, JOB_TYPES, normalizeLink, postVacancy, updateVacancy, vacancyPrice } from '../lib/vacancies';
+import { VGREEN } from '../components/JobCard';
 
 const QUICK_DAYS = [7, 14, 30, 60];
 
@@ -17,6 +18,9 @@ export default function PostVacancyScreen({ navigation, route }: any) {
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
   const [postingType, setPostingType] = useState<'school' | 'personal'>('school');
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('teaching');
+  const [jobType, setJobType] = useState('full_time');
   const [days, setDays] = useState('14');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -35,6 +39,9 @@ export default function PostVacancyScreen({ navigation, route }: any) {
           setDescription(v.description);
           setLink(v.apply_link || '');
           setPostingType(v.posting_type === 'personal' ? 'personal' : 'school');
+          setLocation(v.location || '');
+          setCategory(v.category || 'teaching');
+          setJobType(v.job_type || 'full_time');
           setDays(String(v.days_purchased));
         }
         setLoaded(true);
@@ -89,6 +96,11 @@ export default function PostVacancyScreen({ navigation, route }: any) {
       setError('Title and description are required.');
       return;
     }
+    const loc = location.trim();
+    if (!loc) {
+      setError('Please add the location of this vacancy, for example Mowe, Ogun State.');
+      return;
+    }
     const normalized = normalizeLink(link);
     if (normalized === 'invalid') {
       setError('Application link should start with https:// or www.');
@@ -97,7 +109,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
     setBusy(true);
     try {
       if (editId) {
-        await updateVacancy(editId, { title: t, description: d, applyLink: normalized, postingType });
+        await updateVacancy(editId, { title: t, description: d, applyLink: normalized, postingType, location: loc, category, jobType });
         navigation.goBack();
         return;
       }
@@ -106,7 +118,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
         setBusy(false);
         return;
       }
-      const result = await postVacancy({ title: t, description: d, applyLink: normalized, days: dayCount, postingType });
+      const result = await postVacancy({ title: t, description: d, applyLink: normalized, days: dayCount, postingType, location: loc, category, jobType });
       if (result.free) {
         navigation.replace('MyVacancies');
         return;
@@ -125,7 +137,7 @@ export default function PostVacancyScreen({ navigation, route }: any) {
     <Screen padded={false}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Notice message={error} tone="error" />
-        <Text style={[text.caption, { color: colors.textMuted, marginBottom: 8 }]}>Who is posting this vacancy</Text>
+        <Text style={styles.label}>Who is posting this vacancy</Text>
         <View style={styles.typeRow}>
           {([
             { key: 'school', label: 'For my school', note: ctx.school.name },
@@ -134,28 +146,47 @@ export default function PostVacancyScreen({ navigation, route }: any) {
             const on = postingType === o.key;
             return (
               <PressableScale key={o.key} onPress={() => setPostingType(o.key)} style={[styles.typeBox, on && styles.typeBoxOn]}>
-                <Text style={[styles.typeTitle, on && { color: colors.primary }]} numberOfLines={1}>{o.label}</Text>
+                <Text style={[styles.typeTitle, on && { color: VGREEN.dark }]} numberOfLines={1}>{o.label}</Text>
                 <Text style={styles.typeNote} numberOfLines={2}>{o.note}</Text>
               </PressableScale>
             );
           })}
         </View>
-        <Text style={[text.small, { color: colors.textMuted, marginBottom: spacing.lg }]}>
-          {postingType === 'school' ? 'The school name and logo will show at the top of the vacancy.' : 'Your name and photo will show at the top of the vacancy. The school name will not appear.'}
-        </Text>
-        <Input label="Job title" value={title} onChangeText={setTitle} maxLength={120} placeholder="For example Mathematics Teacher" icon="briefcase" />
-        <Input label="Description" value={description} onChangeText={setDescription} multiline maxLength={5000} placeholder="Describe the role, requirements and how to apply" style={{ minHeight: 150, textAlignVertical: 'top' }} />
+        <Text style={styles.hint}>{postingType === 'school' ? 'The school name will show with this vacancy.' : 'The school name will not show. Only your name will.'}</Text>
+
+        <Input label="Job title" value={title} onChangeText={setTitle} maxLength={120} placeholder="Mathematics Teacher" />
+
+        <Text style={styles.label}>Category</Text>
+        <View style={styles.pills}>
+          {CATEGORIES.map(c => (
+            <PressableScale key={c.value} onPress={() => setCategory(c.value)} style={[styles.pill, category === c.value && styles.pillOn]}>
+              <Text style={[styles.pillText, category === c.value && { color: '#FFFFFF' }]} numberOfLines={1}>{c.label}</Text>
+            </PressableScale>
+          ))}
+        </View>
+
+        <Text style={styles.label}>Job type</Text>
+        <View style={styles.pills}>
+          {JOB_TYPES.map(c => (
+            <PressableScale key={c.value} onPress={() => setJobType(c.value)} style={[styles.pill, jobType === c.value && styles.pillOn]}>
+              <Text style={[styles.pillText, jobType === c.value && { color: '#FFFFFF' }]} numberOfLines={1}>{c.label}</Text>
+            </PressableScale>
+          ))}
+        </View>
+
+        <Input label="Location" value={location} onChangeText={setLocation} maxLength={120} placeholder="Mowe, Ogun State" icon="pin" autoCapitalize="words" />
+        <Input label="Description" value={description} onChangeText={setDescription} multiline maxLength={5000} placeholder="Role, requirements and how to apply" style={{ minHeight: 140 }} />
         <Input label="Application link (optional)" value={link} onChangeText={setLink} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
 
         {!editId ? (
           <View>
-            <Text style={[text.caption, { color: colors.textMuted, marginBottom: 8 }]}>How long should it stay live</Text>
+            <Text style={styles.label}>How long should it stay live</Text>
             <View style={styles.quick}>
               {QUICK_DAYS.map(n => {
                 const on = dayCount === n;
                 return (
                   <PressableScale key={n} onPress={() => setDays(String(n))} style={[styles.dayChip, on && styles.dayChipOn]}>
-                    <Text style={[styles.dayChipText, on && { color: '#FFFFFF' }]}>{n + ' days'}</Text>
+                    <Text style={[styles.dayChipText, on && { color: '#FFFFFF' }]} numberOfLines={1}>{n + ' days'}</Text>
                   </PressableScale>
                 );
               })}
@@ -192,16 +223,22 @@ export default function PostVacancyScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
+  label: { color: colors.textMuted, fontSize: 12.5, letterSpacing: 0.3, marginBottom: 8, fontFamily: fonts.semibold },
+  hint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.lg, fontFamily: fonts.body },
   typeRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.sm },
-  typeBox: { flex: 1, minHeight: 74, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: spacing.md, justifyContent: 'center' },
-  typeBoxOn: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  typeTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
+  typeBox: { flex: 1, minHeight: 74, borderRadius: radius.lg, borderWidth: 1.5, borderColor: '#E3E8E5', backgroundColor: colors.surface, padding: spacing.md, justifyContent: 'center' },
+  typeBoxOn: { borderColor: VGREEN.dark, backgroundColor: VGREEN.soft },
+  typeTitle: { fontFamily: fonts.semibold, fontSize: 14.5, color: colors.text },
   typeNote: { fontFamily: fonts.body, fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
+  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.lg },
+  pill: { height: 40, paddingHorizontal: 16, borderRadius: radius.pill, backgroundColor: '#EEF1EF', alignItems: 'center', justifyContent: 'center' },
+  pillOn: { backgroundColor: VGREEN.dark },
+  pillText: { fontSize: 13.5, color: '#4B5563', fontFamily: fonts.semibold },
   quick: { flexDirection: 'row', gap: 8, marginBottom: spacing.md },
-  dayChip: { flex: 1, height: 42, borderRadius: radius.lg, backgroundColor: '#EEF1F6', alignItems: 'center', justifyContent: 'center' },
-  dayChipOn: { backgroundColor: colors.primary },
-  dayChipText: { fontSize: 13.5, color: colors.textMuted, fontFamily: fonts.semibold },
+  dayChip: { flex: 1, minWidth: 0, height: 42, borderRadius: radius.pill, backgroundColor: '#EEF1EF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  dayChipOn: { backgroundColor: VGREEN.dark },
+  dayChipText: { fontSize: 13, color: '#4B5563', fontFamily: fonts.semibold },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   totalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
-  total: { fontSize: 22, color: colors.primary, fontFamily: fonts.headingBold },
+  total: { fontSize: 22, color: VGREEN.dark, fontFamily: fonts.headingBold },
 });

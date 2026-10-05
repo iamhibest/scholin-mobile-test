@@ -89,3 +89,16 @@ activity-log-migration.sql, activity-log-payments-teachers-migration.sql, activi
 
 ## Nothing else changes on the server
 upload-image stays exactly as it is.
+
+# Vacancy redesign, QR poster, keyboard fix
+
+## Run once in the Supabase SQL editor (replaces the earlier version of this file)
+- vacancy-posting-type-migration.sql
+  Adds: school or personal posting, location, category and job type to vacancies.
+  Existing vacancies stay as school postings in the Teaching category, Full-time, with no location.
+
+## Redeploy one function (use the new file)
+- create-vacancy-payment
+
+## New build library
+- react-native-print (the Print button on the attendance poster). It is added to the build workflow automatically.

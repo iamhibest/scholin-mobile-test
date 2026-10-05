@@ -1,38 +1,40 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import Svg, { Circle, Line } from 'react-native-svg';
 import { useFocusEffect } from '@react-navigation/native';
-import { AdSlot, EmptyState, Fab, JobCard, JobSkeleton, Notice, PressableScale, Screen, SearchBar } from '../components';
+import { AdSlot, BottomSheet, EmptyState, Icon, JobCard, JobSkeleton, Notice, PressableScale, Screen } from '../components';
+import { VGREEN } from '../components/JobCard';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { loadAdConfig } from '../lib/ads';
 import { AdsModule } from '../lib/adsNative';
-import { daysLeft, fetchOpenVacancies, fetchVacancyFlags, isNew, loadSaved, toggleSaved, Vacancy } from '../lib/vacancies';
+import { CATEGORIES, daysLeft, fetchOpenVacancies, fetchVacancyFlags, isNew, loadSaved, toggleSaved, Vacancy } from '../lib/vacancies';
 
-type Chip = 'all' | 'new' | 'closing' | 'saved';
 type Row = { kind: 'job'; vacancy: Vacancy; index: number } | { kind: 'ad'; key: string };
+type Sort = 'newest' | 'closing';
 
-const CHIPS: { value: Chip; label: string }[] = [
-  { value: 'all', label: 'All jobs' },
-  { value: 'new', label: 'New' },
-  { value: 'closing', label: 'Closing soon' },
-  { value: 'saved', label: 'Saved' },
-];
-
-function CountUp({ value }: { value: number }) {
-  const anim = useRef(new Animated.Value(0)).current;
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    const id = anim.addListener(({ value: v }) => setShown(Math.round(v)));
-    Animated.timing(anim, { toValue: value, duration: 900, useNativeDriver: false }).start();
-    return () => anim.removeListener(id);
-  }, [value, anim]);
-  return <Text style={styles.heroNumber}>{shown}</Text>;
+function Lens() {
+  return (
+    <Svg width={150} height={130} viewBox="0 0 150 130">
+      <Circle cx="95" cy="62" r="50" fill="#CFE6D8" opacity="0.7" />
+      <Circle cx="62" cy="54" r="30" fill="none" stroke={VGREEN.dark} strokeWidth="9" />
+      <Circle cx="62" cy="54" r="22" fill="#FFFFFF" opacity="0.65" />
+      <Line x1="84" y1="76" x2="116" y2="108" stroke={VGREEN.dark} strokeWidth="13" strokeLinecap="round" />
+      <Circle cx="50" cy="42" r="5" fill="#FFFFFF" opacity="0.9" />
+    </Svg>
+  );
 }
 
 export default function VacanciesScreen({ navigation }: any) {
   const [items, setItems] = useState<Vacancy[] | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
   const [query, setQuery] = useState('');
-  const [chip, setChip] = useState<Chip>('all');
+  const [cat, setCat] = useState('all');
+  const [place, setPlace] = useState('');
+  const [sort, setSort] = useState<Sort>('newest');
+  const [onlyNew, setOnlyNew] = useState(false);
+  const [onlyClosing, setOnlyClosing] = useState(false);
+  const [onlySaved, setOnlySaved] = useState(false);
+  const [sheet, setSheet] = useState<'none' | 'filter' | 'place' | 'sort'>('none');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [flags, setFlags] = useState({ pageEnabled: true, postingEnabled: true });
@@ -67,36 +69,61 @@ export default function VacanciesScreen({ navigation }: any) {
     }
   }, []);
 
+  const places = useMemo(() => {
+    const set = new Set<string>();
+    (items || []).forEach(v => {
+      if (v.location) {
+        set.add(v.location.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [items]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (items || []).filter(v => {
-      if (chip === 'new' && !isNew(v)) {
+    const list = (items || []).filter(v => {
+      if (cat !== 'all' && (v.category || 'teaching') !== cat) {
         return false;
       }
-      if (chip === 'closing' && daysLeft(v) > 3) {
+      if (place && String(v.location || '').trim() !== place) {
         return false;
       }
-      if (chip === 'saved' && !saved.includes(v.id)) {
+      if (onlyNew && !isNew(v)) {
+        return false;
+      }
+      if (onlyClosing && daysLeft(v) > 3) {
+        return false;
+      }
+      if (onlySaved && !saved.includes(v.id)) {
         return false;
       }
       if (!q) {
         return true;
       }
-      return v.title.toLowerCase().includes(q) || v.description.toLowerCase().includes(q) || String((v.schools && v.schools.name) || '').toLowerCase().includes(q);
+      return (
+        v.title.toLowerCase().includes(q) ||
+        v.description.toLowerCase().includes(q) ||
+        String((v.schools && v.schools.name) || '').toLowerCase().includes(q) ||
+        String(v.location || '').toLowerCase().includes(q)
+      );
     });
-  }, [items, query, chip, saved]);
+    if (sort === 'closing') {
+      return list.slice().sort((a, b) => new Date(a.expires_at).getTime() - new Date(b.expires_at).getTime());
+    }
+    return list;
+  }, [items, query, cat, place, onlyNew, onlyClosing, onlySaved, saved, sort]);
 
   const rows = useMemo(() => {
     const out: Row[] = [];
     filtered.forEach((v, i) => {
       out.push({ kind: 'job', vacancy: v, index: i });
       // A sponsored slot after every few listings, never at the top, and never back to back.
-      if ((i + 1) % every === 0 && i + 1 < filtered.length && chip !== 'saved') {
+      if ((i + 1) % every === 0 && i + 1 < filtered.length && !onlySaved) {
         out.push({ kind: 'ad', key: 'ad' + i });
       }
     });
     return out;
-  }, [filtered, every, chip]);
+  }, [filtered, every, onlySaved]);
 
   const onSave = async (id: string) => setSaved(await toggleSaved(id));
 
@@ -108,47 +135,77 @@ export default function VacanciesScreen({ navigation }: any) {
     );
   }
 
+  const activeFilters = (onlyNew ? 1 : 0) + (onlyClosing ? 1 : 0) + (onlySaved ? 1 : 0);
+
   const header = (
     <View>
       <View style={styles.hero}>
         <View style={styles.orbA} />
         <View style={styles.orbB} />
-        <Text style={styles.heroKicker}>Scholin Careers</Text>
-        <View style={styles.heroRow}>
-          <CountUp value={(items || []).length} />
-          <Text style={styles.heroLabel}>{(items || []).length === 1 ? 'open position' : 'open positions'}</Text>
+        <View style={styles.heroLens}>
+          <Lens />
         </View>
-        <Text style={styles.heroSub}>Teaching and school jobs from across Scholin</Text>
+        <Text style={styles.heroKicker}>SCHOLIN</Text>
+        <Text style={styles.heroTitle}>Vacancies</Text>
       </View>
 
-      <View style={{ marginTop: spacing.lg }}>
-        <SearchBar value={query} onChange={setQuery} placeholder="Search job title, school or keyword" />
+      <View style={styles.searchRow}>
+        <View style={styles.search}>
+          <Icon name="search" size={20} color={colors.textMuted} />
+          <TextInput value={query} onChangeText={setQuery} placeholder="Search job title, school or location" placeholderTextColor="#9CA3AF" style={styles.searchInput} numberOfLines={1} returnKeyType="search" />
+          {query ? (
+            <Pressable onPress={() => setQuery('')} hitSlop={10}>
+              <Icon name="close" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+        <Pressable onPress={() => setSheet('filter')} style={styles.filterBtn}>
+          <Icon name="settings" size={22} color={VGREEN.dark} />
+          {activeFilters > 0 ? (
+            <View style={styles.filterDot}>
+              <Text style={styles.filterDotText}>{activeFilters}</Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       <View style={styles.chips}>
-        {CHIPS.map(c => {
-          const on = chip === c.value;
+        {[{ value: 'all', label: 'All Jobs' }, ...CATEGORIES].map(c => {
+          const on = cat === c.value;
           return (
-            <Pressable key={c.value} onPress={() => setChip(c.value)} style={[styles.chip, on && styles.chipOn]}>
-              <Text style={[styles.chipText, on && { color: '#FFFFFF' }]}>{c.label + (c.value === 'saved' && saved.length > 0 ? ' ' + saved.length : '')}</Text>
+            <Pressable key={c.value} onPress={() => setCat(c.value)} style={[styles.chip, on && styles.chipOn]}>
+              <Text style={[styles.chipText, on && { color: '#FFFFFF' }]} numberOfLines={1}>{c.label}</Text>
             </Pressable>
           );
         })}
       </View>
 
+      <View style={styles.dropRow}>
+        <Pressable onPress={() => setSheet('place')} style={[styles.drop, { flex: 1 }]}>
+          <Icon name="pin" size={16} color={VGREEN.dark} />
+          <Text style={styles.dropText} numberOfLines={1}>{place || 'All Locations'}</Text>
+          <Icon name="chevronDown" size={16} color={colors.textMuted} />
+        </Pressable>
+        <Pressable onPress={() => setSheet('sort')} style={[styles.drop, { flex: 1 }]}>
+          <Text style={[styles.dropText, { color: colors.textMuted, flex: 0 }]}>Sort by</Text>
+          <Text style={styles.dropText} numberOfLines={1}>{sort === 'newest' ? 'Newest' : 'Closing soon'}</Text>
+          <Icon name="chevronDown" size={16} color={colors.textMuted} />
+        </Pressable>
+      </View>
+
       <View style={styles.quick}>
         <PressableScale onPress={() => navigation.navigate('MyVacancies')} style={styles.quickBtn}>
-          <Text style={styles.quickText}>My postings</Text>
+          <Text style={styles.quickText} numberOfLines={1}>My postings</Text>
         </PressableScale>
         {flags.postingEnabled ? (
-          <PressableScale onPress={() => navigation.navigate('PostVacancy', {})} style={[styles.quickBtn, { backgroundColor: colors.primarySoft }]}>
-            <Text style={[styles.quickText, { color: colors.primary }]}>Post a vacancy</Text>
+          <PressableScale onPress={() => navigation.navigate('PostVacancy', {})} style={[styles.quickBtn, { backgroundColor: VGREEN.dark }]}>
+            <Text style={[styles.quickText, { color: '#FFFFFF' }]} numberOfLines={1}>Post a vacancy</Text>
           </PressableScale>
         ) : null}
       </View>
 
       <Notice message={error} tone="error" />
-      {items && filtered.length > 0 ? <Text style={[text.small, { color: colors.textMuted, marginBottom: spacing.md }]}>{filtered.length + (filtered.length === 1 ? ' job' : ' jobs')}</Text> : null}
+      {items ? <Text style={styles.found}>{filtered.length + (filtered.length === 1 ? ' vacancy found' : ' vacancies found')}</Text> : null}
     </View>
   );
 
@@ -178,8 +235,8 @@ export default function VacanciesScreen({ navigation }: any) {
         ListEmptyComponent={
           <EmptyState
             icon="briefcase"
-            title={chip === 'saved' ? 'No saved jobs' : 'No matching vacancies'}
-            message={chip === 'saved' ? 'Tap the bookmark on a job to keep it here.' : 'Try a different search, or check back soon.'}
+            title={onlySaved ? 'No saved jobs' : 'No matching vacancies'}
+            message={onlySaved ? 'Tap the bookmark on a job to keep it here.' : 'Try a different search or filter, or check back soon.'}
           />
         }
         renderItem={({ item }) =>
@@ -198,26 +255,87 @@ export default function VacanciesScreen({ navigation }: any) {
         initialNumToRender={6}
         windowSize={9}
       />
-      {flags.postingEnabled ? <Fab label="Post a vacancy" icon="plus" onPress={() => navigation.navigate('PostVacancy', {})} /> : null}
+      <BottomSheet visible={sheet === 'filter'} onClose={() => setSheet('none')} title="Filters">
+        {[
+          { label: 'New this week', on: onlyNew, set: setOnlyNew },
+          { label: 'Closing soon (3 days or less)', on: onlyClosing, set: setOnlyClosing },
+          { label: 'Saved jobs only' + (saved.length ? ' (' + saved.length + ')' : ''), on: onlySaved, set: setOnlySaved },
+        ].map(f => (
+          <Pressable key={f.label} onPress={() => f.set(!f.on)} style={styles.opt}>
+            <Text style={[styles.optText, f.on && { color: VGREEN.dark }]}>{f.label}</Text>
+            <View style={[styles.box, f.on && { backgroundColor: VGREEN.dark, borderColor: VGREEN.dark }]}>{f.on ? <Icon name="check" size={14} color="#FFFFFF" strokeWidth={3} /> : null}</View>
+          </Pressable>
+        ))}
+        <Pressable
+          onPress={() => {
+            setOnlyNew(false);
+            setOnlyClosing(false);
+            setOnlySaved(false);
+          }}
+          style={{ paddingVertical: spacing.md }}>
+          <Text style={[styles.optText, { color: VGREEN.mid, textAlign: 'center' }]}>Clear filters</Text>
+        </Pressable>
+      </BottomSheet>
+
+      <BottomSheet visible={sheet === 'place'} onClose={() => setSheet('none')} title="Location">
+        {['', ...places].map(p => (
+          <Pressable
+            key={p || 'all'}
+            onPress={() => {
+              setPlace(p);
+              setSheet('none');
+            }}
+            style={styles.opt}>
+            <Text style={[styles.optText, place === p && { color: VGREEN.dark }]}>{p || 'All Locations'}</Text>
+            {place === p ? <Icon name="check" size={18} color={VGREEN.dark} /> : null}
+          </Pressable>
+        ))}
+      </BottomSheet>
+
+      <BottomSheet visible={sheet === 'sort'} onClose={() => setSheet('none')} title="Sort by">
+        {([['newest', 'Newest'], ['closing', 'Closing soon']] as const).map(([k, label]) => (
+          <Pressable
+            key={k}
+            onPress={() => {
+              setSort(k);
+              setSheet('none');
+            }}
+            style={styles.opt}>
+            <Text style={[styles.optText, sort === k && { color: VGREEN.dark }]}>{label}</Text>
+            {sort === k ? <Icon name="check" size={18} color={VGREEN.dark} /> : null}
+          </Pressable>
+        ))}
+      </BottomSheet>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  list: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: 120 },
-  hero: { backgroundColor: colors.primary, borderRadius: radius.xl, padding: spacing.xl, overflow: 'hidden' },
-  orbA: { position: 'absolute', right: -40, top: -50, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.10)' },
-  orbB: { position: 'absolute', right: 40, bottom: -70, width: 130, height: 130, borderRadius: 65, backgroundColor: 'rgba(255,255,255,0.07)' },
-  heroKicker: { color: 'rgba(255,255,255,0.8)', fontSize: 12, letterSpacing: 1.4, textTransform: 'uppercase', fontFamily: fonts.semibold },
-  heroRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, marginTop: 6 },
-  heroNumber: { color: '#FFFFFF', fontSize: 44, lineHeight: 50, fontFamily: fonts.headingBold },
-  heroLabel: { color: '#FFFFFF', fontSize: 16, marginBottom: 8, fontFamily: fonts.semibold },
-  heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 4, fontFamily: fonts.body },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: spacing.md },
-  chip: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: radius.pill, backgroundColor: '#EEF1F6' },
-  chipOn: { backgroundColor: colors.primary },
-  chipText: { fontSize: 13, color: colors.textMuted, fontFamily: fonts.semibold },
-  quick: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg, marginBottom: spacing.lg },
-  quickBtn: { flex: 1, height: 44, borderRadius: radius.lg, backgroundColor: '#EEF1F6', alignItems: 'center', justifyContent: 'center' },
-  quickText: { fontSize: 14, color: colors.text, fontFamily: fonts.semibold },
+  list: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
+  hero: { backgroundColor: '#EAF3EC', borderRadius: radius.xl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xl, overflow: 'hidden', minHeight: 132, justifyContent: 'center', borderWidth: 1, borderColor: '#DCEBE1' },
+  orbA: { position: 'absolute', right: -50, top: -60, width: 190, height: 190, borderRadius: 95, backgroundColor: '#D5E8DB' },
+  orbB: { position: 'absolute', right: 60, bottom: -90, width: 150, height: 150, borderRadius: 75, backgroundColor: '#E1EFE5' },
+  heroLens: { position: 'absolute', right: 6, bottom: 0 },
+  heroKicker: { color: VGREEN.dark, fontSize: 13, letterSpacing: 4, fontFamily: fonts.bold },
+  heroTitle: { color: VGREEN.ink, fontSize: 34, lineHeight: 42, marginTop: 2, fontFamily: fonts.headingBold },
+  searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.lg },
+  search: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, borderRadius: radius.pill, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#E3E8E5', paddingHorizontal: 16 },
+  searchInput: { flex: 1, fontSize: 14.5, fontFamily: fonts.body, color: colors.text, paddingVertical: 0 },
+  filterBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#E3E8E5', alignItems: 'center', justifyContent: 'center' },
+  filterDot: { position: 'absolute', right: 2, top: 2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: VGREEN.dark, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  filterDotText: { color: '#FFFFFF', fontSize: 11, fontFamily: fonts.bold },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: spacing.lg },
+  chip: { paddingHorizontal: 16, height: 40, borderRadius: radius.pill, backgroundColor: '#EEF1EF', alignItems: 'center', justifyContent: 'center' },
+  chipOn: { backgroundColor: VGREEN.dark },
+  chipText: { fontSize: 13.5, color: '#4B5563', fontFamily: fonts.semibold },
+  dropRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
+  drop: { height: 46, borderRadius: radius.pill, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#E3E8E5', paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dropText: { flex: 1, fontSize: 13.5, color: colors.text, fontFamily: fonts.semibold },
+  quick: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
+  quickBtn: { flex: 1, height: 46, borderRadius: radius.pill, backgroundColor: VGREEN.pill, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+  quickText: { fontSize: 14, color: VGREEN.dark, fontFamily: fonts.semibold },
+  found: { color: colors.textMuted, fontSize: 13.5, marginTop: spacing.lg, marginBottom: spacing.md, fontFamily: fonts.medium },
+  opt: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  optText: { flex: 1, fontSize: 15.5, color: colors.text, fontFamily: fonts.medium },
+  box: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, borderColor: '#C9CDD4', alignItems: 'center', justifyContent: 'center' },
 });

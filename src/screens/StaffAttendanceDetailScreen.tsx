@@ -82,7 +82,6 @@ export default function StaffAttendanceDetailScreen({ navigation, route }: any) 
           </Card>
         ) : null}
 
-        <Text style={[text.small, { color: colors.textMuted, marginTop: spacing.lg }]}>No photo is shown here. Verification photos are never stored, by design.</Text>
       </ScrollView>
     </Screen>
   );

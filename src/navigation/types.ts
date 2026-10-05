@@ -48,6 +48,7 @@ export type RootStackParamList = {
   TemplatePreview: { templateKey: string; name: string };
   TemplateCustomize: { templateKey: string; name: string };
   QrCodes: undefined;
+  QrPoster: { html: string; name: string };
   StaffAttendance: undefined;
   StaffAttendanceDetail: { recordId: string };
   StudentAttendance: undefined;
