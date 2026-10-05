@@ -101,4 +101,4 @@ upload-image stays exactly as it is.
 - create-vacancy-payment
 
 ## New build library
-- react-native-print (the Print button on the attendance poster). It is added to the build workflow automatically.
+- Print button on the attendance poster: now opens the phone share sheet, which has a Print option. No extra print library is installed.

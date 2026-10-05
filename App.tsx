@@ -13,13 +13,15 @@ import './src/lib/supabase';
 // Text still follows the phone setting, but only up to a sensible limit.
 const FONT_LIMIT = 1.15;
 [Text, TextInput].forEach((component: any) => {
-  const original = component && component.render;
-  if (typeof original === 'function' && !component.__scholinPatched) {
-    component.render = function (props: any, ref: any) {
-      return original.call(this, { maxFontSizeMultiplier: FONT_LIMIT, ...props }, ref);
-    };
-    component.__scholinPatched = true;
-  }
+  try {
+    const original = component && component.render;
+    if (typeof original === 'function' && !component.__scholinPatched) {
+      component.render = function (props: any, ref: any) {
+        return original.call(this, { maxFontSizeMultiplier: FONT_LIMIT, ...props }, ref);
+      };
+      component.__scholinPatched = true;
+    }
+  } catch {}
 });
 
 export default function App() {

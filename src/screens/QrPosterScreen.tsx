@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Notice } from '../components';
 import { colors, spacing, text } from '../theme';
 import { downloadPdf, makePdf, sharePdf } from '../lib/pdfDoc';
-import { printHtml } from '../lib/printing';
 
 export default function QrPosterScreen({ navigation, route }: any) {
   const { html, name } = route.params as { html: string; name: string };
@@ -30,12 +29,13 @@ export default function QrPosterScreen({ navigation, route }: any) {
     setBusy(mode);
     setNotice({ message: '', tone: 'success' });
     try {
-      if (mode === 'print') {
-        await printHtml(html);
-      } else {
+      {
         const file = await ensure();
         if (mode === 'share') {
           await sharePdf(file.path, name + ' attendance poster');
+        } else if (mode === 'print') {
+          // The phone's own share sheet has a Print option, so no extra print library is needed.
+          await sharePdf(file.path, 'Print ' + name + ' attendance poster');
         } else {
           const where = await downloadPdf(file.path, file.fileName);
           Alert.alert('Saved', 'The poster was saved to ' + where + ' as ' + file.fileName);

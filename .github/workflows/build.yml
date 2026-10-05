@@ -55,7 +55,7 @@ jobs:
           npm install react-native-screens react-native-safe-area-context
           npm install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill
           npm install lucide-react-native react-native-svg
-          npm install react-native-image-picker @react-native-community/datetimepicker react-native-webview react-native-blob-util react-native-qrcode-svg react-native-print
+          npm install react-native-image-picker @react-native-community/datetimepicker react-native-webview react-native-blob-util react-native-qrcode-svg
           npm install @expo-google-fonts/inter @expo-google-fonts/lora
 
       - name: Install ads library (only when ENABLE_ADS is true)
