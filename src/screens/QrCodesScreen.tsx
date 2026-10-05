@@ -37,8 +37,6 @@ export default function QrCodesScreen({ navigation }: any) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ message: string; tone: 'error' | 'success' }>({ message: '', tone: 'success' });
   const refs = useRef<Record<string, any>>({});
-  const bigRef = useRef<any>(null);
-  const [posterPoint, setPosterPoint] = useState<any>(null);
 
   const canManage = !!ctx && (ctx.role === 'owner' || (ctx.role === 'teacher_admin' && ctx.membership.can_manage_qr_codes === true));
 
@@ -83,38 +81,19 @@ export default function QrCodesScreen({ navigation }: any) {
   };
 
   const openPoster = (p: any) => {
-    setBusy(p.id);
-    setPosterPoint(p);
-  };
-
-  useEffect(() => {
-    if (!posterPoint) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      const ref = bigRef.current;
-      if (!ref) {
-        setNotice({ message: 'The QR code is not ready yet. Please try again.', tone: 'error' });
-        setBusy('');
-        setPosterPoint(null);
-        return;
-      }
-      ref.toDataURL((b64: string) => {
-        const html = buildQrPosterHtml({
-          schoolName: ctx ? ctx.school.name : '',
-          address: ctx ? ctx.school.address || '' : '',
-          pointName: posterPoint.name,
-          logoUrl: ctx ? ctx.school.logo_url : null,
-          qrDataUrl: 'data:image/png;base64,' + b64,
-        });
-        const name = posterPoint.name;
-        setBusy('');
-        setPosterPoint(null);
-        navigation.navigate('QrPoster', { html, name });
+    try {
+      const html = buildQrPosterHtml({
+        schoolName: ctx ? ctx.school.name : '',
+        address: ctx ? ctx.school.address || '' : '',
+        pointName: p.name,
+        logoUrl: ctx ? ctx.school.logo_url : null,
+        qrValue: 'SCHOLIN-ATTEND:' + ctx!.schoolId + ':' + p.id + ':' + p.qr_token,
       });
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [posterPoint]);
+      navigation.navigate('QrPoster', { html, name: p.name });
+    } catch (e: any) {
+      setNotice({ message: e && e.message ? e.message : 'Could not build the poster.', tone: 'error' });
+    }
+  };
 
   const toggle = (p: any) => {
     const verb = p.is_active ? 'deactivate' : 'reactivate';
@@ -195,7 +174,7 @@ export default function QrCodesScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[text.small, { color: colors.textMuted, marginBottom: spacing.sm }]}>Tap the button to see the poster. From there you can print it, share it or save it.</Text>
-                <Button title="Print or share poster" icon="send" loading={busy === p.id} onPress={() => openPoster(p)} style={{ height: 46 }} />
+                <Button title="Print or share poster" icon="send" onPress={() => openPoster(p)} style={{ height: 46 }} />
               </View>
             </View>
             {canManage ? (
@@ -207,20 +186,6 @@ export default function QrCodesScreen({ navigation }: any) {
           </Card>
         ))}
       </ScrollView>
-      {posterPoint ? (
-        <View style={{ position: 'absolute', left: -3000, top: 0 }} pointerEvents="none">
-          <QRCode
-            value={'SCHOLIN-ATTEND:' + ctx!.schoolId + ':' + posterPoint.id + ':' + posterPoint.qr_token}
-            size={720}
-            ecl="M"
-            quietZone={0}
-            backgroundColor="#FFFFFF"
-            getRef={(c: any) => {
-              bigRef.current = c;
-            }}
-          />
-        </View>
-      ) : null}
     </Screen>
   );
 }

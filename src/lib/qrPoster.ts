@@ -39,7 +39,31 @@ function laurel(color: string) {
   return '<svg viewBox="0 0 120 124" class="lw" xmlns="http://www.w3.org/2000/svg"><g fill="' + color + '">' + out.join('') + '</g></svg>';
 }
 
-export function buildQrPosterHtml(args: { schoolName: string; address: string; pointName: string; logoUrl?: string | null; qrDataUrl: string }) {
+// Builds the QR as a vector SVG (no bitmap, no native image conversion), so it prints sharp and cannot crash the app.
+function qrSvg(value: string) {
+  const QRImpl: any = require('qrcode/lib/core/qrcode');
+  const qr = QRImpl.create(value, { errorCorrectionLevel: 'M' });
+  const n: number = qr.modules.size;
+  const data: ArrayLike<number> = qr.modules.data;
+  let d = '';
+  for (let r = 0; r < n; r++) {
+    let c = 0;
+    while (c < n) {
+      if (data[r * n + c]) {
+        let start = c;
+        while (c < n && data[r * n + c]) {
+          c++;
+        }
+        d += 'M' + start + ' ' + r + 'h' + (c - start) + 'v1h-' + (c - start) + 'z';
+      } else {
+        c++;
+      }
+    }
+  }
+  return '<svg viewBox="0 0 ' + n + ' ' + n + '" width="262" height="262" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect width="' + n + '" height="' + n + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+}
+
+export function buildQrPosterHtml(args: { schoolName: string; address: string; pointName: string; logoUrl?: string | null; qrValue: string }) {
   const name = (args.schoolName || 'School').trim();
   const size = nameSize(name);
   const initial = esc(name.charAt(0).toUpperCase());
@@ -73,7 +97,7 @@ export function buildQrPosterHtml(args: { schoolName: string; address: string; p
     .addr{ position:absolute; left:140px; right:140px; top:238px; text-align:center; font-size:19px; line-height:1.4; font-weight:500; color:${NAVY}; }
     .qrbox{ position:absolute; left:50%; top:300px; width:300px; height:300px; margin-left:-150px; background:${NAVY}; border-radius:30px; padding:12px; }
     .qrin{ width:100%; height:100%; background:#fff; border-radius:18px; display:flex; align-items:center; justify-content:center; }
-    .qrin img{ width:262px; height:262px; image-rendering:pixelated; }
+    .qrin svg{ width:262px; height:262px; display:block; }
     .banner{ position:absolute; left:130px; right:130px; top:622px; height:84px; background:${NAVY}; border-radius:20px; display:flex; align-items:center; gap:18px; padding:0 28px; color:#fff; }
     .banner .div{ width:2px; height:44px; background:rgba(255,255,255,0.7); }
     .banner .t1{ font-weight:800; font-size:27px; letter-spacing:0.5px; line-height:1.1; }
@@ -120,7 +144,7 @@ export function buildQrPosterHtml(args: { schoolName: string; address: string; p
     (args.pointName ? '<div class="point">' + esc(args.pointName) + '</div>' : '') +
     '<div class="rule"><i></i><b>\u2605</b><i></i></div></div></div>' +
     (args.address ? '<div class="addr">' + esc(args.address) + '</div>' : '') +
-    '<div class="qrbox"><div class="qrin"><img src="' + args.qrDataUrl + '"></div></div>' +
+    '<div class="qrbox"><div class="qrin">' + qrSvg(args.qrValue) + '</div></div>' +
     '<div class="banner">' + ICON_SCAN + '<div class="div"></div><div><div class="t1">SCAN THIS QR CODE</div><div class="t2">to clock in and clock out</div></div></div>' +
     '<div class="how"><h3>HOW TO USE</h3><div class="steps">' +
     '<div class="step"><div class="top"><div class="n">1</div>' + ICON_PHONE + '</div><b>Open the Scholin app</b><span>and tap Clock In and Out.</span></div>' +
