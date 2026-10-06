@@ -64,6 +64,7 @@ export type RootStackParamList = {
   SuperAdminCommissionTiers: undefined;
   SuperAdminPaymentTerms: undefined;
   SuperAdminUser: { userId: string; name?: string };
+  SuperAdminSchoolView: { schoolId: string; name: string };
   SuperAdminSchool: { schoolId: string; name: string };
   StaffAttendance: undefined;
   StaffAttendanceDetail: { recordId: string };
@@ -80,6 +81,7 @@ export type RootStackParamList = {
   ClockFriend: undefined;
   ResultsStatus: undefined;
   ActivityLog: undefined;
+  SchoolOverview: undefined;
   Referral: undefined;
   MyProfile: undefined;
   MySchools: undefined;

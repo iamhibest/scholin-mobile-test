@@ -55,6 +55,7 @@ const featureRoutes: Record<string, string> = {
   'Events and Fees': 'Events',
   'My Profile': 'MyProfile',
   'Recent Activity': 'ActivityLog',
+  'School Overview': 'SchoolOverview',
   'Results Status': 'ResultsStatus',
   'Refer and Earn': 'Referral',
   'My Schools': 'MySchools',

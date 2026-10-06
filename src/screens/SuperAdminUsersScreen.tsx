@@ -85,7 +85,7 @@ export default function SuperAdminUsersScreen() {
           ListFooterComponent={loadingMore ? <ActivityIndicator style={{ marginVertical: spacing.lg }} color={colors.primary} /> : null}
           renderItem={({ item: u }) => (
             <Pressable onPress={() => navigation.navigate('SuperAdminUser', { userId: u.id, name: u.full_name })} style={styles.row}>
-              <Avatar name={u.full_name} uri={u.avatar_url || undefined} size={46} />
+              <Avatar name={u.full_name || ''} uri={u.avatar_url || undefined} size={46} />
               <View style={{ flex: 1 }}>
                 <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>{u.full_name || 'No name'}</Text>
                 <Text style={[text.small, { color: colors.textMuted }]} numberOfLines={1}>{u.email || 'No email'}</Text>

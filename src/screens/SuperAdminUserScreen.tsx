@@ -90,7 +90,7 @@ export default function SuperAdminUserScreen() {
     <Screen padded={false}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.head}>
-          <Avatar name={p.full_name} uri={p.avatar_url || undefined} size={72} />
+          <Avatar name={p.full_name || ''} uri={p.avatar_url || undefined} size={72} />
           <Text style={[text.h2, { color: colors.text, marginTop: spacing.md, textAlign: 'center' }]}>{p.full_name || 'No name'}</Text>
           {p.is_blocked ? <Text style={[styles.pill, { color: colors.danger, backgroundColor: colors.dangerSoft }]}>Blocked</Text> : null}
           {p.is_super_admin ? <Text style={[styles.pill, { color: colors.primary, backgroundColor: colors.primarySoft }]}>Super admin</Text> : null}

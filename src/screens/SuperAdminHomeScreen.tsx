@@ -144,7 +144,7 @@ export default function SuperAdminHomeScreen() {
             </Text>
           ) : (
             shown.map(s => (
-              <Pressable key={s.id} onPress={() => navigation.navigate('SuperAdminSchool', { schoolId: s.id, name: s.name })} style={styles.school}>
+              <Pressable key={s.id} onPress={() => navigation.navigate('SuperAdminSchoolView', { schoolId: s.id, name: s.name })} style={styles.school}>
                 <View style={styles.avatar}>
                   <Text style={[text.bodyStrong, { color: colors.primary }]}>{initials(s.name)}</Text>
                 </View>

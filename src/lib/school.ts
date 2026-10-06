@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { verifiedUpdate } from './verifiedUpdate';
 import { getActiveSchoolContext } from './dashboard';
+import { getSchoolView } from './schoolView';
 
 export type StaffRole = 'owner' | 'teacher_admin' | 'teacher';
 
@@ -46,11 +47,57 @@ export function classLabel(c: { name: string; arm?: string | null }) {
   return c.name + (c.arm ? ' ' + c.arm : '');
 }
 
+// Only a real super admin can use this. It gives owner level access to the chosen school, without joining it.
+async function loadSuperAdminView(userId: string, schoolId: string): Promise<StaffContext | null> {
+  const { data: prof } = await supabase.from('profiles').select('is_super_admin').eq('id', userId).maybeSingle();
+  if (!prof || (prof as any).is_super_admin !== true) {
+    return null;
+  }
+  const { data: school } = await supabase.from('schools').select('*').eq('id', schoolId).maybeSingle();
+  if (!school) {
+    return null;
+  }
+  const membership = {
+    id: 'super-admin-view',
+    school_id: schoolId,
+    profile_id: userId,
+    role: 'owner',
+    is_active: true,
+    can_edit_results: true,
+    can_generate_report_cards: true,
+    can_add_comments: true,
+    can_mark_attendance: true,
+    can_manage_attendance: true,
+    can_manage_qr_codes: true,
+    can_view_attendance_reports: true,
+    can_manage_permissions: true,
+    can_manage_events_fees: true,
+    receive_attendance_notifications: false,
+    schools: school,
+  };
+  return {
+    userId,
+    schoolId,
+    school,
+    membership,
+    role: 'owner',
+    isAdmin: true,
+    autoAdmission: (school as any).auto_admission_enabled === true,
+  };
+}
+
 export async function loadStaffContext(): Promise<StaffContext | null> {
   const { data } = await supabase.auth.getSession();
   const userId = data.session?.user?.id;
   if (!userId) {
     return null;
+  }
+  const viewId = getSchoolView();
+  if (viewId) {
+    const view = await loadSuperAdminView(userId, viewId);
+    if (view) {
+      return view;
+    }
   }
   const context = await getActiveSchoolContext(userId);
   if (!context) {

@@ -387,3 +387,20 @@ export async function deleteVacancyTier(id: string) {
     throw new Error(error.message || 'Could not remove tier.');
   }
 }
+
+export async function fetchSchoolCounts(id: string) {
+  const count = async (table: string, extra?: (q: any) => any) => {
+    let q: any = supabase.from(table).select('id', { count: 'exact', head: true }).eq('school_id', id);
+    if (extra) {
+      q = extra(q);
+    }
+    const { count: c } = await q;
+    return c || 0;
+  };
+  const [staff, pending, students] = await Promise.all([
+    count('school_members', q => q.eq('is_active', true)),
+    count('school_members', q => q.eq('is_active', false)),
+    count('students'),
+  ]);
+  return { staff, pending, students };
+}

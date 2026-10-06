@@ -102,7 +102,7 @@ export default function SuperAdminSubscriptionsScreen() {
                   </Text>
                 ) : null}
                 <View style={styles.actions}>
-                  <Button title="Manage school" variant="outline" onPress={() => navigation.navigate('SuperAdminSchool', { schoolId: s.id, name: s.name })} />
+                  <Button title="Open school" variant="outline" onPress={() => navigation.navigate('SuperAdminSchoolView', { schoolId: s.id, name: s.name })} />
                   {state === 'subscribed' ? <Button title="Cancel" variant="soft" onPress={() => setCancelling(cancelling === s.id ? '' : s.id)} /> : null}
                 </View>
                 {cancelling === s.id ? (

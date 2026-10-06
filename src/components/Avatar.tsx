@@ -11,7 +11,7 @@ export default function Avatar({ name = '', uri, size = 48 }: Props) {
     setFailed(false);
   }, [uri]);
 
-  const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  const initials = (name || '').split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
   const box = { width: size, height: size, borderRadius: size / 2 };
   if (uri && !failed) {
     return <Image key={uri} source={{ uri }} style={[box, { backgroundColor: colors.primarySoft }]} resizeMode="cover" onError={() => setFailed(true)} />;

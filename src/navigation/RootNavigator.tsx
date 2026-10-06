@@ -58,6 +58,8 @@ import QrPosterScreen from '../screens/QrPosterScreen';
 import SuperAdminVacancyScreen from '../screens/SuperAdminVacancyScreen';
 import SuperAdminSettingsScreen from '../screens/SuperAdminSettingsScreen';
 import SuperAdminSchoolScreen from '../screens/SuperAdminSchoolScreen';
+import SchoolOverviewScreen from '../screens/SchoolOverviewScreen';
+import SuperAdminSchoolViewScreen from '../screens/SuperAdminSchoolViewScreen';
 import SuperAdminUsersScreen from '../screens/SuperAdminUsersScreen';
 import SuperAdminSubscriptionPricingScreen from '../screens/SuperAdminSubscriptionPricingScreen';
 import SuperAdminSubscriptionsScreen from '../screens/SuperAdminSubscriptionsScreen';
@@ -177,6 +179,7 @@ export default function RootNavigator() {
       <Stack.Screen name="SuperAdminFinance" component={SuperAdminFinanceScreen} options={{ ...headerOptions, title: 'School finance' }} />
       <Stack.Screen name="SuperAdminUsers" component={SuperAdminUsersScreen} options={{ ...headerOptions, title: 'All users' }} />
       <Stack.Screen name="SuperAdminUser" component={SuperAdminUserScreen} options={{ ...headerOptions, title: 'User' }} />
+      <Stack.Screen name="SuperAdminSchoolView" component={SuperAdminSchoolViewScreen} options={{ ...headerOptions, title: 'School overview' }} />
       <Stack.Screen name="SuperAdminSchool" component={SuperAdminSchoolScreen} options={{ ...headerOptions, title: 'Manage school' }} />
       <Stack.Screen name="SuperAdminVacancy" component={SuperAdminVacancyScreen} options={{ ...headerOptions, title: 'Vacancy settings' }} />
       <Stack.Screen name="QrPoster" component={QrPosterScreen} options={{ ...headerOptions, title: 'Attendance poster' }} />
@@ -187,6 +190,7 @@ export default function RootNavigator() {
       <Stack.Screen name="SchoolSettings" component={SchoolSettingsScreen} options={{ ...headerOptions, title: 'School Settings' }} />
       <Stack.Screen name="ClockFriend" component={ClockFriendScreen} options={{ ...headerOptions, title: 'Clock a friend' }} />
       <Stack.Screen name="ResultsStatus" component={ResultsStatusScreen} options={{ ...headerOptions, title: 'Results status' }} />
+      <Stack.Screen name="SchoolOverview" component={SchoolOverviewScreen} options={{ ...headerOptions, title: 'School overview' }} />
       <Stack.Screen name="ActivityLog" component={ActivityLogScreen} options={{ ...headerOptions, title: 'Recent activity' }} />
       <Stack.Screen name="Referral" component={ReferralScreen} options={{ ...headerOptions, title: 'Refer and earn' }} />
       <Stack.Screen name="MyProfile" component={MyProfileScreen} options={{ ...headerOptions, title: 'My profile' }} />
