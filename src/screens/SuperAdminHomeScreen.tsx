@@ -1,126 +1,180 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, Button, Card, EmptyState, FadeIn, Input, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
-import { MenuGroup } from '../components/SideMenu';
-import { colors, fonts, radius, shadow, spacing, text } from '../theme';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { Icon, Notice, Screen, SearchBar, SectionTitle, Skeleton, StatCard } from '../components';
+import { IconName } from '../components/Icon';
+import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
-import { shortDate } from '../lib/format';
-import { loadSuperAdmin, SchoolRow } from '../lib/superadmin';
+import { fetchAllSchools, fetchPlatformStats } from '../lib/superAdmin';
 
-const links = [
-  'Attendance Monitor', 'Referral Program', 'Broadcast Announcement', 'Vacancy Pricing', 'Subscription Pricing',
-  'Fee Payment Commission', 'Payment Terms of Use', 'School Finance', 'Subscriptions', 'Terms and About', 'App Version',
+type Tool = { label: string; desc: string; icon: IconName; route: string };
+const GROUPS: { title: string; tools: Tool[] }[] = [
+  {
+    title: 'Platform',
+    tools: [
+      { label: 'All users', desc: 'Profiles, block or delete accounts', icon: 'users', route: 'SuperAdminUsers' },
+      { label: 'Broadcasts', desc: 'Message every school at once', icon: 'megaphone', route: 'SuperAdminBroadcasts' },
+      { label: 'Staff attendance', desc: 'Clock ins across all schools', icon: 'checklist', route: 'SuperAdminAttendance' },
+      { label: 'App settings', desc: 'Logo, support button, feature switches', icon: 'settings', route: 'SuperAdminSettings' },
+      { label: 'App version', desc: 'Push an update popup to users', icon: 'server', route: 'SuperAdminAppVersion' },
+      { label: 'Terms and About', desc: 'Terms and conditions, About Scholin', icon: 'file', route: 'SuperAdminTermsAbout' },
+    ],
+  },
+  {
+    title: 'Money',
+    tools: [
+      { label: 'Subscriptions', desc: 'Active, on trial, expired or cancelled', icon: 'card', route: 'SuperAdminSubscriptions' },
+      { label: 'Subscription pricing', desc: 'Trial length, price and discounts', icon: 'tags', route: 'SuperAdminSubPricing' },
+      { label: 'School finance', desc: 'Online fees, commission, settlements', icon: 'bank', route: 'SuperAdminFinance' },
+      { label: 'Referrals', desc: 'Commission rate, balances, payouts', icon: 'gift', route: 'SuperAdminReferrals' },
+      { label: 'Commission ranges', desc: 'Flat commission on fee payments', icon: 'receipt', route: 'SuperAdminCommissionTiers' },
+      { label: 'Payment terms', desc: 'Terms accepted before payouts', icon: 'fileCheck', route: 'SuperAdminPaymentTerms' },
+    ],
+  },
+  {
+    title: 'Vacancies',
+    tools: [{ label: 'Vacancy settings', desc: 'Price per day and banner speed', icon: 'briefcase', route: 'SuperAdminVacancy' }],
+  },
 ];
 
-export default function SuperAdminHomeScreen({ navigation }: any) {
-  const [state, setState] = useState<{ schools: SchoolRow[]; teachers: number; students: number; failed: boolean } | null>(null);
-  const [term, setTerm] = useState('');
-  const [menu, setMenu] = useState(false);
+function initials(name: string) {
+  return (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
+export default function SuperAdminHomeScreen() {
+  const navigation = useNavigation<any>();
+  const [stats, setStats] = useState<{ schools: number; teachers: number; students: number } | null>(null);
+  const [schools, setSchools] = useState<any[] | null>(null);
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      setState(await loadSuperAdmin());
-    } finally {
-      setRefreshing(false);
+      setError('');
+      const [s, list] = await Promise.all([fetchPlatformStats(), fetchAllSchools()]);
+      setStats(s);
+      setSchools(list);
+    } catch (e: any) {
+      setSchools(prev => prev || []);
+      setError(e && e.message ? e.message : 'Could not load the dashboard.');
     }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
 
-  const filtered = useMemo(() => {
-    const t = term.trim().toLowerCase();
-    const list = state ? state.schools : [];
-    return t ? list.filter(s => s.name.toLowerCase().includes(t)) : list;
-  }, [state, term]);
+  const refresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
 
-  async function signOut() {
-    await supabase.auth.signOut();
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  }
-
-  const go = (title: string) => navigation.navigate('Feature', { title });
-
-  const groups: MenuGroup[] = [
-    {
-      title: 'Navigation',
-      items: [
-        { label: 'All Schools', icon: 'school', active: true, onPress: () => {} },
-        { label: 'Developer tools', icon: 'bug' as const, onPress: () => navigation.navigate('Developer') },
-        ...links.map(l => ({ label: l, icon: 'chevron' as const, onPress: () => (l === 'Terms and About' ? navigation.navigate('Terms') : go(l)) })),
-      ],
-    },
-  ];
+  const shown = (schools || []).filter(s => {
+    const q = query.trim().toLowerCase();
+    return !q || (s.name || '').toLowerCase().includes(q) || (s.address || '').toLowerCase().includes(q) || (s.phone || '').includes(q);
+  });
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
-      <TopBar onMenu={() => setMenu(true)} title="Scholin Admin" />
+    <Screen padded={false}>
       <ScrollView
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} colors={[colors.primary]} />}>
-        <FadeIn>
-          <Text style={[text.h1, { color: colors.primary }]}>All registered schools</Text>
-          <Text style={[text.body, { color: colors.textMuted, marginTop: 2 }]}>Everything happening across Scholin, in one place.</Text>
-        </FadeIn>
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
+        <View style={styles.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={[text.h2, { color: colors.text }]}>Super Admin</Text>
+            <Text style={[text.small, { color: colors.textMuted }]}>Everything across the platform</Text>
+          </View>
+          <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut} hitSlop={8}>
+            <Icon name="logout" size={20} color={colors.danger} />
+          </Pressable>
+        </View>
 
-        <FadeIn delay={80} style={styles.stats}>
-          <StatCard style={{ flex: 1 }} tone="blue" icon="school" label="Schools" value={state ? String(state.schools.length) : '-'} />
-          <StatCard style={{ flex: 1 }} tone="purple" icon="userCog" label="Staff" value={state ? String(state.teachers) : '-'} />
-          <StatCard style={{ flex: 1 }} tone="green" icon="users" label="Students" value={state ? String(state.students) : '-'} />
-        </FadeIn>
+        <Notice message={error} tone="error" />
+
+        {stats ? (
+          <View style={styles.statRow}>
+            <View style={styles.statCell}>
+              <StatCard label="Schools" value={String(stats.schools)} icon="school" tone="blue" />
+            </View>
+            <View style={styles.statCell}>
+              <StatCard label="Staff" value={String(stats.teachers)} icon="users" tone="green" />
+            </View>
+            <View style={styles.statCell}>
+              <StatCard label="Students" value={String(stats.students)} icon="cap" tone="purple" />
+            </View>
+          </View>
+        ) : (
+          <Skeleton height={110} radius={22} />
+        )}
+
+        {GROUPS.map(g => (
+          <View key={g.title}>
+            <SectionTitle title={g.title} />
+            <View style={styles.group}>
+              {g.tools.map((t, i) => (
+                <Pressable key={t.route} onPress={() => navigation.navigate(t.route)} style={[styles.tool, i > 0 && styles.toolDivider]}>
+                  <View style={styles.toolIcon}>
+                    <Icon name={t.icon} size={19} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>{t.label}</Text>
+                    <Text style={[text.small, { color: colors.textMuted }]} numberOfLines={1}>{t.desc}</Text>
+                  </View>
+                  <Icon name="chevron" size={16} color={colors.textMuted} />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ))}
 
         <SectionTitle title="Registered schools" />
-        <Input label="Search schools" icon="search" value={term} onChangeText={setTerm} placeholder="Type a school name" />
-
-        {!state ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={96} radius={20} />
-            <Skeleton height={96} radius={20} />
-          </View>
-        ) : state.failed ? (
-          <EmptyState title="Could not load schools" message="Check your connection and try again." actionLabel="Try again" onAction={load} />
-        ) : filtered.length === 0 ? (
-          <EmptyState icon="school" title={term ? 'No school found with that name' : 'No schools registered yet'} message={term ? undefined : "Once school owners sign up and register, they'll appear here."} />
-        ) : (
-          <View style={{ gap: spacing.md }}>
-            {filtered.map((s, i) => (
-              <FadeIn key={s.id} delay={Math.min(i, 8) * 40}>
-                <View style={[styles.school, shadow.soft]}>
-                  <View style={styles.top}>
-                    <Avatar name={s.name} size={46} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>{s.name}</Text>
-                      <Text style={[text.small, { color: colors.textMuted }]} numberOfLines={1}>{s.address || 'No address on file'}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.meta}>
-                    <Text style={[text.small, { color: colors.textMuted }]}>{s.phone || 'No phone'}</Text>
-                    <Text style={[text.small, { color: colors.textMuted }]}>Registered {shortDate(s.created_at)}</Text>
-                  </View>
-                  <Button title="Manage" variant="soft" onPress={() => go('Manage School')} style={styles.manage} />
+        <SearchBar value={query} onChange={setQuery} placeholder="Search schools" />
+        <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+          {schools === null ? (
+            <Skeleton height={170} radius={20} />
+          ) : shown.length === 0 ? (
+            <Text style={[text.body, { color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.xl }]}>
+              {schools.length === 0 ? 'No schools registered yet.' : 'No school matches your search.'}
+            </Text>
+          ) : (
+            shown.map(s => (
+              <Pressable key={s.id} onPress={() => navigation.navigate('SuperAdminSchool', { schoolId: s.id, name: s.name })} style={styles.school}>
+                <View style={styles.avatar}>
+                  <Text style={[text.bodyStrong, { color: colors.primary }]}>{initials(s.name)}</Text>
                 </View>
-              </FadeIn>
-            ))}
-          </View>
-        )}
+                <View style={{ flex: 1 }}>
+                  <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>{s.name}</Text>
+                  <Text style={[text.small, { color: colors.textMuted }]} numberOfLines={1}>{s.address || 'No address'}</Text>
+                  <Text style={[text.caption, { color: colors.textMuted }]}>
+                    {(s.phone || 'No phone') + '  ·  Registered ' + new Date(s.created_at).toLocaleDateString()}
+                  </Text>
+                </View>
+                <Icon name="chevron" size={18} color={colors.textMuted} />
+              </Pressable>
+            ))
+          )}
+        </View>
       </ScrollView>
-
-      <SideMenu visible={menu} onClose={() => setMenu(false)} groups={groups} footer={{ label: 'Sign out', icon: 'logout', onPress: signOut }} />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xxxl, paddingTop: spacing.sm },
-  stats: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xl },
-  school: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg },
-  top: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  meta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.md },
-  manage: { height: 44, marginTop: spacing.md },
+  scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg },
+  signOut: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center' },
+  statRow: { flexDirection: 'row', gap: spacing.md },
+  statCell: { flex: 1 },
+  group: { backgroundColor: colors.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  tool: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+  toolDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  toolIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  school: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
 });

@@ -109,7 +109,7 @@ export default function VacancyBanner({ items, seconds, onPress }: { items: Item
 }
 
 const styles = StyleSheet.create({
-  wrap: { height: HEIGHT, borderRadius: 22, overflow: 'hidden', marginBottom: 14 },
+  wrap: { height: HEIGHT, borderRadius: 22, overflow: 'hidden', marginTop: 16, marginBottom: 16 },
   slide: { height: HEIGHT, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingBottom: 6 },
   iconBox: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   tag: { alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },

@@ -102,3 +102,9 @@ upload-image stays exactly as it is.
 
 ## New build library
 - Print button on the attendance poster: now opens the phone share sheet, which has a Print option. No extra print library is installed.
+
+## manage-user (super admin user control)
+
+1. Run migrations/user-management-migration.sql in the SQL editor.
+2. In Supabase, Edge Functions, create a function named manage-user and paste manage-user.ts into it, then deploy.
+3. No extra secrets are needed. It uses the service role key Supabase already provides.

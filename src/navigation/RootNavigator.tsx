@@ -56,6 +56,21 @@ import TemplateCustomizeScreen from '../screens/TemplateCustomizeScreen';
 import QrCodesScreen from '../screens/QrCodesScreen';
 import QrPosterScreen from '../screens/QrPosterScreen';
 import SuperAdminVacancyScreen from '../screens/SuperAdminVacancyScreen';
+import SuperAdminSettingsScreen from '../screens/SuperAdminSettingsScreen';
+import SuperAdminSchoolScreen from '../screens/SuperAdminSchoolScreen';
+import SuperAdminUsersScreen from '../screens/SuperAdminUsersScreen';
+import SuperAdminSubscriptionPricingScreen from '../screens/SuperAdminSubscriptionPricingScreen';
+import SuperAdminSubscriptionsScreen from '../screens/SuperAdminSubscriptionsScreen';
+import SuperAdminFinanceScreen from '../screens/SuperAdminFinanceScreen';
+import SuperAdminReferralsScreen from '../screens/SuperAdminReferralsScreen';
+import SuperAdminReferralDetailScreen from '../screens/SuperAdminReferralDetailScreen';
+import SuperAdminCommissionTiersScreen from '../screens/SuperAdminCommissionTiersScreen';
+import SuperAdminPaymentTermsScreen from '../screens/SuperAdminPaymentTermsScreen';
+import SuperAdminBroadcastsScreen from '../screens/SuperAdminBroadcastsScreen';
+import SuperAdminAppVersionScreen from '../screens/SuperAdminAppVersionScreen';
+import SuperAdminTermsAboutScreen from '../screens/SuperAdminTermsAboutScreen';
+import SuperAdminAttendanceScreen from '../screens/SuperAdminAttendanceScreen';
+import SuperAdminUserScreen from '../screens/SuperAdminUserScreen';
 import StaffAttendanceScreen from '../screens/StaffAttendanceScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ClockFriendScreen from '../screens/ClockFriendScreen';
@@ -148,6 +163,21 @@ export default function RootNavigator() {
       <Stack.Screen name="ReportTemplates" component={ReportTemplatesScreen} options={{ ...headerOptions, title: 'Report Card Templates' }} />
       <Stack.Screen name="TemplatePreview" component={TemplatePreviewScreen} options={{ ...headerOptions, title: 'Preview' }} />
       <Stack.Screen name="TemplateCustomize" component={TemplateCustomizeScreen} options={{ ...headerOptions, title: 'Customise' }} />
+      <Stack.Screen name="SuperAdminSettings" component={SuperAdminSettingsScreen} options={{ ...headerOptions, title: 'App settings' }} />
+      <Stack.Screen name="SuperAdminSubPricing" component={SuperAdminSubscriptionPricingScreen} options={{ ...headerOptions, title: 'Subscription pricing' }} />
+      <Stack.Screen name="SuperAdminSubscriptions" component={SuperAdminSubscriptionsScreen} options={{ ...headerOptions, title: 'Subscriptions' }} />
+      <Stack.Screen name="SuperAdminBroadcasts" component={SuperAdminBroadcastsScreen} options={{ ...headerOptions, title: 'Broadcasts' }} />
+      <Stack.Screen name="SuperAdminAppVersion" component={SuperAdminAppVersionScreen} options={{ ...headerOptions, title: 'App version' }} />
+      <Stack.Screen name="SuperAdminTermsAbout" component={SuperAdminTermsAboutScreen} options={{ ...headerOptions, title: 'Terms and About' }} />
+      <Stack.Screen name="SuperAdminAttendance" component={SuperAdminAttendanceScreen} options={{ ...headerOptions, title: 'Staff attendance' }} />
+      <Stack.Screen name="SuperAdminReferrals" component={SuperAdminReferralsScreen} options={{ ...headerOptions, title: 'Referrals' }} />
+      <Stack.Screen name="SuperAdminReferralDetail" component={SuperAdminReferralDetailScreen} options={{ ...headerOptions, title: 'Referrer details' }} />
+      <Stack.Screen name="SuperAdminCommissionTiers" component={SuperAdminCommissionTiersScreen} options={{ ...headerOptions, title: 'Commission ranges' }} />
+      <Stack.Screen name="SuperAdminPaymentTerms" component={SuperAdminPaymentTermsScreen} options={{ ...headerOptions, title: 'Payment terms' }} />
+      <Stack.Screen name="SuperAdminFinance" component={SuperAdminFinanceScreen} options={{ ...headerOptions, title: 'School finance' }} />
+      <Stack.Screen name="SuperAdminUsers" component={SuperAdminUsersScreen} options={{ ...headerOptions, title: 'All users' }} />
+      <Stack.Screen name="SuperAdminUser" component={SuperAdminUserScreen} options={{ ...headerOptions, title: 'User' }} />
+      <Stack.Screen name="SuperAdminSchool" component={SuperAdminSchoolScreen} options={{ ...headerOptions, title: 'Manage school' }} />
       <Stack.Screen name="SuperAdminVacancy" component={SuperAdminVacancyScreen} options={{ ...headerOptions, title: 'Vacancy settings' }} />
       <Stack.Screen name="QrPoster" component={QrPosterScreen} options={{ ...headerOptions, title: 'Attendance poster' }} />
       <Stack.Screen name="QrCodes" component={QrCodesScreen} options={{ ...headerOptions, title: 'Attendance QR Codes' }} />
