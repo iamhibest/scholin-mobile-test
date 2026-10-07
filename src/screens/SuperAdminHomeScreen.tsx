@@ -5,6 +5,7 @@ import { Icon, Notice, Screen, SearchBar, SectionTitle, Skeleton, StatCard } fro
 import { IconName } from '../components/Icon';
 import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
+import { confirmAction } from '../lib/confirm';
 import { fetchAllSchools, fetchPlatformStats } from '../lib/superAdmin';
 
 type Tool = { label: string; desc: string; icon: IconName; route: string };
@@ -90,7 +91,7 @@ export default function SuperAdminHomeScreen() {
             <Text style={[text.h2, { color: colors.text }]}>Super Admin</Text>
             <Text style={[text.small, { color: colors.textMuted }]}>Everything across the platform</Text>
           </View>
-          <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut} hitSlop={8}>
+          <Pressable onPress={() => confirmAction('Sign out', 'Are you sure you want to sign out?', 'Sign out', async () => { await supabase.auth.signOut(); navigation.reset({ index: 0, routes: [{ name: 'Login' }] }); })} style={styles.signOut} hitSlop={8}>
             <Icon name="logout" size={20} color={colors.danger} />
           </Pressable>
         </View>

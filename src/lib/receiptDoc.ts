@@ -1,5 +1,6 @@
 import { naira } from './format';
 import { getPaymentStatus, methodLabel } from './events';
+import { phonesOf } from './schoolContact';
 
 function esc(v: any) {
   return String(v === null || v === undefined ? '' : v)
@@ -33,7 +34,7 @@ export function buildReceiptHtml(r: ReceiptInput) {
   const logo = school.logo_url
     ? '<img class="logo" src="' + esc(school.logo_url) + '"/>'
     : '<div class="logo ph">' + esc((school.name || 'S').charAt(0)) + '</div>';
-  const contact = [school.phone ? 'Tel: ' + esc(school.phone) : '', school.email ? 'Email: ' + esc(school.email) : ''].filter(Boolean).join(' | ');
+  const contact = [phonesOf(school) ? 'Tel: ' + esc(phonesOf(school)) : '', school.email ? 'Email: ' + esc(school.email) : ''].filter(Boolean).join(' | ');
   const message =
     status === 'paid'
       ? 'This receipt confirms that the full amount due for this payment has been received. We appreciate your prompt payment.'

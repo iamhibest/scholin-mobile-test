@@ -82,6 +82,7 @@ export type RootStackParamList = {
   ResultsStatus: undefined;
   ActivityLog: undefined;
   SchoolOverview: undefined;
+  AttendanceHistory: undefined;
   Referral: undefined;
   MyProfile: undefined;
   MySchools: undefined;

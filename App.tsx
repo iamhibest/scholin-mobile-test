@@ -1,9 +1,12 @@
+import './src/lib/network';
 import React, { useEffect } from 'react';
 import { StatusBar, Text, TextInput } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import OfflineLayer from './src/components/OfflineLayer';
+import { startSessionGuard } from './src/lib/sessionGuard';
 import { logger } from './src/lib/logger';
 import { navigationRef, startDeepLinks } from './src/lib/deeplink';
 import { startQueueSync } from './src/lib/offlineQueue';
@@ -34,6 +37,10 @@ export default function App() {
     });
   }, []);
 
+  useEffect(() => {
+    startSessionGuard();
+  }, []);
+
   useEffect(() => startDeepLinks(), []);
 
   useEffect(() => startQueueSync(), []);
@@ -42,9 +49,11 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <ErrorBoundary>
-        <NavigationContainer ref={navigationRef}>
-          <RootNavigator />
-        </NavigationContainer>
+        <OfflineLayer>
+          <NavigationContainer ref={navigationRef}>
+            <RootNavigator />
+          </NavigationContainer>
+        </OfflineLayer>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

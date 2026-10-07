@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BottomSheet, Button, EmptyState, FilterChips, Icon, Screen, Skeleton } from '../components';
+import { BottomSheet, Button, EmptyState, FilterChips, Icon, OptionField, Screen, Skeleton } from '../components';
 import { IconName } from '../components/Icon';
 import {
   AMBER, BadgeGrid, BarRow, Callout, Columns, DotRow, Donut, GREEN, Highlights, ListRow, Muted, Pill, RED, Ring, RingList, SectionCard, tierColor,
@@ -313,7 +313,7 @@ export default function SchoolOverviewScreen() {
 
         {sessions.length ? (
           <View>
-            <FilterChips options={sessions.map(s => ({ key: s.id, label: s.name }))} value={sessionId || ''} onChange={pickSession} />
+            <OptionField compact label="Session" value={sessionId || ''} options={sessions.map(s => ({ value: s.id, label: s.name }))} onChange={pickSession} />
             {terms.length ? <FilterChips options={terms.map(t => ({ key: t.id, label: t.name }))} value={termId || ''} onChange={setTermId} /> : <Muted>No terms in this session yet.</Muted>}
           </View>
         ) : ready ? (
@@ -598,13 +598,17 @@ export default function SchoolOverviewScreen() {
                 <Muted>No recent activity yet.</Muted>
               ) : (
                 d.activity.map((r, i) => (
-                  <View key={i} style={[styles.activity, i > 0 && styles.divider]}>
+                  <Pressable
+                    key={i}
+                    disabled={!(r.activity_type === 'announcement_posted' && r.related_announcement_id)}
+                    onPress={() => navigation.navigate('AnnouncementDetail', { id: r.related_announcement_id })}
+                    style={[styles.activity, i > 0 && styles.divider]}>
                     <View style={{ flex: 1 }}>
                       <Text style={[text.bodyStrong, { color: colors.text }]}>{r.title}</Text>
                       {r.detail ? <Text style={[text.small, { color: colors.textMuted }]} numberOfLines={2}>{r.detail}</Text> : null}
                     </View>
                     <Text style={[text.caption, { color: colors.textMuted }]}>{timeShort(r.created_at)}</Text>
-                  </View>
+                  </Pressable>
                 ))
               )}
               <Pressable onPress={() => navigation.navigate('ActivityLog')} style={{ marginTop: spacing.md, alignSelf: 'flex-end' }}>

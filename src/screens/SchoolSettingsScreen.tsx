@@ -59,11 +59,11 @@ function ImageSlot({ label, url, schoolId, onUploaded }: { label: string; url: s
 
 export default function SchoolSettingsScreen() {
   const { ctx, loading: ctxLoading } = useStaff();
-  const infoChain = useChain(5);
+  const infoChain = useChain(6);
   const [school, setSchool] = useState<any>(null);
   const [failed, setFailed] = useState(false);
 
-  const [info, setInfo] = useState({ name: '', address: '', phone: '', email: '', motto: '' });
+  const [info, setInfo] = useState({ name: '', address: '', phone: '', phone2: '', email: '', motto: '' });
   const [infoMsg, setInfoMsg] = useState<Msg>(none);
   const [delegate, setDelegate] = useState(false);
 
@@ -115,7 +115,7 @@ export default function SchoolSettingsScreen() {
     try {
       const s = await fetchSchoolRow(ctx.schoolId);
       setSchool(s);
-      setInfo({ name: s.name || '', address: s.address || '', phone: s.phone || '', email: s.email || '', motto: s.motto || '' });
+      setInfo({ name: s.name || '', address: s.address || '', phone: s.phone || '', phone2: s.phone_2 || '', email: s.email || '', motto: s.motto || '' });
       setDelegate(s.teacher_admin_can_edit_school_info === true);
       setAutoAdm(s.auto_admission_enabled === true);
       setPrefix(s.admission_prefix || '');
@@ -345,8 +345,9 @@ export default function SchoolSettingsScreen() {
           <Input {...infoChain(0)} label="School name" value={info.name} onChangeText={v => setInfo({ ...info, name: v })} editable={canEditInfo} icon="cap" autoCapitalize="words" />
           <Input {...infoChain(1)} label="Address" value={info.address} onChangeText={v => setInfo({ ...info, address: v })} editable={canEditInfo} icon="pin" />
           <Input {...infoChain(2)} label="Phone" value={info.phone} onChangeText={v => setInfo({ ...info, phone: v })} editable={canEditInfo} icon="phone" keyboardType="phone-pad" />
-          <Input {...infoChain(3)} label="Email" value={info.email} onChangeText={v => setInfo({ ...info, email: v })} editable={canEditInfo} icon="mail" keyboardType="email-address" autoCapitalize="none" />
-          <Input {...infoChain(4)} label="Motto" value={info.motto} onChangeText={v => setInfo({ ...info, motto: v })} editable={canEditInfo} />
+          <Input {...infoChain(3)} label="Second phone (optional)" value={info.phone2} onChangeText={v => setInfo({ ...info, phone2: v })} editable={canEditInfo} icon="phone" keyboardType="phone-pad" />
+          <Input {...infoChain(4)} label="Email" value={info.email} onChangeText={v => setInfo({ ...info, email: v })} editable={canEditInfo} icon="mail" keyboardType="email-address" autoCapitalize="none" />
+          <Input {...infoChain(5)} label="Motto" value={info.motto} onChangeText={v => setInfo({ ...info, motto: v })} editable={canEditInfo} />
           {canEditInfo ? (
             <Button
               title="Save information"
@@ -356,7 +357,7 @@ export default function SchoolSettingsScreen() {
                   setInfoMsg({ message: 'School name is required.', tone: 'error' });
                   return;
                 }
-                save('info', { name: info.name.trim(), address: info.address.trim() || null, phone: info.phone.trim() || null, email: info.email.trim() || null, motto: info.motto.trim() || null }, setInfoMsg, 'School information updated.');
+                save('info', { name: info.name.trim(), address: info.address.trim() || null, phone: info.phone.trim() || null, phone_2: info.phone2.trim() || null, email: info.email.trim() || null, motto: info.motto.trim() || null }, setInfoMsg, 'School information updated.');
               }}
             />
           ) : null}
@@ -366,7 +367,7 @@ export default function SchoolSettingsScreen() {
           <Section title="Delegate permissions">
             <SwitchRow
               label="Let teacher admins edit school information"
-              desc="Name, address, phone, email and motto."
+              desc="Name, address, two phone numbers, email and motto."
               value={delegate}
               onChange={v => {
                 setDelegate(v);

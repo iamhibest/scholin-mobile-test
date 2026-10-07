@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { BottomSheet, Button, EmptyState, Icon, LinkedText, Notice, PressableScale, Screen, Skeleton } from '../components';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, spacing, text } from '../theme';
@@ -75,6 +76,7 @@ function Line({ label, value }: { label: string; value: string }) {
 }
 
 export default function ActivityLogScreen() {
+  const navigation = useNavigation<any>();
   const { ctx, loading: ctxLoading } = useStaff();
   const [rows, setRows] = useState<any[] | null>(null);
   const [more, setMore] = useState(false);
@@ -121,12 +123,7 @@ export default function ActivityLogScreen() {
   const open = async (r: any) => {
     try {
       if (r.activity_type === 'announcement_posted' && r.related_announcement_id) {
-        const a = await fetchAnnouncement(r.related_announcement_id);
-        if (!a) {
-          setError('This announcement could not be found. It may have been removed.');
-          return;
-        }
-        setSheet({ title: a.title, body: <LinkedText value={a.body || ''} style={[text.body, { color: colors.text, lineHeight: 23 }]} /> });
+        navigation.navigate('AnnouncementDetail', { id: r.related_announcement_id });
       } else if (r.activity_type === 'payment_received' && r.related_payment_id) {
         const p = await fetchPaymentDetail(r.related_payment_id);
         if (!p) {

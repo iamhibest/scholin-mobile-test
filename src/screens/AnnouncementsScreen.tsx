@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { EmptyState, Notice, PressableScale, ReactionBar, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
-import { fetchAnnouncements, fetchReactions, Reaction, toggleReaction } from '../lib/announcements';
+import { fetchAnnouncements, fetchReactions, markAnnouncementsSeen, Reaction, toggleReaction } from '../lib/announcements';
 import { shortDate } from '../lib/format';
 
 function Card({ item, index, counts, mine, onOpen, onToggle }: any) {
@@ -44,6 +44,10 @@ export default function AnnouncementsScreen({ navigation }: any) {
   const [reactions, setReactions] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    markAnnouncementsSeen();
+  }, []);
 
   const load = useCallback(async () => {
     if (!ctx) {

@@ -5,6 +5,7 @@ import { Button, Icon, Screen, Skeleton } from '../components';
 import { IconName } from '../components/Icon';
 import { colors, radius, spacing, text } from '../theme';
 import { getSchoolAccessStatus } from '../lib/dashboard';
+import { phonesOf } from '../lib/schoolContact';
 import { enterSchoolView, exitSchoolView } from '../lib/schoolView';
 import { fetchSchoolCounts, fetchSchoolFull, fetchSchoolOwner } from '../lib/superAdmin';
 
@@ -92,7 +93,7 @@ export default function SuperAdminSchoolViewScreen() {
           <Text style={[text.h2, { color: colors.text }]}>{school.name}</Text>
           {school.address ? <Text style={[text.small, { color: colors.textMuted, marginTop: 2 }]}>{school.address}</Text> : null}
           <Text style={[text.small, { color: colors.textMuted, marginTop: 2 }]}>
-            {[school.phone, school.email].filter(Boolean).join('  ·  ') || 'No contact details'}
+            {[phonesOf(school), school.email].filter(Boolean).join('  ·  ') || 'No contact details'}
           </Text>
           <Text style={[styles.state, { color: state.color, borderColor: state.color }]}>{state.label}</Text>
           <Text style={[text.small, { color: colors.textMuted, marginTop: spacing.sm }]}>

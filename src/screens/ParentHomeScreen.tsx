@@ -6,6 +6,7 @@ import { Badge, BottomSheet, BottomTabs, Button, Card, EmptyState, FadeIn, Icon,
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
+import { confirmAction } from '../lib/confirm';
 import { logger } from '../lib/logger';
 import { naira, ordinal, shortDate } from '../lib/format';
 import { Child, ChildOverview, FeeRow, linkChildByCode, loadChildOverview, loadChildren, loadParentProfile, loadSessions, ReportRow, Session } from '../lib/parent';
@@ -133,9 +134,11 @@ export default function ParentHomeScreen({ navigation }: any) {
     boot();
   }, [boot]);
 
-  async function signOut() {
-    await supabase.auth.signOut();
-    navigation.reset({ index: 0, routes: [{ name: 'ParentLogin' }] });
+  function signOut() {
+    confirmAction('Sign out', 'Are you sure you want to sign out?', 'Sign out', async () => {
+      await supabase.auth.signOut();
+      navigation.reset({ index: 0, routes: [{ name: 'ParentLogin' }] });
+    });
   }
 
   async function submitCode() {

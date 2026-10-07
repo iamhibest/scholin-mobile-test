@@ -20,7 +20,7 @@ function addDays(d: Date, n: number) {
 }
 
 export async function fetchSessionOptions(schoolId: string) {
-  const { data } = await supabase.from('sessions').select('id, name, is_current').eq('school_id', schoolId).order('created_at', { ascending: false });
+  const { data } = await supabase.from('sessions').select('id, name, is_current').eq('school_id', schoolId).eq('is_archived', false).order('created_at', { ascending: false });
   return (data || []) as { id: string; name: string; is_current: boolean }[];
 }
 
@@ -51,7 +51,7 @@ export type OverviewData = {
   attendanceRate: number;
   classes: { id: string; name: string }[];
   gradeBands: { grade: string; count: number; pct: number }[];
-  activity: { title: string; detail: string | null; created_at: string }[];
+  activity: { title: string; detail: string | null; created_at: string; activity_type?: string; related_announcement_id?: string | null }[];
   gender: { male: number; female: number; unspecified: number } | null;
   punctuality: { data: any; staffLate: any[] } | null;
   finance: { expected: number; collected: number; outstanding: number; rate: number | null } | null;
@@ -141,7 +141,7 @@ export async function loadOverview(ctx: OverviewCtx, sessionId: string | null, t
     }
   }
 
-  const { data: activityRows } = await supabase.from('activity_log').select('title, detail, created_at').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(5);
+  const { data: activityRows } = await supabase.from('activity_log').select('title, detail, created_at, activity_type, related_announcement_id').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(5);
 
   // ---- Admin only blocks ----
   let gender: OverviewData['gender'] = null;

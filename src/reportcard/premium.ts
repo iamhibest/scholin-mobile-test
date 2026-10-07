@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { escapeHtmlRC } from './helpers';
+import { phonesOf } from '../lib/schoolContact';
 
 /* Three premium report card designs: Emerald (royal), Heritage (prestige), Navy Gold (modern).
    Same (data, theme) contract as the other renderers; builders are repeated here so this file stands alone. */
@@ -172,7 +173,7 @@ function signatures(data) {
 function contactBlock(data) {
   const out = [];
   if (data.school.address) out.push('<div class="rc2-contact">' + escapeHtmlRC(data.school.address) + '</div>');
-  if (data.school.phone) out.push('<div class="rc2-contact">Tel: ' + escapeHtmlRC(data.school.phone) + '</div>');
+  if (phonesOf(data.school)) out.push('<div class="rc2-contact">Tel: ' + escapeHtmlRC(phonesOf(data.school)) + '</div>');
   if (data.school.email) out.push('<div class="rc2-contact">' + escapeHtmlRC(data.school.email) + '</div>');
   return out.join('');
 }

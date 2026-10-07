@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { escapeHtmlRC, ordinalRC } from './helpers';
 import { renderEmeraldTemplate, renderHeritageTemplate, renderNavyGoldTemplate } from './premium';
+import { phonesOf } from '../lib/schoolContact';
 /* =========================================================
    Report Card — Template Renderers (1 of 2): shared blocks + Classic + Modern
    =========================================================
@@ -197,7 +198,7 @@ export function renderClassicTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         ${photoBlockHtml(data)}
       </div>
@@ -298,7 +299,7 @@ export function renderModernTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         <div class="rc2-title-row">
           <div><div class="rc2-title">REPORT CARD</div><div class="rc2-session-pill">${escapeHtmlRC(data.sessionName)}</div></div>
@@ -405,7 +406,7 @@ export function renderRoyalTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         ${photoBlockHtml(data)}
       </div>
@@ -504,7 +505,7 @@ export function renderBritishTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         <div class="rc2-title-block">
           <div class="rc2-title">REPORT CARD</div>
@@ -603,7 +604,7 @@ export function renderPrestigeTemplate(data, theme) {
         <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
         ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
         <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-        <p class="rc2-address">${escapeHtmlRC(data.school.phone || '')}</p>
+        <p class="rc2-address">${escapeHtmlRC(phonesOf(data.school) || '')}</p>
         <p class="rc2-address">${escapeHtmlRC(data.school.email || '')}</p>
         ${photoBlockHtml(data, {w:76,h:92})}
       </div>
@@ -703,7 +704,7 @@ export function renderMinimalTemplate(data, theme) {
         <div>
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
-          <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}${data.school.phone ? ' · ' + escapeHtmlRC(data.school.phone) : ''}</p>
+          <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}${phonesOf(data.school) ? ' · ' + escapeHtmlRC(phonesOf(data.school)) : ''}</p>
         </div>
         <div class="rc2-title-block">
           <div class="rc2-title">Report Card</div>
@@ -811,7 +812,7 @@ export function renderPrimaryTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         ${photoBlockHtml(data, {w:56,h:56})}
       </div>
@@ -915,7 +916,7 @@ export function renderMonochromeTemplate(data, theme) {
           <p class="rc2-school-name">${escapeHtmlRC(data.school.name)}</p>
           ${data.school.motto ? `<p class="rc2-motto">${escapeHtmlRC(data.school.motto)}</p>` : ''}
           <p class="rc2-address">${escapeHtmlRC(data.school.address || '')}</p>
-          <p class="rc2-address">${data.school.phone ? 'Tel: ' + escapeHtmlRC(data.school.phone) : ''}${data.school.phone && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
+          <p class="rc2-address">${phonesOf(data.school) ? 'Tel: ' + escapeHtmlRC(phonesOf(data.school)) : ''}${phonesOf(data.school) && data.school.email ? ' | ' : ''}${data.school.email ? 'Email: ' + escapeHtmlRC(data.school.email) : ''}</p>
         </div>
         <div class="rc2-title-block">
           <div class="rc2-title">REPORT CARD</div>

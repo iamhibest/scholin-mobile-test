@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Badge, Card, EmptyState, Icon, Screen, Skeleton } from '../components';
 import { colors, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
@@ -34,15 +35,28 @@ export function PortalSessionsScreen({ navigation }: any) {
   const [items, setItems] = useState<any[] | null>(null);
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    if (!ctx) {
-      return;
-    }
-    fetchSessions(ctx.schoolId).then(setItems).catch(() => setFailed(true));
-  }, [ctx]);
+  // Archived sessions stay out of the portal until they are unarchived. Reloads when you come back from the archive.
+  useFocusEffect(
+    useCallback(() => {
+      if (!ctx) {
+        return;
+      }
+      fetchSessions(ctx.schoolId)
+        .then(list => setItems((list as any[]).filter(s => !s.is_archived)))
+        .catch(() => setFailed(true));
+    }, [ctx]),
+  );
+
+  const archiveButton =
+    ctx && ctx.isAdmin ? (
+      <Pressable onPress={() => navigation.navigate('ArchivedSessions')} style={styles.archive} hitSlop={8} accessibilityLabel="Archived sessions">
+        <Icon name="layers" size={20} color={colors.primary} />
+      </Pressable>
+    ) : null;
 
   return (
     <PortalList
+      headerRight={archiveButton}
       loading={ctxLoading || (!items && !failed)}
       failed={failed}
       items={items || []}
@@ -85,7 +99,7 @@ export function PortalTermsScreen({ navigation, route }: any) {
 }
 
 function PortalList(props: any) {
-  const { loading, failed, items, render, emptyTitle, emptyMessage, title } = props;
+  const { loading, failed, items, render, emptyTitle, emptyMessage, title, headerRight } = props;
   if (loading) {
     return (
       <Screen>
@@ -104,7 +118,14 @@ function PortalList(props: any) {
         keyExtractor={(i: any) => i.id}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-        ListHeaderComponent={title ? <Text style={[text.h2, styles.title]}>{title}</Text> : null}
+        ListHeaderComponent={
+          title || headerRight ? (
+            <View style={styles.headRow}>
+              {title ? <Text style={[text.h2, styles.title, { marginBottom: 0, flex: 1 }]}>{title}</Text> : <Text style={[text.small, { color: colors.textMuted, flex: 1 }]}>Choose a session</Text>}
+              {headerRight}
+            </View>
+          ) : null
+        }
         ListEmptyComponent={failed ? <EmptyState icon="info" title="Could not load" message="Check your connection and open this screen again." /> : <EmptyState icon="calendar" title={emptyTitle} message={emptyMessage} />}
         renderItem={({ item }) => render(item)}
       />
@@ -115,6 +136,8 @@ function PortalList(props: any) {
 const styles = StyleSheet.create({
   list: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
   title: { color: colors.primary, marginBottom: spacing.lg },
+  headRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg },
+  archive: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   chip: { width: 48, height: 48, borderRadius: 16, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
 });

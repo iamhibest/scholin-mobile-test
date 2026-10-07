@@ -90,3 +90,19 @@ export async function deleteAnnouncement(id: string) {
     fail(error, 'Could not delete announcement.');
   }
 }
+
+// Unread announcements (like the bell for recent activity): the count goes back to zero once the Announcements page is opened.
+export async function fetchUnreadAnnouncements(schoolId: string) {
+  try {
+    const { data, error } = await supabase.rpc('get_unread_announcements_count', { p_school_id: schoolId });
+    return error ? 0 : Number(data || 0);
+  } catch {
+    return 0;
+  }
+}
+
+export async function markAnnouncementsSeen() {
+  try {
+    await supabase.rpc('mark_announcements_seen');
+  } catch {}
+}

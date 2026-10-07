@@ -59,6 +59,7 @@ import SuperAdminVacancyScreen from '../screens/SuperAdminVacancyScreen';
 import SuperAdminSettingsScreen from '../screens/SuperAdminSettingsScreen';
 import SuperAdminSchoolScreen from '../screens/SuperAdminSchoolScreen';
 import SchoolOverviewScreen from '../screens/SchoolOverviewScreen';
+import AttendanceHistoryScreen from '../screens/AttendanceHistoryScreen';
 import SuperAdminSchoolViewScreen from '../screens/SuperAdminSchoolViewScreen';
 import SuperAdminUsersScreen from '../screens/SuperAdminUsersScreen';
 import SuperAdminSubscriptionPricingScreen from '../screens/SuperAdminSubscriptionPricingScreen';
@@ -190,6 +191,7 @@ export default function RootNavigator() {
       <Stack.Screen name="SchoolSettings" component={SchoolSettingsScreen} options={{ ...headerOptions, title: 'School Settings' }} />
       <Stack.Screen name="ClockFriend" component={ClockFriendScreen} options={{ ...headerOptions, title: 'Clock a friend' }} />
       <Stack.Screen name="ResultsStatus" component={ResultsStatusScreen} options={{ ...headerOptions, title: 'Results status' }} />
+      <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} options={{ ...headerOptions, title: 'Attendance history' }} />
       <Stack.Screen name="SchoolOverview" component={SchoolOverviewScreen} options={{ ...headerOptions, title: 'School overview' }} />
       <Stack.Screen name="ActivityLog" component={ActivityLogScreen} options={{ ...headerOptions, title: 'Recent activity' }} />
       <Stack.Screen name="Referral" component={ReferralScreen} options={{ ...headerOptions, title: 'Refer and earn' }} />

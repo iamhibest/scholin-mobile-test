@@ -9,6 +9,8 @@ import { MenuGroup } from '../components/SideMenu';
 import { IconName } from '../components/Icon';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
+import { confirmAction } from '../lib/confirm';
+import { fetchUnreadAnnouncements } from '../lib/announcements';
 import { logger } from '../lib/logger';
 import { greeting, naira, shortDate } from '../lib/format';
 import { loadStaffDashboard, StaffData, switchActiveSchool } from '../lib/dashboard';
@@ -28,6 +30,7 @@ const adminTiles: Tile[] = [
 
 const teacherTiles: Tile[] = [
   { label: 'My Classes', icon: 'cap', tone: 'blue', route: 'Feature' },
+  { label: 'School Portal', icon: 'school', tone: 'green', route: 'Feature' },
   { label: 'My Postings', icon: 'file', tone: 'green', route: 'Feature' },
   { label: 'Announcements', icon: 'megaphone', tone: 'purple', route: 'Feature' },
   { label: 'Clock In and Out', icon: 'clock', tone: 'amber', route: 'Feature' },
@@ -56,6 +59,7 @@ const featureRoutes: Record<string, string> = {
   'My Profile': 'MyProfile',
   'Recent Activity': 'ActivityLog',
   'School Overview': 'SchoolOverview',
+  'Attendance History': 'AttendanceHistory',
   'Results Status': 'ResultsStatus',
   'Refer and Earn': 'Referral',
   'My Schools': 'MySchools',
@@ -72,6 +76,7 @@ export default function StaffHomeScreen({ navigation }: any) {
   const [menu, setMenu] = useState(false);
   const [tools, setTools] = useState(false);
   const [news, setNews] = useState(false);
+  const [annUnread, setAnnUnread] = useState(0);
   const userId = useRef('');
 
   const load = useCallback(async () => {
@@ -95,6 +100,7 @@ export default function StaffHomeScreen({ navigation }: any) {
       }
       setData(result);
       setVacancyIndex(0);
+      fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
       setFailed(true);
@@ -119,9 +125,11 @@ export default function StaffHomeScreen({ navigation }: any) {
     }, [load]),
   );
 
-  async function signOut() {
-    await supabase.auth.signOut();
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  function signOut() {
+    confirmAction('Sign out', 'Are you sure you want to sign out?', 'Sign out', async () => {
+      await supabase.auth.signOut();
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    });
   }
 
   async function switchSchool(schoolId: string) {
@@ -174,11 +182,8 @@ export default function StaffHomeScreen({ navigation }: any) {
         { label: 'Dashboard', icon: 'dashboard', active: true, onPress: () => {} },
         { label: 'School Overview', icon: 'building', onPress: () => go('School Overview') },
         { label: 'School Portal', icon: 'school', hidden: !access.active, onPress: () => go('School Portal') },
-        { label: 'Clock In and Out', icon: 'clock', hidden: !access.active, onPress: () => go('Clock In and Out') },
         { label: 'Refer and Earn', icon: 'gift', onPress: () => go('Refer and Earn') },
         { label: 'Job Vacancies', icon: 'briefcase', onPress: () => go('Job Vacancies') },
-        { label: 'My Postings', icon: 'file', onPress: () => go('My Postings') },
-        { label: 'Subscription', icon: 'card', hidden: !isAdmin, onPress: () => go('Subscription') },
         { label: 'My Profile', icon: 'user', onPress: () => navigation.navigate('MyProfile') },
         { label: 'My Schools', icon: 'school', onPress: () => navigation.navigate('MySchools') },
         { label: 'Terms and About', icon: 'info', onPress: () => navigation.navigate('Terms') },
@@ -189,8 +194,6 @@ export default function StaffHomeScreen({ navigation }: any) {
       title: 'Administration',
       items: [
         { label: 'Teachers and Roles', icon: 'userCog', hidden: !isAdmin, onPress: () => go('Teachers and Roles') },
-        { label: 'Announcements', icon: 'megaphone', onPress: () => go('Announcements') },
-        { label: 'More Admin Tools', icon: 'grid', hidden: !(isAdmin && access.active), onPress: () => setTools(true) },
       ],
     },
   ];
@@ -247,7 +250,12 @@ export default function StaffHomeScreen({ navigation }: any) {
     <SafeAreaView style={styles.root} edges={['top']}>
       <TopBar
         onMenu={() => setMenu(true)}
-        right={<RoundButton icon="bell" badge={data.unread} onPress={() => { setData({ ...data, unread: 0 }); go('Recent Activity'); }} />}
+        right={
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <RoundButton icon="megaphone" badge={annUnread} onPress={() => { setAnnUnread(0); navigation.navigate('Announcements'); }} />
+            <RoundButton icon="bell" badge={data.unread} onPress={() => { setData({ ...data, unread: 0 }); go('Recent Activity'); }} />
+          </View>
+        }
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -326,7 +334,7 @@ export default function StaffHomeScreen({ navigation }: any) {
         </FadeIn>
 
         {data.announcement ? (
-          <InfoBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => setNews(true)} />
+          <InfoBanner tag="Scholin" icon="megaphone" title={data.announcement.title ? data.announcement.title + '.' : ''} body={data.announcement.body} onPress={() => (data.announcement.id ? navigation.navigate('AnnouncementDetail', { id: data.announcement.id }) : setNews(true))} />
         ) : null}
 
         {data.vacancies.length ? <VacancyBanner items={data.vacancies} seconds={data.rotation} onPress={() => go('Job Vacancies')} /> : null}
