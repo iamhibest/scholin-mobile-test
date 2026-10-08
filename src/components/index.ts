@@ -40,3 +40,4 @@ export { default as AdSlot } from './AdSlot';
 export { default as JobCard, SchoolMark } from './JobCard';
 export { default as ReactionBar } from './ReactionBar';
 export { default as FilterChips } from './FilterChips';
+export { default as BrandEmblem } from './BrandEmblem';

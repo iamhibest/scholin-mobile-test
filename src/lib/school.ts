@@ -78,7 +78,7 @@ async function loadSuperAdminView(userId: string, schoolId: string): Promise<Sta
   return {
     userId,
     schoolId,
-    school,
+    school: { ...(school as any), __superAdminView: true },
     membership,
     role: 'owner',
     isAdmin: true,

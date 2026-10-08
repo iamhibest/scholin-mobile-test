@@ -13,6 +13,12 @@ export function startSessionGuard() {
   }
   auth.__scholinGuard = true;
   const original = auth.getSession.bind(auth);
+  // Remember the current session right away, so even the very first offline start has something to fall back on.
+  original().then((r: any) => {
+    if (r && r.data && r.data.session) {
+      AsyncStorage.setItem(KEY, JSON.stringify(r.data.session)).catch(() => {});
+    }
+  }).catch(() => {});
 
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {

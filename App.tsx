@@ -7,6 +7,9 @@ import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import OfflineLayer from './src/components/OfflineLayer';
 import { startSessionGuard } from './src/lib/sessionGuard';
+
+// Must run before the first screen (the splash) asks whether someone is signed in.
+startSessionGuard();
 import { logger } from './src/lib/logger';
 import { navigationRef, startDeepLinks } from './src/lib/deeplink';
 import { startQueueSync } from './src/lib/offlineQueue';
@@ -35,10 +38,6 @@ export default function App() {
       logger.error((isFatal ? 'Fatal: ' : '') + error.message);
       previous?.(error, isFatal);
     });
-  }, []);
-
-  useEffect(() => {
-    startSessionGuard();
   }, []);
 
   useEffect(() => startDeepLinks(), []);

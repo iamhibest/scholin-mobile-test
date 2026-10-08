@@ -37,6 +37,10 @@ export function getSchoolAccessStatus(school: any): Access {
   if (!school) {
     return { active: false, reason: 'expired', trialEndsAt: null, subscriptionEndsAt: null };
   }
+  // A super admin looking at a school (support work) is never locked out by that school's subscription.
+  if (school.__superAdminView) {
+    return { active: true, reason: 'subscribed', trialEndsAt: school.trial_ends_at, subscriptionEndsAt: school.subscription_ends_at };
+  }
   const base = { trialEndsAt: school.trial_ends_at, subscriptionEndsAt: school.subscription_ends_at };
   if (school.subscription_cancelled_at) {
     return { active: false, reason: 'cancelled', ...base };

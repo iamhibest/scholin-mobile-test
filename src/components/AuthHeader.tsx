@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import BrandEmblem from './BrandEmblem';
 import { colors, spacing, text } from '../theme';
 
 type Props = { title: string; subtitle?: string };
@@ -7,7 +8,7 @@ type Props = { title: string; subtitle?: string };
 export default function AuthHeader({ title, subtitle }: Props) {
   return (
     <View style={styles.head}>
-      <Image source={require('../assets/images/emblem.png')} style={styles.emblem} resizeMode="contain" />
+      <BrandEmblem style={styles.emblem} />
       <Text style={[text.h1, styles.title]}>{title}</Text>
       {subtitle ? <Text style={[text.body, styles.sub]}>{subtitle}</Text> : null}
     </View>

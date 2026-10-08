@@ -11,6 +11,9 @@ import { colors, fonts, radius, shadow, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { confirmAction } from '../lib/confirm';
 import { fetchUnreadAnnouncements } from '../lib/announcements';
+import { BirthdaySummary, fetchBirthdayRows, summarizeBirthdays } from '../lib/birthdays';
+import BirthdayBanner from '../components/BirthdayBanner';
+import { addDays, lagosToday } from '../lib/attendance';
 import { logger } from '../lib/logger';
 import { greeting, naira, shortDate } from '../lib/format';
 import { loadStaffDashboard, StaffData, switchActiveSchool } from '../lib/dashboard';
@@ -77,6 +80,7 @@ export default function StaffHomeScreen({ navigation }: any) {
   const [tools, setTools] = useState(false);
   const [news, setNews] = useState(false);
   const [annUnread, setAnnUnread] = useState(0);
+  const [bdays, setBdays] = useState<BirthdaySummary | null>(null);
   const userId = useRef('');
 
   const load = useCallback(async () => {
@@ -101,6 +105,7 @@ export default function StaffHomeScreen({ navigation }: any) {
       setData(result);
       setVacancyIndex(0);
       fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
+      fetchBirthdayRows(result.school.id).then(rows => setBdays(summarizeBirthdays(rows))).catch(() => {});
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
       setFailed(true);
@@ -284,6 +289,30 @@ export default function StaffHomeScreen({ navigation }: any) {
           </View>
         ) : null}
 
+        {bdays && (bdays.today.length > 0 || bdays.tomorrow.length > 0) ? (
+          <View style={{ marginTop: spacing.md }}>
+            <BirthdayBanner
+              today={bdays.today}
+              tomorrow={bdays.tomorrow}
+              tomorrowLabel={new Date(addDays(lagosToday(), 1) + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              onPress={() => navigation.navigate('Birthdays')}
+            />
+          </View>
+        ) : null}
+        {bdays && bdays.remaining > 0 ? (
+          <Pressable onPress={() => navigation.navigate('Birthdays')} style={styles.bdayRow}>
+            <View style={styles.bdayIcon}>
+              <Icon name="calendar" size={17} color={colors.success} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>All Upcoming Birthdays</Text>
+              <Text style={[text.caption, { color: colors.textMuted }]}>This month</Text>
+            </View>
+            <Text style={styles.bdayCount}>{String(bdays.remaining)}</Text>
+            <Icon name="chevron" size={16} color={colors.textMuted} />
+          </Pressable>
+        ) : null}
+
         <FadeIn delay={80} style={{ marginTop: spacing.lg }}>
           {data.layout === 'adminFees' ? (
             <View style={styles.statRow}>
@@ -346,6 +375,9 @@ export default function StaffHomeScreen({ navigation }: any) {
               <QuickTile width="100%" label={t.label} icon={t.icon} tone={t.tone} onPress={() => go(t.label)} />
             </FadeIn>
           ))}
+          {Array.from({ length: (3 - (tiles.length % 3)) % 3 }).map((_, i) => (
+            <View key={'fill' + i} style={{ width: '31%' }} />
+          ))}
         </View>
       </ScrollView>
 
@@ -376,6 +408,9 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   half: { width: '48%', flexGrow: 1 },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: spacing.md },
+  bdayRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.sm, backgroundColor: colors.successSoft, borderRadius: 16, paddingVertical: 9, paddingHorizontal: spacing.md },
+  bdayIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  bdayCount: { minWidth: 26, height: 26, borderRadius: 13, backgroundColor: colors.success, color: '#FFFFFF', fontSize: 13, fontWeight: '700', textAlign: 'center', lineHeight: 26, overflow: 'hidden', paddingHorizontal: 6 },
   schools: { marginTop: spacing.lg, gap: 4 },
   schoolRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: 11, paddingHorizontal: spacing.md, borderRadius: radius.md },
 });

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fonts, radius, shadow, spacing } from '../theme';
 import Icon, { IconName } from './Icon';
+import BrandEmblem from './BrandEmblem';
 
 type Props = { onMenu?: () => void; right?: React.ReactNode; title?: string };
 
@@ -23,7 +24,7 @@ export default function TopBar({ onMenu, right, title }: Props) {
     <View style={styles.bar}>
       {onMenu ? <RoundButton icon="menu" onPress={onMenu} /> : <View style={styles.spacer} />}
       <View style={styles.brand}>
-        <Image source={require('../assets/images/emblem.png')} style={styles.logo} resizeMode="contain" />
+        <BrandEmblem style={styles.logo} />
         <Text style={styles.name}>{title || 'Scholin'}</Text>
       </View>
       <View style={styles.right}>{right || <View style={styles.spacer} />}</View>

@@ -5,6 +5,8 @@ import { IconName } from '../components/Icon';
 import { colors, radius, shadow, spacing, text } from '../theme';
 import { env } from '../config/env';
 import { markWelcomeSeen } from '../lib/storage';
+import { useBrand } from '../lib/brand';
+import BrandEmblem from '../components/BrandEmblem';
 
 const features: { label: string; icon: IconName; tint: string; color: string }[] = [
   { label: 'Students', icon: 'users', tint: colors.primarySoft, color: colors.primary },
@@ -14,6 +16,7 @@ const features: { label: string; icon: IconName; tint: string; color: string }[]
 ];
 
 export default function WelcomeScreen({ navigation }: any) {
+  const brand = useBrand();
   async function go(target: string) {
     await markWelcomeSeen();
     navigation.reset({ index: 1, routes: [{ name: 'Login' }, { name: target }] });
@@ -22,7 +25,14 @@ export default function WelcomeScreen({ navigation }: any) {
   return (
     <Screen scroll background={colors.surface}>
       <View style={styles.top}>
-        <Image source={require('../assets/images/logoHorizontal.png')} style={styles.logo} resizeMode="contain" />
+        {brand && brand.logo ? (
+          <View style={styles.custom}>
+            <BrandEmblem style={styles.customEmblem} />
+            <Image source={require('../assets/images/wordmark.png')} style={styles.customWord} resizeMode="contain" />
+          </View>
+        ) : (
+          <Image source={require('../assets/images/logoHorizontal.png')} style={styles.logo} resizeMode="contain" />
+        )}
         <Text style={[text.body, styles.tagline]}>Smarter Schools. Brighter Futures.</Text>
         <Text style={[text.display, styles.headline]}>Everything your school needs, in one place.</Text>
       </View>
@@ -61,6 +71,9 @@ export default function WelcomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   top: { alignItems: 'center', marginTop: spacing.sm },
   logo: { width: 230, height: 70 },
+  custom: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 70 },
+  customEmblem: { width: 64, height: 66 },
+  customWord: { width: 150, height: 45 },
   tagline: { color: colors.textMuted, marginTop: spacing.xs },
   headline: { color: colors.text, textAlign: 'center', marginTop: spacing.xl, fontSize: 28, lineHeight: 36 },
   heroWrap: { marginTop: spacing.xl, borderRadius: radius.xl, backgroundColor: colors.surface },
