@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { addDays, lagosToday } from './attendance';
+import { logger } from './logger';
 
 // Student birthdays for a school. Dates use Nigerian time, like the rest of the app.
 export type Birthday = { id: string; name: string; photo: string | null; month: number; day: number; turning: number; dateLabel: string };
@@ -9,6 +10,7 @@ export type BirthdaySummary = {
   upcoming: Birthday[]; // later this month
   earlier: Birthday[]; // already celebrated this month
   nextMonth: Birthday[];
+  soon: Birthday[]; // next upcoming day, only if within a week
   remaining: number; // today and the rest of this month
 };
 
@@ -22,6 +24,7 @@ export async function fetchBirthdayRows(schoolId: string, _force = false) {
   for (let from = 0; from < 20000; from += 1000) {
     const { data, error } = await supabase.from('students').select('id, full_name, dob, photo_url').eq('school_id', schoolId).not('dob', 'is', null).range(from, from + 999);
     if (error || !data) {
+      logger.error('Birthdays could not load: ' + (error ? error.message : 'no data'));
       const kept = cache[schoolId];
       return kept ? kept.rows : rows;
     }
@@ -42,7 +45,7 @@ export function summarizeBirthdays(rows: any[], todayStr = lagosToday()): Birthd
   const [ty, tm, td] = todayStr.split('-').map(Number);
   const [, tomM, tomD] = addDays(todayStr, 1).split('-').map(Number);
   const nextM = tm === 12 ? 1 : tm + 1;
-  const out: BirthdaySummary = { today: [], tomorrow: [], upcoming: [], earlier: [], nextMonth: [], remaining: 0 };
+  const out: BirthdaySummary = { today: [], tomorrow: [], upcoming: [], earlier: [], nextMonth: [], soon: [], remaining: 0 };
 
   for (const r of rows) {
     const parts = String(r.dob || '').slice(0, 10).split('-').map(Number);
@@ -77,6 +80,10 @@ export function summarizeBirthdays(rows: any[], todayStr = lagosToday()): Birthd
   out.upcoming.sort(byDay);
   out.earlier.sort(byDay);
   out.nextMonth.sort(byDay);
+  const nextDay = out.upcoming.length ? out.upcoming[0].day : 0;
+  if (nextDay && nextDay - td <= 7) {
+    out.soon = out.upcoming.filter(b => b.day === nextDay);
+  }
   out.remaining = out.today.length + out.upcoming.length;
   return out;
 }

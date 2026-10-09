@@ -289,12 +289,13 @@ export default function StaffHomeScreen({ navigation }: any) {
           </View>
         ) : null}
 
-        {bdays && (bdays.today.length > 0 || bdays.tomorrow.length > 0) ? (
+        {bdays && (bdays.today.length > 0 || bdays.tomorrow.length > 0 || bdays.soon.length > 0) ? (
           <View style={{ marginTop: spacing.md }}>
             <BirthdayBanner
               today={bdays.today}
               tomorrow={bdays.tomorrow}
-              tomorrowLabel={new Date(addDays(lagosToday(), 1) + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              soon={bdays.soon}
+              tomorrowLabel={(() => { const [, mm, dd] = addDays(lagosToday(), 1).split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mm - 1] + ' ' + dd; })()}
               onPress={() => navigation.navigate('Birthdays')}
             />
           </View>
