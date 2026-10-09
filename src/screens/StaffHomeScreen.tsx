@@ -81,6 +81,7 @@ export default function StaffHomeScreen({ navigation }: any) {
   const [news, setNews] = useState(false);
   const [annUnread, setAnnUnread] = useState(0);
   const [bdays, setBdays] = useState<BirthdaySummary | null>(null);
+  const [bdayError, setBdayError] = useState('');
   const userId = useRef('');
 
   const load = useCallback(async () => {
@@ -105,7 +106,7 @@ export default function StaffHomeScreen({ navigation }: any) {
       setData(result);
       setVacancyIndex(0);
       fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
-      fetchBirthdayRows(result.school.id).then(rows => setBdays(summarizeBirthdays(rows))).catch(() => setBdays(summarizeBirthdays([])));
+      fetchBirthdayRows(result.school.id).then(rows => { setBdayError(''); setBdays(summarizeBirthdays(rows)); }).catch((e: any) => { setBdayError(e && e.message ? e.message : 'error'); setBdays(summarizeBirthdays([])); });
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
       setFailed(true);
@@ -300,21 +301,29 @@ export default function StaffHomeScreen({ navigation }: any) {
             />
           </View>
         ) : null}
-        {bdays ? (
-          <Pressable onPress={() => navigation.navigate('Birthdays')} style={[styles.bdayRow, bdays.remaining === 0 && { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
-            <View style={styles.bdayIcon}>
-              <Icon name="calendar" size={17} color={bdays.remaining > 0 ? colors.success : colors.textMuted} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>All Upcoming Birthdays</Text>
-              <Text style={[text.caption, { color: colors.textMuted }]} numberOfLines={1}>
-                {bdays.remaining > 0 ? 'This month' : bdays.nextMonth.length > 0 ? 'None left this month. ' + bdays.nextMonth.length + ' next month' : 'No upcoming birthdays this month'}
-              </Text>
-            </View>
-            <Text style={[styles.bdayCount, bdays.remaining === 0 && { backgroundColor: colors.border, color: colors.textMuted }]}>{String(bdays.remaining)}</Text>
-            <Icon name="chevron" size={16} color={colors.textMuted} />
-          </Pressable>
-        ) : null}
+        <Pressable onPress={() => navigation.navigate('Birthdays')} style={[styles.bdayRow, (!bdays || bdays.remaining === 0) && { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
+          <View style={styles.bdayIcon}>
+            <Icon name="calendar" size={17} color={bdays && bdays.remaining > 0 ? colors.success : colors.textMuted} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>All Upcoming Birthdays</Text>
+            <Text style={[text.caption, { color: bdayError ? colors.danger : colors.textMuted }]} numberOfLines={1}>
+              {!bdays
+                ? 'Checking birthdays...'
+                : bdayError
+                  ? 'Could not load birthdays. Tap to retry'
+                  : bdays.total === 0
+                    ? 'No student has a date of birth saved yet'
+                    : bdays.remaining > 0
+                      ? 'This month'
+                      : bdays.nextMonth.length > 0
+                        ? 'None left this month. ' + bdays.nextMonth.length + ' next month'
+                        : 'No upcoming birthdays this month'}
+            </Text>
+          </View>
+          <Text style={[styles.bdayCount, (!bdays || bdays.remaining === 0) && { backgroundColor: colors.border, color: colors.textMuted }]}>{bdays ? String(bdays.remaining) : '-'}</Text>
+          <Icon name="chevron" size={16} color={colors.textMuted} />
+        </Pressable>
 
         <FadeIn delay={80} style={{ marginTop: spacing.lg }}>
           {data.layout === 'adminFees' ? (

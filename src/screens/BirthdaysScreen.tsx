@@ -90,7 +90,7 @@ export default function BirthdaysScreen() {
           <EmptyState
             icon="gift"
             title="No birthdays here"
-            message={view === 'earlier' ? 'No birthdays have passed yet this month.' : view === 'next' ? 'No student birthdays next month.' : 'No more birthdays this month. Make sure student dates of birth are filled in.'}
+            message={view === 'earlier' ? 'No birthdays have passed yet this month.' : view === 'next' ? 'No student birthdays next month.' : (sum.total === 0 ? 'No student has a date of birth saved yet. Open a student, tap edit, and fill in Date of birth.' : 'No more birthdays this month.')}
           />
         ) : (
           <View style={styles.card}>

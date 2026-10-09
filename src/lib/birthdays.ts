@@ -11,6 +11,7 @@ export type BirthdaySummary = {
   earlier: Birthday[]; // already celebrated this month
   nextMonth: Birthday[];
   soon: Birthday[]; // next upcoming day, only if within a week
+  total: number; // students with a usable date of birth
   remaining: number; // today and the rest of this month
 };
 
@@ -26,7 +27,10 @@ export async function fetchBirthdayRows(schoolId: string, _force = false) {
     if (error || !data) {
       logger.error('Birthdays could not load: ' + (error ? error.message : 'no data'));
       const kept = cache[schoolId];
-      return kept ? kept.rows : rows;
+      if (kept) {
+        return kept.rows;
+      }
+      throw new Error(error ? error.message : 'Could not load birthdays.');
     }
     rows.push(...data);
     if (data.length < 1000) {
@@ -45,7 +49,7 @@ export function summarizeBirthdays(rows: any[], todayStr = lagosToday()): Birthd
   const [ty, tm, td] = todayStr.split('-').map(Number);
   const [, tomM, tomD] = addDays(todayStr, 1).split('-').map(Number);
   const nextM = tm === 12 ? 1 : tm + 1;
-  const out: BirthdaySummary = { today: [], tomorrow: [], upcoming: [], earlier: [], nextMonth: [], soon: [], remaining: 0 };
+  const out: BirthdaySummary = { today: [], tomorrow: [], upcoming: [], earlier: [], nextMonth: [], soon: [], total: 0, remaining: 0 };
 
   for (const r of rows) {
     const parts = String(r.dob || '').slice(0, 10).split('-').map(Number);
@@ -53,6 +57,10 @@ export function summarizeBirthdays(rows: any[], todayStr = lagosToday()): Birthd
       continue;
     }
     const [by, m, dRaw] = parts;
+    if (m < 1 || m > 12 || dRaw < 1 || dRaw > 31) {
+      continue;
+    }
+    out.total += 1;
     // A 29 February birthday is marked on the 28th in years without one.
     const d = m === 2 && dRaw === 29 && !leap(ty) ? 28 : dRaw;
     const year = m < tm || (m === tm && d < td) ? ty + 1 : ty;
