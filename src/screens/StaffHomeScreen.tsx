@@ -105,7 +105,7 @@ export default function StaffHomeScreen({ navigation }: any) {
       setData(result);
       setVacancyIndex(0);
       fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
-      fetchBirthdayRows(result.school.id).then(rows => setBdays(summarizeBirthdays(rows))).catch(() => {});
+      fetchBirthdayRows(result.school.id).then(rows => setBdays(summarizeBirthdays(rows))).catch(() => setBdays(summarizeBirthdays([])));
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
       setFailed(true);
@@ -299,16 +299,18 @@ export default function StaffHomeScreen({ navigation }: any) {
             />
           </View>
         ) : null}
-        {bdays && bdays.remaining > 0 ? (
-          <Pressable onPress={() => navigation.navigate('Birthdays')} style={styles.bdayRow}>
+        {bdays ? (
+          <Pressable onPress={() => navigation.navigate('Birthdays')} style={[styles.bdayRow, bdays.remaining === 0 && { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
             <View style={styles.bdayIcon}>
-              <Icon name="calendar" size={17} color={colors.success} />
+              <Icon name="calendar" size={17} color={bdays.remaining > 0 ? colors.success : colors.textMuted} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>All Upcoming Birthdays</Text>
-              <Text style={[text.caption, { color: colors.textMuted }]}>This month</Text>
+              <Text style={[text.caption, { color: colors.textMuted }]} numberOfLines={1}>
+                {bdays.remaining > 0 ? 'This month' : bdays.nextMonth.length > 0 ? 'None left this month. ' + bdays.nextMonth.length + ' next month' : 'No upcoming birthdays this month'}
+              </Text>
             </View>
-            <Text style={styles.bdayCount}>{String(bdays.remaining)}</Text>
+            <Text style={[styles.bdayCount, bdays.remaining === 0 && { backgroundColor: colors.border, color: colors.textMuted }]}>{String(bdays.remaining)}</Text>
             <Icon name="chevron" size={16} color={colors.textMuted} />
           </Pressable>
         ) : null}

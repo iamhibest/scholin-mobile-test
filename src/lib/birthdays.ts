@@ -15,16 +15,15 @@ export type BirthdaySummary = {
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cache: Record<string, { at: number; rows: any[] }> = {};
 
-export async function fetchBirthdayRows(schoolId: string, force = false) {
-  const hit = cache[schoolId];
-  if (hit && !force && Date.now() - hit.at < 10 * 60 * 1000) {
-    return hit.rows;
-  }
+// Always asks for the current list, so a student added a minute ago is counted at once.
+// The last good list is only used if the internet fails.
+export async function fetchBirthdayRows(schoolId: string, _force = false) {
   const rows: any[] = [];
   for (let from = 0; from < 20000; from += 1000) {
     const { data, error } = await supabase.from('students').select('id, full_name, dob, photo_url').eq('school_id', schoolId).not('dob', 'is', null).range(from, from + 999);
     if (error || !data) {
-      break;
+      const kept = cache[schoolId];
+      return kept ? kept.rows : rows;
     }
     rows.push(...data);
     if (data.length < 1000) {
