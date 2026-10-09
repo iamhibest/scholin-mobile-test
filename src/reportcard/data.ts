@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { supabase } from '../lib/supabase';
 import { computeDayValue } from '../lib/attendance';
+import { pickBand } from '../lib/bandMatch';
 /* =========================================================
    Report Card — data gathering (shared, logic unchanged)
    =========================================================
@@ -106,9 +107,9 @@ export async function gatherReportCardData({ studentId, classId, termId, session
 
   function getGrade(total) {
     const percent = (total / maxPerSubject) * 100;
-    // Inclusive on both ends: a 40-49 band must match exactly 49%,
-    // and a 70-100 band must match exactly 100%.
-    const match = (gradingScale || []).find(g => percent >= g.min_score && percent <= g.max_score);
+    // pickBand also covers in-between values such as 49.5% or 29.5%, which fall in the gap
+    // between whole-number bands (40-49 and 50-59) and used to show a dash.
+    const match = pickBand(gradingScale, percent);
     return match ? { grade: match.grade, remark: match.remark } : { grade: '-', remark: '' };
   }
 

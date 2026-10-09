@@ -108,3 +108,13 @@ upload-image stays exactly as it is.
 1. Run migrations/user-management-migration.sql in the SQL editor.
 2. In Supabase, Edge Functions, create a function named manage-user and paste manage-user.ts into it, then deploy.
 3. No extra secrets are needed. It uses the service role key Supabase already provides.
+
+# Phase 7x: Payment history, vacancy clean-up
+
+## Run once in the Supabase SQL editor
+1. migrations/school-payment-history-migration.sql  (Payment history screen and receipts)
+2. migrations/vacancy-auto-delete-migration.sql      (deletes vacancies 7 days after they expire; needs the pg_cron extension)
+
+## Optional function
+- sync-school-settlements (new file in this folder). Lets a school tap "Check Paystack for payouts".
+  Without it, payments turn to Paid when the super admin presses Sync settlements, as before.

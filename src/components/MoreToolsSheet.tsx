@@ -8,7 +8,7 @@ import { toneColors } from './QuickTile';
 type Tool = { label: string; icon: IconName; tone: keyof typeof toneColors };
 type Section = { title: string; tools: Tool[] };
 
-const sections: Section[] = [
+const allSections: Section[] = [
   {
     title: 'Academics',
     tools: [
@@ -32,6 +32,7 @@ const sections: Section[] = [
     title: 'School records',
     tools: [
       { label: 'Events and Fees', icon: 'receipt', tone: 'rose' },
+      { label: 'Payment History', icon: 'bank', tone: 'teal' },
       { label: 'Sessions and Terms', icon: 'calendar', tone: 'teal' },
       { label: 'Auto Comments', icon: 'tags', tone: 'pink' },
       { label: 'Archived Sessions', icon: 'layers', tone: 'gold' },
@@ -40,9 +41,11 @@ const sections: Section[] = [
   },
 ];
 
-type Props = { visible: boolean; onClose: () => void; onSelect: (label: string) => void };
+type Props = { visible: boolean; onClose: () => void; onSelect: (label: string) => void; hiddenLabels?: string[] };
 
-export default function MoreToolsSheet({ visible, onClose, onSelect }: Props) {
+export default function MoreToolsSheet({ visible, onClose, onSelect, hiddenLabels }: Props) {
+  const hide = hiddenLabels || [];
+  const sections = allSections.map(sec => ({ ...sec, tools: sec.tools.filter(t => !hide.includes(t.label)) })).filter(sec => sec.tools.length > 0);
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [mounted, setMounted] = useState(visible);

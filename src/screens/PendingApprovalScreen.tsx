@@ -38,6 +38,8 @@ export default function PendingApprovalScreen({ navigation }: any) {
         <Text style={[text.body, styles.body]}>Your request to join has been sent. Once your school's admin approves you, you'll get full access automatically.</Text>
         {note ? <Text style={[text.small, { color: colors.textMuted, marginTop: spacing.lg }]}>{note}</Text> : null}
         <Button title="Check again" variant="outline" onPress={check} loading={loading} style={styles.btn} />
+        <Button title="Join another school" variant="soft" onPress={() => navigation.navigate('JoinSchool')} style={styles.btn2} />
+        <Button title="Register my own school" variant="soft" onPress={() => navigation.navigate('RegisterSchool')} style={styles.btn2} />
         <Button title="Sign out" variant="ghost" onPress={signOut} />
       </View>
     </Screen>
@@ -49,5 +51,6 @@ const styles = StyleSheet.create({
   circle: { width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
   title: { color: colors.primary, marginTop: spacing.xl, textAlign: 'center' },
   body: { color: colors.textMuted, marginTop: spacing.sm, textAlign: 'center' },
+  btn2: { alignSelf: 'stretch', marginBottom: spacing.sm },
   btn: { alignSelf: 'stretch', marginTop: spacing.xl, marginBottom: spacing.sm },
 });

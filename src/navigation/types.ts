@@ -97,6 +97,7 @@ export type RootStackParamList = {
   PostVacancy: { editId?: string } | undefined;
   MyVacancies: undefined;
   Events: undefined;
+  PaymentHistory: { schoolId?: string } | undefined;
   EventForm: undefined;
   EventDetail: { eventId: string };
   Receipt: { html: string; fileName: string };

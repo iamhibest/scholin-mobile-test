@@ -59,6 +59,7 @@ const featureRoutes: Record<string, string> = {
   'School Settings': 'SchoolSettings',
   'Subscription': 'Subscription',
   'Events and Fees': 'Events',
+  'Payment History': 'PaymentHistory',
   'My Profile': 'MyProfile',
   'Recent Activity': 'ActivityLog',
   'School Overview': 'SchoolOverview',
@@ -395,7 +396,7 @@ export default function StaffHomeScreen({ navigation }: any) {
 
       <SideMenu visible={menu} onClose={() => setMenu(false)} groups={groups} header={schoolHeader} footer={{ label: 'Sign out', icon: 'logout', onPress: signOut }} />
 
-      <MoreToolsSheet visible={tools} onClose={() => setTools(false)} onSelect={label => { setTools(false); setTimeout(() => go(label), 280); }} />
+      <MoreToolsSheet hiddenLabels={data.layout === 'adminFees' ? [] : ['Payment History', 'Events and Fees']} visible={tools} onClose={() => setTools(false)} onSelect={label => { setTools(false); setTimeout(() => go(label), 280); }} />
 
       <BottomSheet visible={news} onClose={() => setNews(false)} title={data.announcement?.title || 'Announcement'}>
         <ScrollView style={{ maxHeight: 360 }}>

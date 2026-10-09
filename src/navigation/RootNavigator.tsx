@@ -65,6 +65,7 @@ import SuperAdminSchoolViewScreen from '../screens/SuperAdminSchoolViewScreen';
 import SuperAdminUsersScreen from '../screens/SuperAdminUsersScreen';
 import SuperAdminSubscriptionPricingScreen from '../screens/SuperAdminSubscriptionPricingScreen';
 import SuperAdminSubscriptionsScreen from '../screens/SuperAdminSubscriptionsScreen';
+import PaymentHistoryScreen from '../screens/PaymentHistoryScreen';
 import SuperAdminFinanceScreen from '../screens/SuperAdminFinanceScreen';
 import SuperAdminReferralsScreen from '../screens/SuperAdminReferralsScreen';
 import SuperAdminReferralDetailScreen from '../screens/SuperAdminReferralDetailScreen';
@@ -209,6 +210,7 @@ export default function RootNavigator() {
       <Stack.Screen name="PostVacancy" component={PostVacancyScreen} options={{ ...headerOptions, title: 'Post a vacancy' }} />
       <Stack.Screen name="MyVacancies" component={MyVacanciesScreen} options={{ ...headerOptions, title: 'My postings' }} />
       <Stack.Screen name="Events" component={EventsScreen} options={{ ...headerOptions, title: 'Events and Fees' }} />
+      <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} options={{ ...headerOptions, title: 'Payment history' }} />
       <Stack.Screen name="EventForm" component={EventFormScreen} options={{ ...headerOptions, title: 'New event' }} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} options={{ ...headerOptions, title: 'Event' }} />
       <Stack.Screen name="ParentFeeDetail" component={ParentFeeDetailScreen} options={{ ...headerOptions, title: 'Fee details' }} />

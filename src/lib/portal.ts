@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { pickBand } from './bandMatch';
 import { addDays, computeDayValue, Mode } from './attendance';
 
 function fail(error: any, fallback: string): never {
@@ -266,8 +267,10 @@ export async function suggestComment(schoolId: string, classId: string, termId: 
     return { message: 'No scores recorded yet for published subjects.' };
   }
   const avg = (totals.reduce((a, b) => a + b, 0) / totals.length / maxPer) * 100;
-  const { data: bands } = await supabase.from('auto_comment_bands').select('*').eq('school_id', schoolId).lte('min_score', avg).gte('max_score', avg).limit(1);
-  if (!bands || bands.length === 0) {
+  const { data: allBands } = await supabase.from('auto_comment_bands').select('*').eq('school_id', schoolId);
+  const picked = pickBand(allBands as any[], avg);
+  const bands = picked ? [picked] : [];
+  if (bands.length === 0) {
     return { message: 'Average ' + avg.toFixed(1) + '%. No matching comment band is set up. Configure one in Auto Comments.' };
   }
   return { message: 'Applied based on a ' + avg.toFixed(1) + '% average. You can still edit any text.', band: bands[0] };

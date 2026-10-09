@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { pickBand } from './bandMatch';
 
 // School overview data. Mirrors school-overview.html: the heavy analysis runs in the database
 // (get_* functions), and this file only asks for it and shapes it for the screen.
@@ -122,7 +123,7 @@ export async function loadOverview(ctx: OverviewCtx, sessionId: string | null, t
     const counts: Record<string, number> = {};
     scale.forEach(g => (counts[g.grade] = 0));
     (moversData.students || []).forEach((s: any) => {
-      const band = scale.find(g => s.overall_pct >= g.min_score && s.overall_pct <= g.max_score);
+      const band = pickBand(scale, Number(s.overall_pct));
       if (band) {
         counts[band.grade] = (counts[band.grade] || 0) + 1;
       }

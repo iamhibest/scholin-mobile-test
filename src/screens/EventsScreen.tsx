@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Badge, Button, Card, EmptyState, Fab, Notice, Screen, Skeleton } from '../components';
+import { Badge, Button, Card, EmptyState, Fab, Icon, Notice, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
 import { getSchoolAccessStatus } from '../lib/dashboard';
@@ -91,6 +91,16 @@ export default function EventsScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
       >
         <Notice message={error} tone="error" />
+        <Pressable onPress={() => navigation.navigate('PaymentHistory')} style={styles.payShortcut}>
+          <View style={styles.payIcon}>
+            <Icon name="bank" size={20} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[text.bodyStrong, { color: colors.text }]}>Payment history</Text>
+            <Text style={[text.caption, { color: colors.textMuted }]}>See what Paystack has paid to your account</Text>
+          </View>
+          <Icon name="chevron" size={16} color={colors.textMuted} />
+        </Pressable>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
           {FILTERS.map(f => (
             <Pressable key={f.value} onPress={() => setFilter(f.value)} style={[styles.chip, filter === f.value && styles.chipOn]}>
@@ -154,6 +164,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  payShortcut: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
+  payIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: 120 },
   filters: { gap: spacing.sm, paddingBottom: spacing.lg },
   chip: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20, backgroundColor: '#EEF1F6' },

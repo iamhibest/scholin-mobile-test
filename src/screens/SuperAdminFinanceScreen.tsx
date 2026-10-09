@@ -20,7 +20,7 @@ function Box({ label, value, color }: { label: string; value: number; color?: st
   );
 }
 
-export default function SuperAdminFinanceScreen() {
+export default function SuperAdminFinanceScreen({ navigation }: any) {
   const [figures, setFigures] = useState<any[] | null>(null);
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -133,6 +133,7 @@ export default function SuperAdminFinanceScreen() {
             </Pressable>
             {open === s.id ? (
               <View style={styles.detail}>
+                <Button title="Open payment history and receipts" variant="soft" onPress={() => navigation.navigate('PaymentHistory', { schoolId: s.id })} />
                 {details[s.id] === null || details[s.id] === undefined ? (
                   <Text style={[text.small, { color: colors.textMuted }]}>Loading payments...</Text>
                 ) : (details[s.id] as any[]).length === 0 ? (

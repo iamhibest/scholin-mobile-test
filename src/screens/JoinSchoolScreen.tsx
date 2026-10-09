@@ -64,8 +64,9 @@ export default function JoinSchoolScreen({ navigation }: any) {
         return;
       }
       setOk(true);
-      setMsg('Request sent! You will get access once your school admin approves you.');
-      setTimeout(() => navigation.reset({ index: 0, routes: [{ name: 'PendingApproval' }] }), 1800);
+      setMsg('Request sent to ' + school.name + '! You can join another school or register your own while you wait.');
+      setSchools(list => list.filter(x => x.id !== school.id));
+      setTimeout(() => navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] }), 1800);
     } catch (e: any) {
       logger.error('Join school failed: ' + e.message);
       setMsg('Something went wrong. Please try again.');

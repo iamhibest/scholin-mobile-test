@@ -39,13 +39,9 @@ export async function resolveDestination(userId: string): Promise<Destination> {
         if (links && links.length > 0) {
           dest = 'ParentHome';
         } else {
-          const { data: pending } = await supabase
-            .from('school_members')
-            .select('id')
-            .eq('profile_id', userId)
-            .eq('is_active', false)
-            .limit(1);
-          dest = pending && pending.length > 0 ? 'PendingApproval' : 'Onboarding';
+          // Waiting for approval is no longer a dead end: the person goes to the Onboarding choices
+          // (which also list their pending requests) so they can join another school or register their own.
+          dest = 'Onboarding';
         }
       }
     }
