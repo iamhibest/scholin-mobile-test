@@ -5,8 +5,7 @@
 -- The app saves its token in your existing push_tokens table, the same table the
 -- send-push-notification function reads. This works out your column names itself
 -- (user_id or profile_id, token or fcm_token, platform, school_id) so it fits the table
--- your HTML app already uses. If the table has a school_id column, one row is saved per school
--- the person belongs to, so the function can find them by school.
+-- your HTML app already uses. If the table has a school_id column, the person's first school is filled in.
 -- =========================================================
 create or replace function register_push_token(p_token text, p_platform text default 'android')
 returns void
@@ -22,11 +21,10 @@ declare
   v_platform_col text;
   v_has_school boolean;
   v_school uuid;
-  v_count int := 0;
-  v_rows int := 0;
   v_names text;
   v_vals text;
   v_flag text;
+  v_rows int := 0;
 begin
   if v_uid is null then
     raise exception 'Not signed in';
@@ -53,45 +51,35 @@ begin
   -- A phone belongs to whoever is signed in on it now.
   execute format('delete from push_tokens where %I = $1', v_token_col) using p_token;
 
+  -- One row per person and phone. (The table is unique on person + token, so one row is all that fits.)
+  v_names := format('%I, %I', v_user_col, v_token_col);
+  v_vals := format('%L, %L', v_uid, p_token);
+  if v_platform_col is not null then
+    v_names := v_names || format(', %I', v_platform_col);
+    v_vals := v_vals || format(', %L', p_platform);
+  end if;
+  foreach v_flag in array array['is_active', 'active', 'enabled'] loop
+    if v_flag = any(v_cols) then
+      v_names := v_names || format(', %I', v_flag);
+      v_vals := v_vals || ', true';
+    end if;
+  end loop;
+  if v_has_school then
+    select school_id into v_school from school_members where profile_id = v_uid and is_active = true limit 1;
+    if v_school is not null then
+      v_names := v_names || ', school_id';
+      v_vals := v_vals || format(', %L', v_school);
+    end if;
+  end if;
+
   begin
-    v_names := format('%I, %I', v_user_col, v_token_col);
-    if v_platform_col is not null then
-      v_names := v_names || format(', %I', v_platform_col);
-    end if;
-    foreach v_flag in array array['is_active', 'active', 'enabled'] loop
-      if v_flag = any(v_cols) then
-        v_names := v_names || format(', %I', v_flag);
-      end if;
-    end loop;
-
-    if v_has_school then
-      for v_school in select distinct school_id from school_members where profile_id = v_uid and is_active = true loop
-        v_vals := format('%L, %L', v_uid, p_token);
-        if v_platform_col is not null then v_vals := v_vals || format(', %L', p_platform); end if;
-        foreach v_flag in array array['is_active', 'active', 'enabled'] loop
-          if v_flag = any(v_cols) then v_vals := v_vals || ', true'; end if;
-        end loop;
-        execute 'insert into push_tokens (' || v_names || ', school_id) values (' || v_vals || format(', %L)', v_school);
-        v_count := v_count + 1;
-      end loop;
-    end if;
-
-    if v_count = 0 then
-      v_vals := format('%L, %L', v_uid, p_token);
-      if v_platform_col is not null then v_vals := v_vals || format(', %L', p_platform); end if;
-      foreach v_flag in array array['is_active', 'active', 'enabled'] loop
-        if v_flag = any(v_cols) then v_vals := v_vals || ', true'; end if;
-      end loop;
-      execute 'insert into push_tokens (' || v_names || ') values (' || v_vals || ')';
-    end if;
+    execute 'insert into push_tokens (' || v_names || ') values (' || v_vals || ')';
   exception when unique_violation then
     -- The table allows only one row per person (or per person and platform), so this phone replaces the old one.
     -- Only rows of the same platform are changed, so another device (for example the web app) is left alone.
     if v_platform_col is not null then
       execute format('update push_tokens set %I = $1 where %I = $2 and %I::text = $3', v_token_col, v_user_col, v_platform_col) using p_token, v_uid, p_platform;
       get diagnostics v_rows = row_count;
-    else
-      v_rows := 0;
     end if;
     if v_rows = 0 then
       -- No row of this platform: the table keeps one row per person, so replace that row.

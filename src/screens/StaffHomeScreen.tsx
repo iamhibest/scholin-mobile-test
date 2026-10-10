@@ -105,7 +105,6 @@ export default function StaffHomeScreen({ navigation }: any) {
         return;
       }
       setData(result);
-      setVacancyIndex(0);
       fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
