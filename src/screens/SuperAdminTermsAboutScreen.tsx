@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button, Card, Input, Notice, Screen, Skeleton } from '../components';
 import { colors, spacing, text } from '../theme';
@@ -15,6 +16,12 @@ export default function SuperAdminTermsAboutScreen() {
   const [version, setVersion] = useState(1);
   const [termsMeta, setTermsMeta] = useState('');
   const [aboutMeta, setAboutMeta] = useState('');
+  const [privacy, setPrivacy] = useState('');
+  const [privacyMeta, setPrivacyMeta] = useState('');
+  const [contact, setContact] = useState('');
+  const [contactMeta, setContactMeta] = useState('');
+  const [privacyMsg, setPrivacyMsg] = useState<Msg>(none);
+  const [contactMsg, setContactMsg] = useState<Msg>(none);
   const [busy, setBusy] = useState('');
   const [termsMsg, setTermsMsg] = useState<Msg>(none);
   const [aboutMsg, setAboutMsg] = useState<Msg>(none);
@@ -28,6 +35,10 @@ export default function SuperAdminTermsAboutScreen() {
       setAbout(s && s.about_scholin ? s.about_scholin : '');
       setTermsMeta(s ? 'Currently version ' + v + (s.terms_updated_at ? '. Last updated ' + new Date(s.terms_updated_at).toLocaleDateString() + '.' : '.') : 'Not set yet. It is created when you save.');
       setAboutMeta(s && s.about_updated_at ? 'Last updated ' + new Date(s.about_updated_at).toLocaleDateString() + '.' : 'Not set yet.');
+      setPrivacy(s && s.privacy_policy ? s.privacy_policy : '');
+      setPrivacyMeta(s && s.privacy_updated_at ? 'Last updated ' + new Date(s.privacy_updated_at).toLocaleDateString() + '.' : 'Not set yet.');
+      setContact(s && s.contact_info ? s.contact_info : '');
+      setContactMeta(s && s.contact_updated_at ? 'Last updated ' + new Date(s.contact_updated_at).toLocaleDateString() + '.' : 'Not set yet.');
     } catch {
       setTermsMsg({ message: 'Could not load the current content.', tone: 'error' });
     }
@@ -75,6 +86,40 @@ export default function SuperAdminTermsAboutScreen() {
     setBusy('');
   };
 
+  const savePrivacy = async () => {
+    setPrivacyMsg(none);
+    if (!privacy.trim()) {
+      setPrivacyMsg({ message: 'The Privacy Policy cannot be empty.', tone: 'error' });
+      return;
+    }
+    setBusy('privacy');
+    try {
+      await saveSettings({ privacy_policy: privacy.trim(), privacy_updated_at: new Date().toISOString() });
+      setPrivacyMsg({ message: 'Privacy Policy saved. Everyone sees it in Settings now.', tone: 'success' });
+      await load();
+    } catch (e: any) {
+      setPrivacyMsg({ message: e.message, tone: 'error' });
+    }
+    setBusy('');
+  };
+
+  const saveContact = async () => {
+    setContactMsg(none);
+    if (!contact.trim()) {
+      setContactMsg({ message: 'Contact information cannot be empty.', tone: 'error' });
+      return;
+    }
+    setBusy('contact');
+    try {
+      await saveSettings({ contact_info: contact.trim(), contact_updated_at: new Date().toISOString() });
+      setContactMsg({ message: 'Contact information saved. Everyone sees it in Settings now.', tone: 'success' });
+      await load();
+    } catch (e: any) {
+      setContactMsg({ message: e.message, tone: 'error' });
+    }
+    setBusy('');
+  };
+
   if (loading) {
     return (
       <Screen>
@@ -103,6 +148,22 @@ export default function SuperAdminTermsAboutScreen() {
           <Notice message={aboutMsg.message} tone={aboutMsg.tone} />
           <Input label="About Scholin" value={about} onChangeText={setAbout} multiline textAlignVertical="top" placeholder="Tell people about Scholin" style={{ minHeight: 180 }} />
           <Button title="Save about" loading={busy === 'about'} onPress={saveAbout} />
+        </Card>
+
+        <Card style={styles.block}>
+          <Text style={[text.h3, { color: colors.text }]}>Privacy Policy</Text>
+          <Text style={[text.small, { color: colors.textMuted, marginVertical: spacing.md }]}>{privacyMeta}</Text>
+          <Notice message={privacyMsg.message} tone={privacyMsg.tone} />
+          <Input label="Privacy Policy" value={privacy} onChangeText={setPrivacy} multiline textAlignVertical="top" placeholder="Write the privacy policy here" style={{ minHeight: 240 }} />
+          <Button title="Save privacy policy" loading={busy === 'privacy'} onPress={savePrivacy} />
+        </Card>
+
+        <Card style={styles.block}>
+          <Text style={[text.h3, { color: colors.text }]}>Contact information</Text>
+          <Text style={[text.small, { color: colors.textMuted, marginVertical: spacing.md }]}>{'Put each email, phone number, website and address on its own line. Emails, phone numbers and websites become tappable. ' + contactMeta}</Text>
+          <Notice message={contactMsg.message} tone={contactMsg.tone} />
+          <Input label="Contact information" value={contact} onChangeText={setContact} multiline textAlignVertical="top" placeholder={'Email: support@example.com\nPhone: 08012345678'} style={{ minHeight: 140 }} />
+          <Button title="Save contact information" loading={busy === 'contact'} onPress={saveContact} />
         </Card>
       </ScrollView>
     </Screen>

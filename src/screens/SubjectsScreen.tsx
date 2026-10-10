@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button, Card, EmptyState, Icon, Input, Notice, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
@@ -98,7 +99,7 @@ export default function SubjectsScreen() {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={list}
         keyExtractor={s => s.id}
         keyboardShouldPersistTaps="handled"

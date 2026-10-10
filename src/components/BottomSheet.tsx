@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Keyboard, Modal, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, Modal, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import ScrollView from './KeyboardAwareScrollView';
+import { keyboardTop, onKeyboardHide, onKeyboardShow } from '../lib/keyboardMetrics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, text } from '../theme';
 
@@ -18,9 +20,21 @@ export default function BottomSheet({ visible, onClose, title, children }: Props
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
+  const rootRef = useRef<View>(null);
   useEffect(() => {
-    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', e => setKeyboard(e.endCoordinates.height));
-    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboard(0));
+    const show = onKeyboardShow(h => {
+      const measure = () => {
+        if (!rootRef.current) {
+          setKeyboard(h);
+          return;
+        }
+        // How much of this popup's area the keyboard really covers (zero if Android already resized it).
+        rootRef.current.measureInWindow((_x, y, _w, rh) => setKeyboard(Math.max(0, Math.round(y + rh - keyboardTop(h)))));
+      };
+      measure();
+      setTimeout(measure, 180);
+    });
+    const hide = onKeyboardHide(() => setKeyboard(0));
     return () => {
       show.remove();
       hide.remove();
@@ -70,7 +84,7 @@ export default function BottomSheet({ visible, onClose, title, children }: Props
 
   return (
     <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.root}>
+      <View ref={rootRef} collapsable={false} style={styles.root}>
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: colors.overlay, opacity: slide }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>

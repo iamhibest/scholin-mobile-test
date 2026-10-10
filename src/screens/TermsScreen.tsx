@@ -1,14 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, Screen, Skeleton } from '../components';
 import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 
+type Tab = 'terms' | 'privacy' | 'contact' | 'about';
+
 type Settings = {
   terms_and_conditions?: string;
   terms_updated_at?: string;
+  privacy_policy?: string;
+  privacy_updated_at?: string;
+  contact_info?: string;
+  contact_updated_at?: string;
   about_scholin?: string;
   about_updated_at?: string;
+};
+
+const TABS: Array<{ key: Tab; label: string }> = [
+  { key: 'terms', label: 'Terms' },
+  { key: 'privacy', label: 'Privacy' },
+  { key: 'contact', label: 'Contact' },
+  { key: 'about', label: 'About' },
+];
+
+const EMPTY: Record<Tab, string> = {
+  terms: 'Terms and Conditions have not been set up yet.',
+  privacy: 'The Privacy Policy has not been set up yet.',
+  contact: 'Contact information has not been set up yet.',
+  about: 'About Scholin has not been set up yet.',
 };
 
 function formatDate(value?: string) {
@@ -18,8 +38,33 @@ function formatDate(value?: string) {
   return 'Last updated ' + new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-export default function TermsScreen() {
-  const [tab, setTab] = useState<'terms' | 'about'>('terms');
+const TOKEN = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,;:!?)\]]|\+?\d[\d\s-]{7,}\d)/gi;
+
+// Plain text where emails, web addresses and phone numbers can be tapped.
+function RichText({ value }: { value: string }) {
+  const parts = value.split(TOKEN);
+  return (
+    <Text selectable style={[text.body, { color: colors.text }]}>
+      {parts.map((p, i) => {
+        if (i % 2 === 0) {
+          return p;
+        }
+        const isMail = p.indexOf('@') > 0;
+        const isWeb = /^(https?:\/\/|www\.)/i.test(p);
+        const target = isMail ? 'mailto:' + p : isWeb ? (/^https?:\/\//i.test(p) ? p : 'https://' + p) : 'tel:' + p.replace(/[\s-]/g, '');
+        return (
+          <Text key={i} style={{ color: colors.primary, textDecorationLine: 'underline' }} onPress={() => Linking.openURL(target).catch(() => {})}>
+            {p}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+}
+
+export default function TermsScreen({ route }: any) {
+  const initial: Tab = route && route.params && route.params.tab ? route.params.tab : 'terms';
+  const [tab, setTab] = useState<Tab>(initial);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -27,7 +72,7 @@ export default function TermsScreen() {
   useEffect(() => {
     supabase
       .from('app_settings')
-      .select('terms_and_conditions, terms_updated_at, about_scholin, about_updated_at')
+      .select('*')
       .limit(1)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -40,16 +85,27 @@ export default function TermsScreen() {
       });
   }, []);
 
-  const isTerms = tab === 'terms';
-  const body = isTerms ? settings?.terms_and_conditions || 'Terms and Conditions have not been set up yet.' : settings?.about_scholin || 'About Scholin has not been set up yet.';
-  const meta = formatDate(isTerms ? settings?.terms_updated_at : settings?.about_updated_at);
+  const bodyOf: Record<Tab, string | undefined> = {
+    terms: settings?.terms_and_conditions,
+    privacy: settings?.privacy_policy,
+    contact: settings?.contact_info,
+    about: settings?.about_scholin,
+  };
+  const metaOf: Record<Tab, string | undefined> = {
+    terms: settings?.terms_updated_at,
+    privacy: settings?.privacy_updated_at,
+    contact: settings?.contact_updated_at,
+    about: settings?.about_updated_at,
+  };
+  const body = bodyOf[tab] || EMPTY[tab];
+  const meta = bodyOf[tab] ? formatDate(metaOf[tab]) : '';
 
   return (
     <Screen scroll>
       <View style={styles.tabs}>
-        {(['terms', 'about'] as const).map(t => (
-          <Pressable key={t} onPress={() => setTab(t)} style={[styles.tab, tab === t && styles.tabActive]}>
-            <Text style={[text.bodyStrong, { color: tab === t ? colors.primary : colors.textMuted }]}>{t === 'terms' ? 'Terms and Conditions' : 'About Scholin'}</Text>
+        {TABS.map(t => (
+          <Pressable key={t.key} onPress={() => setTab(t.key)} style={[styles.tab, tab === t.key && styles.tabActive]}>
+            <Text style={[text.bodyStrong, { color: tab === t.key ? colors.primary : colors.textMuted, fontSize: 13 }]} numberOfLines={1}>{t.label}</Text>
           </Pressable>
         ))}
       </View>
@@ -65,7 +121,7 @@ export default function TermsScreen() {
         ) : (
           <>
             {meta ? <Text style={[text.caption, { color: colors.textMuted, marginBottom: spacing.md }]}>{meta}</Text> : null}
-            <Text style={[text.body, { color: colors.text }]}>{body}</Text>
+            <RichText value={body} />
           </>
         )}
       </Card>

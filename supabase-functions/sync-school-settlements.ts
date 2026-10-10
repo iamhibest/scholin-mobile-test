@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
     // Same call as sync-paystack-settlements, for this one school only.
     const list = await ps('/settlement?subaccount=' + encodeURIComponent(school.paystack_subaccount_code) + '&status=success&perPage=50');
-    if (!list?.status) return json(502, { error: 'Could not reach Paystack. Please try again.' });
+    if (!list?.status) return json(502, { error: 'Could not check payments right now. Please try again.' });
 
     let settlements = 0;
     let matched = 0;

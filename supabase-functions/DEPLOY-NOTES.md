@@ -118,3 +118,14 @@ upload-image stays exactly as it is.
 ## Optional function
 - sync-school-settlements (new file in this folder). Lets a school tap "Check Paystack for payouts".
   Without it, payments turn to Paid when the super admin presses Sync settlements, as before.
+
+# Phase 7x: Notifications, Settings pages
+
+## Run once in the Supabase SQL editor
+3. migrations/push-token-registration-migration.sql  (the app saves each phone's token; fits your existing push_tokens table)
+4. migrations/legal-pages-migration.sql               (Privacy Policy and Contact info columns)
+
+## After installing the new APK
+- Sign in once on the phone and allow notifications when asked (Android 13 and above asks).
+- Check in Supabase > Table editor > push_tokens that a new row appeared for that person.
+- If no row appears, open Logs in the app. A line "Could not save notification token" says why.

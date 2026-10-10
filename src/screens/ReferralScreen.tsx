@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import Share from 'react-native-share';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card, EmptyState, Input, Notice, OptionField, PressableScale, Screen, ShineButton, Skeleton } from '../components';

@@ -10,6 +10,7 @@ import ParentLoginScreen from '../screens/ParentLoginScreen';
 import ParentRegisterScreen from '../screens/ParentRegisterScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import TermsScreen from '../screens/TermsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import StaffHomeScreen from '../screens/StaffHomeScreen';
 import ParentHomeScreen from '../screens/ParentHomeScreen';
 import SuperAdminHomeScreen from '../screens/SuperAdminHomeScreen';
@@ -126,7 +127,8 @@ export default function RootNavigator() {
       <Stack.Screen name="ParentLogin" component={ParentLoginScreen} />
       <Stack.Screen name="ParentRegister" component={ParentRegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="Terms" component={TermsScreen} options={{ ...headerOptions, title: 'Terms and About' }} />
+      <Stack.Screen name="Terms" component={TermsScreen} options={{ ...headerOptions, title: 'Terms and Policies' }} />
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ ...headerOptions, title: 'Settings' }} />
       <Stack.Screen name="Home" component={StaffHomeScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="ParentHome" component={ParentHomeScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="SuperAdminHome" component={SuperAdminHomeScreen} options={{ animation: 'fade' }} />

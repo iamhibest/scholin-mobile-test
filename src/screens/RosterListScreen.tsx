@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { EmptyState, Notice, Screen, SearchBar, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
@@ -54,7 +55,7 @@ export default function RosterListScreen({ navigation, route }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={list}
         keyExtractor={(r, i) => r.name + i}
         contentContainerStyle={styles.list}

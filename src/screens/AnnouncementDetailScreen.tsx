@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { EmptyState, LinkedText, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import { fetchAnnouncement } from '../lib/announcements';

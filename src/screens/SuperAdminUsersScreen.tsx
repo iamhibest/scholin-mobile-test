@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Notice, Screen, SearchBar, Skeleton } from '../components';
 import { colors, radius, spacing, text } from '../theme';
@@ -74,7 +75,7 @@ export default function SuperAdminUsersScreen() {
           <Skeleton height={80} radius={20} />
         </View>
       ) : (
-        <FlatList
+        <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
           data={users}
           keyExtractor={u => u.id}
           contentContainerStyle={styles.list}

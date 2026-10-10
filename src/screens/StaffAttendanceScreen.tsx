@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Badge, Button, Card, DateField, EmptyState, OptionField, PeriodControls, Screen, SearchBar, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
@@ -193,7 +194,7 @@ export default function StaffAttendanceScreen({ navigation }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={tab === 'daily' ? rows : staff}
         keyExtractor={(i: any) => (tab === 'daily' ? i.s.id : i.id)}
         keyboardShouldPersistTaps="handled"

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { Avatar, Card, EmptyState, Icon, Screen, SearchBar, Skeleton } from '../components';
 import { colors, spacing, text } from '../theme';
 import { fetchClassRoster } from '../lib/school';
@@ -31,7 +32,7 @@ export default function ClassReportCardsScreen({ navigation, route }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={shown}
         keyExtractor={s => s.id}
         keyboardShouldPersistTaps="handled"

@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomSheet, Badge, Button, Card, DateField, EmptyState, Icon, Input, Notice, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';

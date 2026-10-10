@@ -6,7 +6,8 @@ export type RootStackParamList = {
   ParentLogin: undefined;
   ParentRegister: undefined;
   ForgotPassword: undefined;
-  Terms: undefined;
+  Terms: { tab?: 'terms' | 'privacy' | 'contact' | 'about' } | undefined;
+  Settings: undefined;
   Home: undefined;
   ParentHome: undefined;
   SuperAdminHome: undefined;

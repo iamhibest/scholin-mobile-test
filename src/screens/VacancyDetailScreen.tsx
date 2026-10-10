@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Linking, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import Share from 'react-native-share';
 import { AdSlot, Button, EmptyState, Icon, LinkedText, Notice, PressableScale, Screen, ShineButton, Skeleton } from '../components';
 import { VGREEN } from '../components/JobCard';

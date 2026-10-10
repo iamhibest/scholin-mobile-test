@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Avatar, Badge, Card, EmptyState, Fab, OptionField, Screen, SearchBar, Skeleton } from '../components';
 import { colors, spacing, text } from '../theme';
@@ -132,7 +133,7 @@ export default function StudentsScreen({ navigation }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={visible}
         keyExtractor={s => s.id}
         ListHeaderComponent={header}

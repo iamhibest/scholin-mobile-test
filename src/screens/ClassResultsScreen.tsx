@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar, BottomSheet, Button, Card, Checkbox, EmptyState, Icon, Notice, OptionField, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, shadow, spacing, text } from '../theme';
@@ -22,7 +23,7 @@ export default function ClassResultsScreen({ navigation, route }: any) {
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<Record<string, TextInput | null>>({});
-  const listRef = useRef<FlatList<any>>(null);
+  const listRef = useRef<FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}<any>>(null);
   const [sortKey, setSortKey] = useState<'name' | 'total'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [sheet, setSheet] = useState(false);
@@ -253,7 +254,7 @@ export default function ClassResultsScreen({ navigation, route }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         ref={listRef}
         data={showList ? sorted : []}
         initialNumToRender={Math.max(12, roster.length)}

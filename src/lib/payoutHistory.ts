@@ -35,7 +35,7 @@ export async function fetchPayoutHistory(schoolId: string): Promise<PayoutHistor
 
 // Asks Paystack whether any of this school's payments have been paid out. Safe to fail quietly.
 export async function checkPaystackPayouts(schoolId: string) {
-  return (await callFunction('sync-school-settlements', { school_id: schoolId }, 'Could not check Paystack right now.')) as { settlements_synced: number; payments_matched: number };
+  return (await callFunction('sync-school-settlements', { school_id: schoolId }, 'Could not check payments right now.')) as { settlements_synced: number; payments_matched: number };
 }
 
 export function maskAccount(last4: string) {

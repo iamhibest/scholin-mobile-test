@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Icon, Notice, Screen, SearchBar, SectionTitle, Skeleton, StatCard } from '../components';
 import { IconName } from '../components/Icon';
@@ -18,7 +19,7 @@ const GROUPS: { title: string; tools: Tool[] }[] = [
       { label: 'Staff attendance', desc: 'Clock ins across all schools', icon: 'checklist', route: 'SuperAdminAttendance' },
       { label: 'App settings', desc: 'Logo, support button, feature switches', icon: 'settings', route: 'SuperAdminSettings' },
       { label: 'App version', desc: 'Push an update popup to users', icon: 'server', route: 'SuperAdminAppVersion' },
-      { label: 'Terms and About', desc: 'Terms and conditions, About Scholin', icon: 'file', route: 'SuperAdminTermsAbout' },
+      { label: 'Terms, Privacy and About', desc: 'Terms, privacy policy, contact info, About Scholin', icon: 'file', route: 'SuperAdminTermsAbout' },
     ],
   },
   {

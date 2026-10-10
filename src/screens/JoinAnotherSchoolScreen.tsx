@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { Button, EmptyState, Notice, SchoolMark, Screen, SearchBar, Skeleton } from '../components';
 import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
@@ -60,7 +61,7 @@ export default function JoinAnotherSchoolScreen() {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={list}
         keyExtractor={s => s.id}
         contentContainerStyle={styles.list}

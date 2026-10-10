@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SchoolMark } from '../components/JobCard';
 import { Avatar, BottomSheet, Button, FadeIn, Icon, InfoBanner, MoreToolsSheet, QuickTile, RoundButton, SectionTitle, SideMenu, Skeleton, StatCard, TopBar } from '../components';
@@ -11,7 +12,7 @@ import { colors, fonts, radius, shadow, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
 import { confirmAction } from '../lib/confirm';
 import { fetchUnreadAnnouncements } from '../lib/announcements';
-import { BirthdaySummary, fetchBirthdayRows, summarizeBirthdays } from '../lib/birthdays';
+import { useBirthdays } from '../lib/useBirthdays';
 import BirthdayBanner from '../components/BirthdayBanner';
 import { addDays, lagosToday } from '../lib/attendance';
 import { logger } from '../lib/logger';
@@ -81,9 +82,8 @@ export default function StaffHomeScreen({ navigation }: any) {
   const [tools, setTools] = useState(false);
   const [news, setNews] = useState(false);
   const [annUnread, setAnnUnread] = useState(0);
-  const [bdays, setBdays] = useState<BirthdaySummary | null>(null);
-  const [bdayError, setBdayError] = useState('');
   const userId = useRef('');
+  const { summary: bdays, error: bdayError, reload: reloadBirthdays, todayKey } = useBirthdays(data ? data.school.id : undefined);
 
   const load = useCallback(async () => {
     setFailed(false);
@@ -107,7 +107,6 @@ export default function StaffHomeScreen({ navigation }: any) {
       setData(result);
       setVacancyIndex(0);
       fetchUnreadAnnouncements(result.school.id).then(setAnnUnread);
-      fetchBirthdayRows(result.school.id).then(rows => { setBdayError(''); setBdays(summarizeBirthdays(rows)); }).catch((e: any) => { setBdayError(e && e.message ? e.message : 'error'); setBdays(summarizeBirthdays([])); });
     } catch (e: any) {
       logger.error('Dashboard failed: ' + e.message);
       setFailed(true);
@@ -129,7 +128,8 @@ export default function StaffHomeScreen({ navigation }: any) {
         return;
       }
       load();
-    }, [load]),
+      reloadBirthdays();
+    }, [load, reloadBirthdays]),
   );
 
   function signOut() {
@@ -193,7 +193,6 @@ export default function StaffHomeScreen({ navigation }: any) {
         { label: 'Job Vacancies', icon: 'briefcase', onPress: () => go('Job Vacancies') },
         { label: 'My Profile', icon: 'user', onPress: () => navigation.navigate('MyProfile') },
         { label: 'My Schools', icon: 'school', onPress: () => navigation.navigate('MySchools') },
-        { label: 'Terms and About', icon: 'info', onPress: () => navigation.navigate('Terms') },
         { label: 'Developer tools', icon: 'bug', onPress: () => navigation.navigate('Developer') },
       ],
     },
@@ -297,23 +296,23 @@ export default function StaffHomeScreen({ navigation }: any) {
               today={bdays.today}
               tomorrow={bdays.tomorrow}
               soon={bdays.soon}
-              tomorrowLabel={(() => { const [, mm, dd] = addDays(lagosToday(), 1).split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mm - 1] + ' ' + dd; })()}
+              tomorrowLabel={(() => { const [, mm, dd] = addDays(todayKey, 1).split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mm - 1] + ' ' + dd; })()}
               onPress={() => navigation.navigate('Birthdays')}
             />
           </View>
         ) : null}
-        <Pressable onPress={() => navigation.navigate('Birthdays')} style={[styles.bdayRow, (!bdays || bdays.remaining === 0) && { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
+        <Pressable onPress={() => (!bdays ? reloadBirthdays() : navigation.navigate('Birthdays'))} style={[styles.bdayRow, (!bdays || bdays.remaining === 0) && { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}>
           <View style={styles.bdayIcon}>
             <Icon name="calendar" size={17} color={bdays && bdays.remaining > 0 ? colors.success : colors.textMuted} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[text.bodyStrong, { color: colors.text }]} numberOfLines={1}>All Upcoming Birthdays</Text>
-            <Text style={[text.caption, { color: bdayError ? colors.danger : colors.textMuted }]} numberOfLines={1}>
+            <Text style={[text.caption, { color: !bdays && bdayError ? colors.danger : colors.textMuted }]} numberOfLines={1}>
               {!bdays
-                ? 'Checking birthdays...'
-                : bdayError
+                ? bdayError
                   ? 'Could not load birthdays. Tap to retry'
-                  : bdays.total === 0
+                  : 'Checking birthdays...'
+                : bdays.total === 0
                     ? 'No student has a date of birth saved yet'
                     : bdays.remaining > 0
                       ? 'This month'

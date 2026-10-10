@@ -1,5 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
+import ScrollView from './KeyboardAwareScrollView';
+import KeyboardSafeView from './KeyboardSafeView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '../theme';
 
@@ -15,6 +17,7 @@ export default function Screen({ children, scroll, padded = true, style, backgro
   const inner = padded ? styles.padded : undefined;
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: background || colors.background }]}>
+      <KeyboardSafeView>
       {scroll ? (
         <ScrollView
           contentContainerStyle={[inner, style]}
@@ -25,6 +28,7 @@ export default function Screen({ children, scroll, padded = true, style, backgro
       ) : (
         <View style={[styles.flex, inner, style]}>{children}</View>
       )}
+      </KeyboardSafeView>
     </SafeAreaView>
   );
 }

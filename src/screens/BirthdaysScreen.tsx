@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Avatar, EmptyState, FilterChips, Screen, Skeleton } from '../components';
 import { colors, radius, spacing, text } from '../theme';

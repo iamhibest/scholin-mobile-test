@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardSafeView from '../components/KeyboardSafeView';
 import { Button, Input, Notice, Screen } from '../components';
 import { useChain } from '../lib/useChain';
 import { colors, radius, spacing, text } from '../theme';
@@ -58,6 +59,7 @@ export default function ClassSettingsScreen({ navigation, route }: any) {
       </View>
 
       <Modal visible={confirming} transparent animationType="fade" onRequestClose={() => setConfirming(false)}>
+        <KeyboardSafeView>
         <View style={styles.backdrop}>
           <View style={styles.dialog}>
             <Text style={[text.h3, { color: colors.text }]}>Confirm deletion</Text>
@@ -69,6 +71,7 @@ export default function ClassSettingsScreen({ navigation, route }: any) {
             </View>
           </View>
         </View>
+        </KeyboardSafeView>
       </Modal>
     </Screen>
   );

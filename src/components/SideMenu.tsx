@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fonts, radius, spacing, text } from '../theme';
 import Icon, { IconName } from './Icon';
 import { useBrand } from '../lib/brand';
+import { navigationRef } from '../lib/deeplink';
 
 export type MenuItem = { label: string; icon: IconName; onPress: () => void; hidden?: boolean; active?: boolean };
 export type MenuGroup = { title?: string; items: MenuItem[] };
@@ -95,10 +96,21 @@ export default function SideMenu({ visible, onClose, groups, header, footer }: P
               <Icon name="chevron" size={16} color={colors.textMuted} />
             </Pressable>
           ) : null}
-          <Pressable onPress={() => choose(footer)} style={[styles.footer, { marginBottom: bottomPad }]}>
-            <Icon name={footer.icon} size={20} color={colors.danger} />
-            <Text style={[text.bodyStrong, { color: colors.danger }]}>{footer.label}</Text>
-          </Pressable>
+          <View style={[styles.footerRow, { marginBottom: bottomPad }]}>
+            <Pressable onPress={() => choose(footer)} style={styles.footer}>
+              <Icon name={footer.icon} size={20} color={colors.danger} />
+              <Text style={[text.bodyStrong, { color: colors.danger }]}>{footer.label}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Settings"
+              onPress={() => {
+                onClose();
+                setTimeout(() => navigationRef.isReady() && navigationRef.navigate('Settings'), 240);
+              }}
+              style={styles.gear}>
+              <Icon name="settings" size={22} color={colors.primary} />
+            </Pressable>
+          </View>
         </Animated.View>
       </View>
     </Modal>
@@ -116,5 +128,7 @@ const styles = StyleSheet.create({
   itemActive: { backgroundColor: colors.primarySoft },
   support: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, marginBottom: spacing.sm, borderRadius: radius.md, backgroundColor: colors.primarySoft },
   supportIcon: { width: 32, height: 32, borderRadius: 10 },
-  footer: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg, paddingHorizontal: spacing.md, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+  footerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+  footer: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg, paddingHorizontal: spacing.md },
+  gear: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
 });

@@ -342,7 +342,7 @@ export async function fetchVersionSettings() {
 export async function fetchTermsAndAbout() {
   const { data } = await supabase
     .from('app_settings')
-    .select('id, terms_and_conditions, terms_version, terms_updated_at, about_scholin, about_updated_at')
+    .select('id, terms_and_conditions, terms_version, terms_updated_at, about_scholin, about_updated_at, privacy_policy, privacy_updated_at, contact_info, contact_updated_at')
     .limit(1)
     .maybeSingle();
   return (data || null) as any;

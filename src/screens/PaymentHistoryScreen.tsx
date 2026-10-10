@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Badge, Button, Card, EmptyState, FilterChips, Icon, Notice, Screen, Skeleton } from '../components';
 import { colors, spacing, text } from '../theme';
@@ -49,7 +50,7 @@ export default function PaymentHistoryScreen({ navigation, route }: any) {
     }
   }, [schoolId]);
 
-  // Asks Paystack if anything has been paid out, then reloads. Quiet when it is not available.
+  // Checks if anything has been paid out, then reloads. Quiet when it is not available.
   const check = useCallback(async (manual: boolean) => {
     if (!schoolId) {
       return;
@@ -58,12 +59,12 @@ export default function PaymentHistoryScreen({ navigation, route }: any) {
     try {
       const r = await checkPaystackPayouts(schoolId);
       if (manual) {
-        setMsg({ message: r.payments_matched > 0 ? r.payments_matched + ' payment(s) are now marked as paid to your account.' : 'Checked Paystack. Nothing new has been paid out yet.', tone: 'success' });
+        setMsg({ message: r.payments_matched > 0 ? r.payments_matched + ' payment(s) are now marked as paid to your account.' : 'Checked. Nothing new has been paid to your account yet.', tone: 'success' });
       }
       await load();
     } catch (e: any) {
       if (manual) {
-        setMsg({ message: e.message || 'Could not check Paystack right now.', tone: 'error' });
+        setMsg({ message: e.message || 'Could not check payments right now.', tone: 'error' });
       }
     }
     setChecking(false);
@@ -120,23 +121,23 @@ export default function PaymentHistoryScreen({ navigation, route }: any) {
             <Text style={[text.h3, { color: colors.success }]}>{naira(paidTotal)}</Text>
           </View>
           <View style={[styles.box, { borderColor: '#FDE68A' }]}>
-            <Text style={[text.small, { color: colors.accentDark }]}>Pending from Paystack</Text>
+            <Text style={[text.small, { color: colors.accentDark }]}>Pending payment</Text>
             <Text style={[text.h3, { color: colors.accentDark }]}>{naira(pendingTotal)}</Text>
           </View>
         </View>
         {account ? (
           <View style={styles.account}>
             <Icon name="bank" size={18} color={colors.primary} />
-            <Text style={[text.small, { color: colors.text, flex: 1 }]}>{'Paystack pays to: ' + account}</Text>
+            <Text style={[text.small, { color: colors.text, flex: 1 }]}>{'Payments go to: ' + account}</Text>
           </View>
         ) : null}
-        <Button title="Check Paystack for payouts" variant="outline" loading={checking} onPress={() => check(true)} />
+        <Button title="Check payment" variant="outline" loading={checking} onPress={() => check(true)} />
         <FilterChips options={FILTERS} value={filter} onChange={setFilter} />
         {list.length === 0 ? (
           <EmptyState
             icon="receipt"
             title={all.length === 0 ? 'No online payments yet' : 'Nothing here'}
-            message={all.length === 0 ? 'When a parent pays a fee online it will show here, then change to Paid once Paystack pays it into your account.' : 'No payments match this filter.'}
+            message={all.length === 0 ? 'When a parent pays a fee online it will show here, then change to Paid once it is paid into your account.' : 'No payments match this filter.'}
           />
         ) : (
           list.map(p => {
@@ -154,7 +155,7 @@ export default function PaymentHistoryScreen({ navigation, route }: any) {
                   <View style={styles.bottom}>
                     <Text style={[text.bodyStrong, { color: colors.text }]}>{naira(Number(p.net_amount_to_school || 0))}</Text>
                     <Text style={[text.small, { color: paid ? colors.success : colors.accentDark }]}>
-                      {paid ? 'Paid to your account ' + shortDate(p.settled_at as string) : 'Waiting for Paystack'}
+                      {paid ? 'Paid to your account ' + shortDate(p.settled_at as string) : 'Waiting for payment'}
                     </Text>
                   </View>
                   <Text style={[text.caption, { color: colors.textMuted, marginTop: 4 }]}>{'Parent paid ' + naira(Number(p.amount)) + ' · tap for receipt'}</Text>

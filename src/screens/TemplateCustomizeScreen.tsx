@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { WebView } from 'react-native-webview';
 import { Button, Card, ColorPicker, Notice, Screen, Skeleton, SwitchRow } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';

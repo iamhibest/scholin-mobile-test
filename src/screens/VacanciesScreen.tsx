@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Circle, Line } from 'react-native-svg';
 import { useFocusEffect } from '@react-navigation/native';
 import { AdSlot, BottomSheet, EmptyState, Icon, JobCard, JobSkeleton, Notice, PressableScale, Screen } from '../components';
@@ -224,7 +225,7 @@ export default function VacanciesScreen({ navigation }: any) {
 
   return (
     <Screen padded={false}>
-      <FlatList
+      <FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}
         data={rows}
         keyExtractor={r => (r.kind === 'job' ? r.vacancy.id : r.key)}
         contentContainerStyle={styles.list}

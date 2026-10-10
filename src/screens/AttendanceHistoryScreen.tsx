@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { EmptyState, FilterChips, Icon, Screen, Skeleton } from '../components';
 import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';

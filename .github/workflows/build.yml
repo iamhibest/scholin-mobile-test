@@ -101,7 +101,33 @@ jobs:
                 </intent-filter>
               </activity>"""
           s = s.replace('</activity>', f, 1)
+          # Small white icon shown in the status bar for notifications (instead of a grey square).
+          import re
+          if 'default_notification_icon' not in s:
+              s = re.sub(r'(<application[^>]*>)', r'\1\n      <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_scholin" />', s, count=1)
           open(p, 'w').write(s)
+
+          # Create the notification channels at startup. High importance is what lets a notification
+          # appear in the status bar and pop up on screen. FCM uses fcm_fallback_notification_channel
+          # when the server does not name a channel, so that one is created as high importance too.
+          import glob
+          for kt in glob.glob('app/src/main/java/**/MainApplication.kt', recursive=True):
+              k = open(kt).read()
+              if 'scholin_default' not in k:
+                  channel_lines = [
+                      'super.onCreate()',
+                      '    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {',
+                      '      val nm = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager',
+                      '      for (id in listOf("scholin_default", "fcm_fallback_notification_channel")) {',
+                      '        val ch = android.app.NotificationChannel(id, "Scholin notifications", android.app.NotificationManager.IMPORTANCE_HIGH)',
+                      '        ch.description = "Announcements, fees and school updates"',
+                      '        nm.createNotificationChannel(ch)',
+                      '      }',
+                      '    }',
+                  ]
+                  channel_code = chr(10).join(channel_lines)
+                  k = k.replace('super.onCreate()', channel_code, 1)
+                  open(kt, 'w').write(k)
           PYEOF
 
       - name: Build APK

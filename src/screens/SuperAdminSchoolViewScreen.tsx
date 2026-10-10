@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Icon, Screen, Skeleton } from '../components';
 import { IconName } from '../components/Icon';

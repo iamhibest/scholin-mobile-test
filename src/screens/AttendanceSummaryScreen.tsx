@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { Alert } from 'react-native';
 import { safeName, saveToDownloads, shareFile, writeTempFile } from '../lib/files';
 import { Button, Card, EmptyState, Notice, Screen, Skeleton } from '../components';

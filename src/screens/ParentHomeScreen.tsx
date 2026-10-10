@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, BottomSheet, BottomTabs, Button, Card, EmptyState, FadeIn, Icon, Input, ListRow, Notice, RoundButton, SectionTitle, Skeleton, StatCard, TopBar } from '../components';
 import { IconName } from '../components/Icon';
@@ -298,7 +299,7 @@ export default function ParentHomeScreen({ navigation }: any) {
           </Card>
           <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
             <Button title="Add another child" variant="soft" icon="plus" onPress={() => setAddChild(true)} />
-            <Button title="Terms and About" variant="outline" onPress={() => navigation.navigate('Terms')} />
+            <Button title="Settings" variant="outline" icon="settings" onPress={() => navigation.navigate('Settings')} />
             <Button title="Developer tools" variant="ghost" onPress={() => navigation.navigate('Developer')} />
             <Button title="Sign out" variant="danger" icon="logout" onPress={signOut} />
           </View>
@@ -391,7 +392,7 @@ export default function ParentHomeScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <TopBar right={<RoundButton icon="info" onPress={() => navigation.navigate('Terms')} />} />
+      <TopBar right={<RoundButton icon="settings" onPress={() => navigation.navigate('Settings')} />} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}

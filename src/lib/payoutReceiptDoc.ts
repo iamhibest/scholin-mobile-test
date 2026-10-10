@@ -13,7 +13,7 @@ function longDate(iso: string) {
   }
 }
 
-// A receipt that says Paystack has paid this money into the school's account (or that it is still on its way).
+// A receipt that says this has been paid this money into the school's account (or that it is still on its way).
 export function buildPayoutReceiptHtml(h: PayoutHistory, p: PayoutPayment) {
   const paid = !!p.settled_at;
   const net = Number(p.net_amount_to_school || 0);
@@ -39,7 +39,7 @@ export function buildPayoutReceiptHtml(h: PayoutHistory, p: PayoutPayment) {
     '<div class="sn">' + esc(h.school_name || 'School') + '</div>' +
     '<div class="title">' + (paid ? 'PAYOUT RECEIPT' : 'PAYMENT RECEIVED, PAYOUT PENDING') + '</div>' +
     '<div class="status ' + (paid ? 'paid' : 'pending') + '">' +
-    (paid ? 'PAID TO YOUR ACCOUNT ON ' + esc(longDate(p.settled_at as string).toUpperCase()) : 'PENDING. PAYSTACK HAS NOT PAID THIS OUT YET') +
+    (paid ? 'PAID TO YOUR ACCOUNT ON ' + esc(longDate(p.settled_at as string).toUpperCase()) : 'PENDING. NOT YET PAID INTO YOUR ACCOUNT') +
     '</div>' +
     '<div class="grid">' +
     '<div class="cell"><span>Paid by</span>' + esc(p.payer_name) + '</div>' +
@@ -52,11 +52,11 @@ export function buildPayoutReceiptHtml(h: PayoutHistory, p: PayoutPayment) {
     '</div>' +
     '<div class="amounts">' +
     '<div class="row"><span>Amount the parent paid</span><span>' + esc(naira(Number(p.amount))) + '</span></div>' +
-    '<div class="row"><span>Scholin and Paystack charges</span><span>- ' + esc(naira(fees)) + '</span></div>' +
+    '<div class="row"><span>Transaction fee</span><span>- ' + esc(naira(fees)) + '</span></div>' +
     '<div class="row tot"><span>' + (paid ? 'Amount paid to your account' : 'Amount due to your account') + '</span><span>' + esc(naira(net)) + '</span></div>' +
     '</div>' +
-    '<div class="msg">' + (paid ? 'Paystack has paid this amount into the account above.' : 'Paystack usually pays the next working day. This receipt updates to PAID once it does.') +
-    '<br/>Reference: ' + esc(p.paystack_reference || '') + (paid && p.paystack_settlement_id ? '<br/>Paystack settlement: ' + esc(p.paystack_settlement_id) : '') + '</div>' +
+    '<div class="msg">' + (paid ? 'This amount has been paid into the account above.' : 'Payments are made the next working day. This receipt updates to PAID once it is paid.') +
+    '<br/>Reference: ' + esc(p.paystack_reference || '') + (paid && p.paystack_settlement_id ? '<br/>Payout ID: ' + esc(p.paystack_settlement_id) : '') + '</div>' +
     '</body></html>'
   );
 }

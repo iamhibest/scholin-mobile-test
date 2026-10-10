@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, PermissionsAndroid, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, PermissionsAndroid, Platform, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import Geolocation from 'react-native-geolocation-service';

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomSheet, Button, Card, EmptyState, Fab, Input, Notice, PressableScale, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';

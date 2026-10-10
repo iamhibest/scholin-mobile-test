@@ -13,6 +13,8 @@ startSessionGuard();
 import { logger } from './src/lib/logger';
 import { navigationRef, startDeepLinks } from './src/lib/deeplink';
 import { startQueueSync } from './src/lib/offlineQueue';
+import { startPush } from './src/lib/push';
+import PushBanner from './src/components/PushBanner';
 import './src/lib/supabase';
 
 // Very large phone font settings used to push text out of buttons and fields.
@@ -44,6 +46,8 @@ export default function App() {
 
   useEffect(() => startQueueSync(), []);
 
+  useEffect(() => startPush(), []);
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -52,6 +56,7 @@ export default function App() {
           <NavigationContainer ref={navigationRef}>
             <RootNavigator />
           </NavigationContainer>
+          <PushBanner />
         </OfflineLayer>
       </ErrorBoundary>
     </SafeAreaProvider>

@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import { Badge, Button, Card, EmptyState, Fab, Icon, Notice, Screen, Skeleton } from '../components';
 import { colors, fonts, radius, spacing, text } from '../theme';
@@ -97,7 +98,7 @@ export default function EventsScreen({ navigation }: any) {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[text.bodyStrong, { color: colors.text }]}>Payment history</Text>
-            <Text style={[text.caption, { color: colors.textMuted }]}>See what Paystack has paid to your account</Text>
+            <Text style={[text.caption, { color: colors.textMuted }]}>See what has been paid to your account</Text>
           </View>
           <Icon name="chevron" size={16} color={colors.textMuted} />
         </Pressable>

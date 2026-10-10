@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, PermissionsAndroid, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, PermissionsAndroid, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { useFocusEffect } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
 import { Avatar, Button, Card, EmptyState, Icon, Input, Notice, OptionField, Screen, Skeleton, SwitchRow, TimeField } from '../components';

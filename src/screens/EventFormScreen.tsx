@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import ScrollView from '../components/KeyboardAwareScrollView';
 import { Button, Card, DateField, Input, Notice, OptionField, Screen, SearchBar, SwitchRow } from '../components';
 import { colors, spacing, text } from '../theme';
 import { useStaff } from '../lib/useStaff';
