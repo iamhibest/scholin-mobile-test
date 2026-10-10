@@ -23,7 +23,7 @@ export default function ClassResultsScreen({ navigation, route }: any) {
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<Record<string, TextInput | null>>({});
-  const listRef = useRef<FlatList renderScrollComponent={(sp: any) => <ScrollView {...sp} />}<any>>(null);
+  const listRef = useRef<FlatList<any>>(null);
   const [sortKey, setSortKey] = useState<'name' | 'total'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [sheet, setSheet] = useState(false);
