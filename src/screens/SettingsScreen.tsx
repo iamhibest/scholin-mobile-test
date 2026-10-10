@@ -49,6 +49,7 @@ export default function SettingsScreen({ navigation }: any) {
                 : 'Off. Turn them on to get announcements and updates on this phone, even when the app is closed.'}
           </Text>
           {allowed === false ? <Button title="Turn on notifications" onPress={enable} loading={busy} style={{ marginTop: spacing.md }} /> : null}
+          <Button title="Notification check" variant="soft" onPress={() => navigation.navigate('Push')} style={{ marginTop: spacing.md }} />
         </View>
       </Card>
     </Screen>

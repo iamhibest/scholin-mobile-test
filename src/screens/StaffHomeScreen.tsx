@@ -297,7 +297,7 @@ export default function StaffHomeScreen({ navigation }: any) {
               tomorrow={bdays.tomorrow}
               soon={bdays.soon}
               tomorrowLabel={(() => { const [, mm, dd] = addDays(todayKey, 1).split('-').map(Number); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mm - 1] + ' ' + dd; })()}
-              onPress={() => navigation.navigate('Birthdays')}
+              onPress={() => navigation.navigate('BirthdayWish')}
             />
           </View>
         ) : null}

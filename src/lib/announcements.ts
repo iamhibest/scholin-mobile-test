@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from './logger';
 
 function fail(error: any, fallback: string): never {
   throw new Error((error && error.message) || fallback);
@@ -73,7 +74,14 @@ export async function postAnnouncement(schoolId: string, userId: string, title: 
       created_by: userId,
     })
     .then(() => {});
-  supabase.functions.invoke('send-push-notification', { body: { category: 'school_announcement', title: 'New Announcement', message: title, school_id: schoolId } }).catch(() => {});
+  supabase.functions
+    .invoke('send-push-notification', { body: { category: 'school_announcement', title: 'New Announcement', message: title, school_id: schoolId } })
+    .then((r: any) => {
+      if (r && r.error) {
+        logger.error('Sending notifications failed: ' + (r.error.message || 'unknown error'));
+      }
+    })
+    .catch((e: any) => logger.error('Sending notifications failed: ' + (e && e.message ? e.message : e)));
   return data as any;
 }
 

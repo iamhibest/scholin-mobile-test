@@ -8,6 +8,8 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Terms: { tab?: 'terms' | 'privacy' | 'contact' | 'about' } | undefined;
   Settings: undefined;
+  BirthdayWish: undefined;
+  ParentBirthdayWish: undefined;
   Home: undefined;
   ParentHome: undefined;
   SuperAdminHome: undefined;

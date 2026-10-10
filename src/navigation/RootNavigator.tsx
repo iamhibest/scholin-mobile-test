@@ -61,6 +61,8 @@ import SuperAdminSettingsScreen from '../screens/SuperAdminSettingsScreen';
 import SuperAdminSchoolScreen from '../screens/SuperAdminSchoolScreen';
 import SchoolOverviewScreen from '../screens/SchoolOverviewScreen';
 import BirthdaysScreen from '../screens/BirthdaysScreen';
+import BirthdayWishScreen from '../screens/BirthdayWishScreen';
+import ParentBirthdayWishScreen from '../screens/ParentBirthdayWishScreen';
 import AttendanceHistoryScreen from '../screens/AttendanceHistoryScreen';
 import SuperAdminSchoolViewScreen from '../screens/SuperAdminSchoolViewScreen';
 import SuperAdminUsersScreen from '../screens/SuperAdminUsersScreen';
@@ -197,6 +199,8 @@ export default function RootNavigator() {
       <Stack.Screen name="ResultsStatus" component={ResultsStatusScreen} options={{ ...headerOptions, title: 'Results status' }} />
       <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} options={{ ...headerOptions, title: 'Attendance history' }} />
       <Stack.Screen name="Birthdays" component={BirthdaysScreen} options={{ ...headerOptions, title: 'Birthdays' }} />
+      <Stack.Screen name="BirthdayWish" component={BirthdayWishScreen} options={{ ...headerOptions, title: 'Birthday' }} />
+      <Stack.Screen name="ParentBirthdayWish" component={ParentBirthdayWishScreen} options={{ ...headerOptions, title: 'Birthday wish' }} />
       <Stack.Screen name="SchoolOverview" component={SchoolOverviewScreen} options={{ ...headerOptions, title: 'School overview' }} />
       <Stack.Screen name="ActivityLog" component={ActivityLogScreen} options={{ ...headerOptions, title: 'Recent activity' }} />
       <Stack.Screen name="Referral" component={ReferralScreen} options={{ ...headerOptions, title: 'Refer and earn' }} />
@@ -224,7 +228,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Logs" component={LogsScreen} options={{ ...headerOptions, title: 'App logs' }} />
       <Stack.Screen name="Scan" component={ScanTestScreen} options={{ ...headerOptions, title: 'QR scan test' }} />
       <Stack.Screen name="Location" component={LocationTestScreen} options={{ ...headerOptions, title: 'Location test' }} />
-      <Stack.Screen name="Push" component={PushTestScreen} options={{ ...headerOptions, title: 'Push test' }} />
+      <Stack.Screen name="Push" component={PushTestScreen} options={{ ...headerOptions, title: 'Notification check' }} />
       <Stack.Screen name="Pdf" component={PdfTestScreen} options={{ ...headerOptions, title: 'PDF test' }} />
     </Stack.Navigator>
   );

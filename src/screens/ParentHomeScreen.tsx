@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import ScrollView from '../components/KeyboardAwareScrollView';
+import { BirthdayBannerCard } from '../components/BirthdayBanner';
+import { useChildBirthdayWishes } from '../lib/useChildBirthdayWishes';
+import { parentBannerLine } from '../lib/birthdayWishes';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, BottomSheet, BottomTabs, Button, Card, EmptyState, FadeIn, Icon, Input, ListRow, Notice, RoundButton, SectionTitle, Skeleton, StatCard, TopBar } from '../components';
 import { IconName } from '../components/Icon';
@@ -74,6 +77,7 @@ export default function ParentHomeScreen({ navigation }: any) {
   const [addMsg, setAddMsg] = useState('');
   const [adding, setAdding] = useState(false);
   const [userId, setUserId] = useState('');
+  const { wishes: birthdayWishes, reload: reloadWishes } = useChildBirthdayWishes(true);
 
   const child = children.find(c => c.id === childId);
   const session = sessions.find(s => s.id === sessionId);
@@ -173,10 +177,11 @@ export default function ParentHomeScreen({ navigation }: any) {
         firstFocus.current = false;
         return;
       }
+      reloadWishes();
       if (child) {
         loadOverview(child, sessionId);
       }
-    }, [child, sessionId, loadOverview]),
+    }, [child, sessionId, loadOverview, reloadWishes]),
   );
 
   const soon = (title: string) => navigation.navigate('Feature', { title });
@@ -425,6 +430,12 @@ export default function ParentHomeScreen({ navigation }: any) {
               </View>
             </View>
           </FadeIn>
+        ) : null}
+
+        {tab !== 'profile' && birthdayWishes.length > 0 ? (
+          <View style={{ marginTop: spacing.lg }}>
+            <BirthdayBannerCard tone="gold" title="Happy Birthday!" body={parentBannerLine(birthdayWishes)} onPress={() => navigation.navigate('ParentBirthdayWish')} />
+          </View>
         ) : null}
 
         {tab !== 'profile' && children.length > 1 ? (

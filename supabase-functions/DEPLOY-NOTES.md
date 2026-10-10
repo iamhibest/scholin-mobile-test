@@ -129,3 +129,12 @@ upload-image stays exactly as it is.
 - Sign in once on the phone and allow notifications when asked (Android 13 and above asks).
 - Check in Supabase > Table editor > push_tokens that a new row appeared for that person.
 - If no row appears, open Logs in the app. A line "Could not save notification token" says why.
+
+# Phase 7x: Birthday wishes for parents, notification check
+- Run migrations/birthday-wishes-migration.sql once (parents see the birthday wish on their dashboard on the day).
+- Run migrations/push-token-registration-migration.sql again (it is now version 2 and safe to re-run).
+- In the app: Settings > Notifications > Notification check shows exactly which step is failing.
+
+# Notifications: replace the send function
+- Supabase > Edge Functions > send-push-notification: paste the new send-push-notification.ts from this folder and Deploy.
+  It reports why a send failed, removes dead phones, supports the app's test button, and includes parents in school announcements.

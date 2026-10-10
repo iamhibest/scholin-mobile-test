@@ -92,23 +92,42 @@ async function saveToken(token: string, userId: string) {
   await AsyncStorage.setItem(TOKEN_KEY, token).catch(() => {});
 }
 
-export async function registerDevice() {
+export async function getFcmToken(): Promise<string> {
+  return api().getToken();
+}
+
+// Saves this phone's token and says exactly what went wrong if it could not.
+export async function registerDeviceDetailed(): Promise<{ ok: boolean; message: string; token: string }> {
   try {
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
     if (!user) {
-      return;
+      return { ok: false, message: 'You are not signed in.', token: '' };
     }
     if (!(await notificationsAllowed())) {
-      return;
+      return { ok: false, message: 'Notifications are switched off for this app on your phone.', token: '' };
     }
     const token = await api().getToken();
-    if (token) {
-      await saveToken(token, user.id);
+    if (!token) {
+      return { ok: false, message: 'Firebase did not give this phone a token.', token: '' };
     }
+    const { error } = await supabase.rpc('register_push_token', { p_token: token, p_platform: Platform.OS });
+    if (error) {
+      logger.error('Could not save notification token: ' + error.message);
+      return { ok: false, message: error.message, token };
+    }
+    lastSaved = user.id + ':' + token;
+    await AsyncStorage.setItem(TOKEN_KEY, token).catch(() => {});
+    return { ok: true, message: 'Saved.', token };
   } catch (e: any) {
-    logger.error('Notification setup failed: ' + (e && e.message ? e.message : e));
+    const m = e && e.message ? e.message : String(e);
+    logger.error('Notification setup failed: ' + m);
+    return { ok: false, message: m, token: '' };
   }
+}
+
+export async function registerDevice() {
+  await registerDeviceDetailed();
 }
 
 async function unregisterDevice() {
