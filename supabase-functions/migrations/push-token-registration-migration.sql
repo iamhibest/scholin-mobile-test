@@ -23,6 +23,7 @@ declare
   v_has_school boolean;
   v_school uuid;
   v_count int := 0;
+  v_rows int := 0;
   v_names text;
   v_vals text;
   v_flag text;
@@ -84,8 +85,18 @@ begin
       execute 'insert into push_tokens (' || v_names || ') values (' || v_vals || ')';
     end if;
   exception when unique_violation then
-    -- The table allows only one device per person, so this phone replaces the old one.
-    execute format('update push_tokens set %I = $1 where %I = $2', v_token_col, v_user_col) using p_token, v_uid;
+    -- The table allows only one row per person (or per person and platform), so this phone replaces the old one.
+    -- Only rows of the same platform are changed, so another device (for example the web app) is left alone.
+    if v_platform_col is not null then
+      execute format('update push_tokens set %I = $1 where %I = $2 and %I::text = $3', v_token_col, v_user_col, v_platform_col) using p_token, v_uid, p_platform;
+      get diagnostics v_rows = row_count;
+    else
+      v_rows := 0;
+    end if;
+    if v_rows = 0 then
+      -- No row of this platform: the table keeps one row per person, so replace that row.
+      execute format('update push_tokens set %I = $1 where %I = $2', v_token_col, v_user_col) using p_token, v_uid;
+    end if;
   end;
 end;
 $$;

@@ -3,7 +3,7 @@ import { Linking, Share, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Icon, Screen } from '../components';
 import { colors, radius, spacing, text } from '../theme';
 import { supabase } from '../lib/supabase';
-import { getFcmToken, notificationsAllowed, registerDeviceDetailed, turnOnNotifications } from '../lib/push';
+import { getFcmToken, getFirebaseProjectId, notificationsAllowed, registerDeviceDetailed, turnOnNotifications } from '../lib/push';
 
 type Step = { label: string; ok: boolean | null; detail: string };
 
@@ -75,11 +75,16 @@ export default function PushTestScreen() {
         setTestResult({ ok: false, text: 'The server said: ' + (r.error.message || 'error') });
       } else {
         const d = r.data || {};
-        if (d.sent > 0) {
-          setTestResult({ ok: true, text: 'Sent to ' + d.sent + ' device(s). Pull down the notification bar on this phone. If nothing shows, check the phone notification settings.' });
+        const mine = getFirebaseProjectId();
+        const projectLine = (d.project_id ? '\nServer Firebase project: ' + d.project_id : '') + (mine ? '\nThis app Firebase project: ' + mine : '');
+        const mismatch = d.project_id && mine && d.project_id !== mine;
+        const failedLine = d.failed > 0 ? '\n' + d.failed + ' device(s) failed: ' + Object.keys(d.errors || {}).join('; ') : '';
+        const hint = mismatch ? '\nThe server and this app use DIFFERENT Firebase projects, so this phone cannot receive notifications until they are the same project.' : '';
+        if (d.sent > 0 && !d.failed) {
+          setTestResult({ ok: true, text: 'Sent to ' + d.sent + ' device(s). Pull down the notification bar on this phone. If nothing shows, check the phone notification settings.' + projectLine });
         } else {
-          const why = d.errors && Object.keys(d.errors).length ? Object.keys(d.errors).join('; ') : d.reason || 'Nothing was sent.';
-          setTestResult({ ok: false, text: 'Not delivered. ' + why + (d.project_id ? ' (server Firebase project: ' + d.project_id + ')' : '') });
+          const why = d.sent > 0 ? 'Sent to ' + d.sent + ' device(s), but not all.' : d.errors && Object.keys(d.errors).length ? '' : d.reason || 'Nothing was sent.';
+          setTestResult({ ok: false, text: why + failedLine + projectLine + hint });
         }
       }
     } catch (e: any) {

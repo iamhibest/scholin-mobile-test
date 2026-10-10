@@ -95,7 +95,8 @@ async function sendFcmMessage(accessToken, projectId, token, title, body, data) 
   const status = result && result.error ? result.error.status || '' : '';
   const errorCode = result && result.error && Array.isArray(result.error.details) ? (result.error.details.find((d) => d.errorCode) || {}).errorCode || '' : '';
   const message = result && result.error ? result.error.message || '' : '';
-  const dead = status === 'NOT_FOUND' || errorCode === 'UNREGISTERED' || (status === 'INVALID_ARGUMENT' && /registration token/i.test(message));
+  // Tokens that can never work with this server's Firebase project are removed too. The app saves a fresh token the next time it opens.
+  const dead = status === 'NOT_FOUND' || errorCode === 'UNREGISTERED' || errorCode === 'SENDER_ID_MISMATCH' || /sender ?id mismatch/i.test(message) || (status === 'INVALID_ARGUMENT' && /registration token/i.test(message));
   return { ok: response.ok, error: response.ok ? '' : (errorCode || status || 'ERROR') + (message ? ': ' + message : ''), dead };
 }
 

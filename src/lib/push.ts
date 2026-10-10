@@ -92,6 +92,17 @@ async function saveToken(token: string, userId: string) {
   await AsyncStorage.setItem(TOKEN_KEY, token).catch(() => {});
 }
 
+// The Firebase project this app was built with (from google-services.json).
+export function getFirebaseProjectId(): string {
+  try {
+    const m: any = require('@react-native-firebase/app');
+    const app = typeof m.getApp === 'function' ? m.getApp() : m.default.app();
+    return (app && app.options && app.options.projectId) || '';
+  } catch {
+    return '';
+  }
+}
+
 export async function getFcmToken(): Promise<string> {
   return api().getToken();
 }
